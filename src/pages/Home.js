@@ -35,7 +35,7 @@ function Home() {
             </div>
             {/* sale banner */}
             <div className="sale__banner--container mt-4">
-                <img src="https://res.cloudinary.com/learn-code-10/image/upload/v1654093280/xkia6f13xxlk5xvvb5ed.png" />
+                <img src="https://res.cloudinary.com/learn-code-10/image/upload/v1654093280/xkia6f13xxlk5xvvb5ed.png" width="100%" alt="img" />
             </div>
             <div className="recent-products-container container mt-4">
                 <h2>Categories</h2>
