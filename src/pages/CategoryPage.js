@@ -32,8 +32,8 @@ function CategoryPage() {
 
     const productsSearch = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    function ProductSearch({ _id, category, name, pictures }) {
-        return <ProductPreview _id={_id} category={category} name={name} pictures={pictures} />;
+    function ProductSearch({ _id, category, name, pictures, price }) {
+        return <ProductPreview _id={_id} category={category} name={name} price={price} pictures={pictures} />;
     }
 
     return (
