@@ -11,3 +11,16 @@ a {
     text-decoration: none;
     color: rgba(0, 0, 0, 0.664);
 }
+
+.bottom-footer {
+    border-top: solid 1px lightgray;
+    background-color: grey;
+}
+
+.bottom-footer p {
+    text-align: center;
+    line-height: 10%;
+    font-size: 12px;
+    margin-top: 1%;
+    color: azure;
+}

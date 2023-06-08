@@ -39,7 +39,7 @@ function CategoryPage() {
     return (
         <div className="category-page-container">
             <div className={`pt-3 ${category}-banner-container category-banner-container`}>
-                <h1 className="text-center">{category.charAt(0).toUpperCase() + category.slice(1)}</h1>
+                <h1 className="text-center">{category.charAt(0).toUpperCase() + category.slice(1)} Products</h1>
             </div>
             <div className="filters-container d-flex justify-content-center pt-4 pb-4">
                 <input type="search" placeholder="Search" onChange={(e) => setSearchTerm(e.target.value)} />

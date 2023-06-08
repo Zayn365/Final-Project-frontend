@@ -10,3 +10,29 @@
     align-items: center;
     color: white;
 }
+
+.all-banner-container {
+    background-image: url('../../public/product.jpg');
+    background-position: center;
+    background-size: cover;
+    /* background-position-y: -100px; */
+
+}
+.phones-banner-container {
+    background-image: url('../../public/phone-banner.jpg');
+    background-position: top;
+    background-size: cover;
+    background-position-y: -100px;
+}
+
+.laptops-banner-container {
+    background-image: url('../../public/laptops-banner.jpg');
+    background-position: center;
+    background-size: cover;
+}
+
+.technology-banner-container {
+    background-image: url('../../public/tech-banner.jpg');
+    background-position: center;
+    background-size: cover;
+}
