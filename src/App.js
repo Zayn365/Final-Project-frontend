@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { addNotification } from "./features/userSlice";
 import Footer from "./components/Footer";
+import AdminLogin from "./pages/AdminLogin";
 
 function App() {
     const user = useSelector((state) => state.user);
@@ -65,7 +66,7 @@ function App() {
                     )}
                     <Route path="/product/:id" element={<ProductPage />} />
                     <Route path="/category/:category" element={<CategoryPage />} />
-
+                    <Route path="/admin-login" element={<AdminLogin />} />
                     <Route path="/new-product" element={<NewProduct />} />
 
                     <Route path="*" element={<Home />} />
