@@ -18,9 +18,6 @@ const AdminLogin = () => {
     if(details.isAdmin === true) {
         return details;
     }
-    else {
-        alert("Username or Password Incorrect!")
-    }
     goBack();
   }
   return (
