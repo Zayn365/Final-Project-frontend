@@ -1,6 +1,24 @@
 # Ecomern - MERN Stack E-Commerce Site
 
 ![Ecomern]('pics/a.png')
+![Ecomern]('pics/b.png')
+![Ecomern]('pics/c.png')
+![Ecomern]('pics/d.png')
+![Ecomern]('pics/e.png')
+![Ecomern]('pics/f.png')
+![Ecomern]('pics/g.png')
+![Ecomern]('pics/h.png')
+![Ecomern]('pics/i.png')
+![Ecomern]('pics/j.png')
+![Ecomern]('pics/k.png')
+![Ecomern]('pics/l.png')
+![Ecomern]('pics/m.png')
+![Ecomern]('pics/n.png')
+
+
+
+
+
 
 Ecomern is a full-fledged E-Commerce website developed using the MERN (MongoDB, Express, React, Node.js) stack. It provides a seamless shopping experience with features like product listings, shopping cart functionality, user authentication, and secure payment processing.
 
