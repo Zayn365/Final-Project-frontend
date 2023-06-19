@@ -1,19 +1,19 @@
 # Ecomern - MERN Stack E-Commerce Site
 
-![Ecomern]('pics/a.png')
-![Ecomern]('pics/b.png')
-![Ecomern]('pics/c.png')
-![Ecomern]('pics/d.png')
-![Ecomern]('pics/e.png')
-![Ecomern]('pics/f.png')
-![Ecomern]('pics/g.png')
-![Ecomern]('pics/h.png')
-![Ecomern]('pics/i.png')
-![Ecomern]('pics/j.png')
-![Ecomern]('pics/k.png')
-![Ecomern]('pics/l.png')
-![Ecomern]('pics/m.png')
-![Ecomern]('pics/n.png')
+![Ecomern](./pics/a.png)
+![Ecomern](./pics/b.png)
+![Ecomern](./pics/c.png)
+![Ecomern](./pics/d.png)
+![Ecomern](./pics/e.png)
+![Ecomern](./pics/f.png)
+![Ecomern](./pics/g.png)
+![Ecomern](./pics/h.png)
+![Ecomern](./pics/i.png)
+![Ecomern](./pics/j.png)
+![Ecomern](./pics/k.png)
+![Ecomern](./pics/l.png)
+![Ecomern](./pics/m.png)
+![Ecomern](./pics/n.png)
 
 
 
