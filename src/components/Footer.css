@@ -1,26 +1,22 @@
-h1, h2, h3 , h4, h5 , h6, p, li {
-    text-align: left;
+.footer-section {
+  background-color: #00214d;
 }
 
-
-li {
-    list-style-type: none;
+.footer-link {
+  color: #fff;
+  text-decoration: none;
 }
 
-a {
-    text-decoration: none;
-    color: rgba(0, 0, 0, 0.664);
+.footer-link:hover {
+  text-decoration: underline;
 }
 
-.bottom-footer {
-    border-top: solid 1px lightgray;
-    background-color: grey;
+.social-icon {
+  color: #b0bfcf;
+  font-size: 20px;
+  cursor: pointer;
 }
 
-.bottom-footer p {
-    text-align: center;
-    line-height: 10%;
-    font-size: 12px;
-    margin-top: 1%;
-    color: azure;
+.social-icon:hover {
+  color: #ffffff;
 }

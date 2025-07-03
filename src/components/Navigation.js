@@ -1,11 +1,12 @@
-import axios from "../axios";
 import React, { useRef, useState } from "react";
-import { Navbar, Button, Nav, NavDropdown, Container } from "react-bootstrap";
+import axios from "../axios";
+import { Navbar, Nav, Container, Form, FormControl } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { LinkContainer } from "react-router-bootstrap";
 import { logout, resetNotifications } from "../features/userSlice";
-import "./Navigation.css";
 import Logo from "../assets/images/logo.png";
+import "./Navigation.css";
+
 function Navigation() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -13,15 +14,13 @@ function Navigation() {
   const notificationRef = useRef(null);
   const [bellPos, setBellPos] = useState({});
 
-  function handleLogout() {
-    dispatch(logout());
-  }
-  const unreadNotifications = user?.notifications?.reduce((acc, current) => {
-    if (current.status == "unread") return acc + 1;
-    return acc;
-  }, 0);
+  const handleLogout = () => dispatch(logout());
 
-  function handleToggleNotifications() {
+  const unreadNotifications = user?.notifications?.filter(
+    (n) => n.status === "unread"
+  ).length;
+
+  const handleToggleNotifications = () => {
     const position = bellRef.current.getBoundingClientRect();
     setBellPos(position);
     notificationRef.current.style.display =
@@ -29,46 +28,44 @@ function Navigation() {
     dispatch(resetNotifications());
     if (unreadNotifications > 0)
       axios.post(`/users/${user._id}/updateNotifications`);
-  }
+  };
 
   return (
-    <Navbar style={{ backgroundColor: "#00214d" }} expand="lg">
-      <Container>
-        <LinkContainer to="/">
-          <img src={Logo} alt="logo" width={150} />
-        </LinkContainer>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            <LinkContainer to="/">
-              <Nav.Link>Home</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to="/category/all">
-              <Nav.Link>Products</Nav.Link>
-            </LinkContainer>
-            {/* if no user */}
+    <>
+      {/* Marquee Strip */}
+      <div
+        className="py-1 px-3 text-white"
+        style={{ backgroundColor: "#cc182c", fontSize: "0.9rem" }}
+      >
+        <marquee behavior="scroll" direction="left">
+          "Education is the passport to the future" | "Study hard, dream big" |
+          "Stationery is the first step to creativity" | "Books and pens pave
+          the path to success" | "Where school life begins, stationery matters!"
+        </marquee>
+      </div>
+
+      {/* Main Navbar */}
+      <Navbar style={{ backgroundColor: "#00214d" }} expand="lg" variant="dark">
+        <Container>
+          <LinkContainer to="/">
+            <img src={Logo} alt="logo" width={150} />
+          </LinkContainer>
+
+          <Form className="d-flex mx-3" style={{ flexGrow: 1 }}>
+            <FormControl
+              type="search"
+              placeholder="Search..."
+              className="me-2"
+              aria-label="Search"
+            />
+          </Form>
+
+          <Nav className="align-items-center">
             {!user && (
               <LinkContainer to="/login">
-                <Nav.Link>Login</Nav.Link>
+                <Nav.Link className="text-white">Login / Signup</Nav.Link>
               </LinkContainer>
             )}
-            {user && !user.isAdmin && (
-              <LinkContainer to="/cart">
-                <Nav.Link>
-                  <i
-                    className="fas fa-shopping-cart"
-                    style={{ marginTop: "4px" }}
-                  ></i>
-                  {user?.cart.count > 0 && (
-                    <span className="badge badge-warning" id="cartcount">
-                      {user.cart.count}
-                    </span>
-                  )}
-                </Nav.Link>
-              </LinkContainer>
-            )}
-
-            {/* if user */}
             {user && (
               <>
                 <Nav.Link
@@ -76,48 +73,47 @@ function Navigation() {
                   onClick={handleToggleNotifications}
                 >
                   <i
-                    className="fas fa-bell"
+                    className="fas fa-bell text-white"
                     ref={bellRef}
                     data-count={unreadNotifications || null}
                   ></i>
                 </Nav.Link>
-                <NavDropdown title={`${user.email}`} id="basic-nav-dropdown">
-                  {user.isAdmin && (
-                    <>
-                      <LinkContainer to="/admin">
-                        <NavDropdown.Item>Dashboard</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/new-product">
-                        <NavDropdown.Item>Create Product</NavDropdown.Item>
-                      </LinkContainer>
-                    </>
-                  )}
-                  {!user.isAdmin && (
-                    <>
-                      <LinkContainer to="/cart">
-                        <NavDropdown.Item>Cart</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/orders">
-                        <NavDropdown.Item>My orders</NavDropdown.Item>
-                      </LinkContainer>
-                    </>
-                  )}
-
-                  <NavDropdown.Divider />
-                  <Button
-                    variant="danger"
-                    onClick={handleLogout}
-                    className="logout-btn"
-                  >
-                    Logout
-                  </Button>
-                </NavDropdown>
+                <Nav.Link className="text-white" onClick={handleLogout}>
+                  Logout
+                </Nav.Link>
               </>
             )}
           </Nav>
-        </Navbar.Collapse>
-      </Container>
-      {/* notifications */}
+        </Container>
+      </Navbar>
+
+      {/* Navigation Links */}
+      <Navbar bg="light" variant="light">
+        <Container>
+          <Nav className="mx-auto">
+            <LinkContainer to="/">
+              <Nav.Link>Home</Nav.Link>
+            </LinkContainer>
+            <LinkContainer to="/category/all">
+              <Nav.Link>Products</Nav.Link>
+            </LinkContainer>
+            {user && !user.isAdmin && (
+              <LinkContainer to="/cart">
+                <Nav.Link>
+                  <i className="fas fa-shopping-cart"></i>
+                  {user?.cart?.count > 0 && (
+                    <span className="badge badge-warning" id="cartcount">
+                      {user.cart.count}
+                    </span>
+                  )}
+                </Nav.Link>
+              </LinkContainer>
+            )}
+          </Nav>
+        </Container>
+      </Navbar>
+
+      {/* Notification Dropdown */}
       <div
         className="notifications-container"
         ref={notificationRef}
@@ -129,8 +125,8 @@ function Navigation() {
         }}
       >
         {user?.notifications.length > 0 ? (
-          user?.notifications.map((notification) => (
-            <p className={`notification-${notification.status}`}>
+          user.notifications.map((notification, idx) => (
+            <p key={idx} className={`notification-${notification.status}`}>
               {notification.message}
               <br />
               <span>
@@ -141,10 +137,10 @@ function Navigation() {
             </p>
           ))
         ) : (
-          <p>No notifcations yet</p>
+          <p>No notifications yet</p>
         )}
       </div>
-    </Navbar>
+    </>
   );
 }
 

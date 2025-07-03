@@ -1,33 +1,91 @@
-.category-tile {
-    height: 250px;
-    background-size: cover;
-    background-position: center;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 30px;
+/* 5-column layout fix for Bootstrap (12 / 2.4 = 5 cols) */
+@media (min-width: 1200px) {
+  .five-col-grid > .col-lg-2 {
+    flex: 0 0 auto;
+    width: 20%;
+  }
 }
 
-.card {
-    border: none !important;
-    width: 15rem !important;
+.hero-carousel {
+  margin-top: 0;
 }
-img.card-img-top.product-preview-img {
-    border-radius: 10px;
+
+.hero-slide {
+  width: 100%;
+  height: 60vh;
+  max-height: 800px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-slide img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 0;
+}
+
+/* Responsive height adjustments */
+@media (max-width: 992px) {
+  .hero-slide {
+    height: 50vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-slide {
+    height: 40vh;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-slide {
+    height: 35vh;
+  }
+}
+
+.category-tile {
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
 }
 
 .category-tile:hover {
-    transform: scale(1.05);
+  transform: scale(1.03);
+  opacity: 0.9;
+}
+
+.category-tile {
+  height: 250px;
+  background-size: cover;
+  background-position: center;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 30px;
+}
+
+.card {
+  border: none !important;
+  width: 15rem !important;
+}
+img.card-img-top.product-preview-img {
+  border-radius: 10px;
+}
+
+.category-tile:hover {
+  transform: scale(1.05);
 }
 
 .sale__banner--container img {
-    max-width: 1200px;
-    display: block;
-    margin: 0 auto;
+  max-width: 1200px;
+  display: block;
+  margin: 0 auto;
 }

@@ -1,0 +1,18 @@
+.brand-logo-wrapper {
+  border: 1px solid #f0f0f0;
+  padding: 10px;
+  border-radius: 6px;
+  background: #fff;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.brand-logo-wrapper img {
+  max-height: 80px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}

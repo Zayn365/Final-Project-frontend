@@ -1,48 +1,93 @@
 import React from "react";
-import { Row, Col, Ratio } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import Logo from "../assets/images/logo.png";
 import "./Footer.css";
-import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <div
-      className="bg-light jumbotron mt-5"
-      style={{ top: "4vh" }}
-    >
-      <Row className="border-top m-0">
-        <Col md={6}>
-          <h3 className="pt-4 px-4">Ecomm</h3>
-          <p className="py-1 px-4">
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a type specimen book.
-          </p>
-          <ul>
-            <h4 className="pt-1 px-3">Navigate: </h4>
-          <li className="pt-1 px-4"><h5><Link to="/">Home</Link></h5></li>
-          <li className="pt-1 px-4"><h5><Link to="/category/all">Products</Link></h5></li>
-          <li className="pt-1 px-4"><h5><Link to="/login">Login</Link></h5></li>
-          <li className="pt-1 px-4"><h5><Link to="/signup">Signup</Link></h5></li>
-          </ul>
-        </Col>
-        <Col md={6} className="p-0 mr-0">
-          <h3 className="py-4 px-5">Location:</h3>
-          <div style={{width: '80%'}}>
-          <Ratio  aspectRatio="4x3">
-          {/* eslint-disable-next-line */}
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3441.3026709775263!2d-87.7789593!3d30.3991534!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x889a16b47e522a71%3A0xd49e37cf6bbb8570!2sMay%20James%20W!5e0!3m2!1sen!2s!4v1686145952015!5m2!1sen!2s" width="300" height="150" style={{border: 0}} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </Ratio>
-          </div>
-        </Col>
-      </Row>
-      <Row className="m-0">
-        <Col className="bottom-footer">
-           <p>Ecomern©️ Website Created by Zayn Saeed</p>
-           <p>All Rights Reserved-2023-24</p>
-        </Col>
-      </Row>
-    </div>
+    <footer className="footer-section py-5 text-white">
+      <Container>
+        <Row className="gy-4">
+          {/* Left: Logo + Description */}
+          <Col md={4}>
+            <img src={Logo} alt="logo" className="mb-3" width={150} />
+            <p>
+              We offer a diverse selection of stationery, office, and school
+              supplies, as well as gift and packaging products. Our inventory is
+              carefully curated to provide the best quality and value for all
+              your business and personal needs.
+            </p>
+          </Col>
+
+          {/* Middle: Main Menu */}
+          <Col md={4}>
+            <h6 className="text-uppercase fw-bold mb-3">Main Menu</h6>
+            <ul className="list-unstyled">
+              <li>
+                <Link to="/blogs" className="footer-link">
+                  Blogs
+                </Link>
+              </li>
+              <li>
+                <Link to="/stationery" className="footer-link">
+                  Stationery
+                </Link>
+              </li>
+              <li>
+                <Link to="/birthday" className="footer-link">
+                  Birthday Items
+                </Link>
+              </li>
+              <li>
+                <Link to="/balloting" className="footer-link">
+                  Balloting Offer
+                </Link>
+              </li>
+            </ul>
+          </Col>
+
+          {/* Right: Newsletter */}
+          <Col md={4}>
+            <h6 className="text-uppercase fw-bold mb-3">Newsletter</h6>
+            <p>Your one stop shop for all your stationery needs</p>
+            <form>
+              <input
+                type="email"
+                placeholder="Your email"
+                className="form-control mb-2"
+              />
+              <button type="submit" className="btn btn-danger">
+                Subscribe
+              </button>
+            </form>
+          </Col>
+        </Row>
+
+        {/* Social Icons */}
+        <Row className="mt-5">
+          <Col className="text-center">
+            <p className="mb-2">Follow Us</p>
+            <div className="d-flex justify-content-center gap-3">
+              <i className="fab fa-facebook-f social-icon"></i>
+              <i className="fab fa-twitter social-icon"></i>
+              <i className="fab fa-instagram social-icon"></i>
+              <i className="fab fa-tiktok social-icon"></i>
+              <i className="fab fa-linkedin-in social-icon"></i>
+            </div>
+          </Col>
+        </Row>
+
+        {/* Bottom line */}
+        <hr className="border-light my-4" />
+        <Row>
+          <Col className="text-center small">
+            <p className="mb-1"> BİRİKİM OKULLARI</p>
+            <p>All Rights Reserved — 2025-26</p>
+          </Col>
+        </Row>
+      </Container>
+    </footer>
   );
 };
 
