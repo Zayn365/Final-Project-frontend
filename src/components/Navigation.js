@@ -77,6 +77,11 @@ function Navigation() {
                 </LinkContainer>
               </>
             )}
+            {user && user.isAdmin && (
+              <LinkContainer to="/admin">
+                <Nav.Link>Admin</Nav.Link>
+              </LinkContainer>
+            )}
             {user && !user.isAdmin && (
               <LinkContainer to="/cart">
                 <Nav.Link>
