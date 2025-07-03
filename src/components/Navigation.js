@@ -45,7 +45,7 @@ function Navigation() {
       </div>
 
       {/* Main Navbar */}
-      <Navbar style={{ backgroundColor: "#00214d" }} expand="lg" variant="dark">
+      <Navbar style={{ backgroundColor: "#00214d" }} expand="lg">
         <Container>
           <LinkContainer to="/">
             <img src={Logo} alt="logo" width={150} />
@@ -62,22 +62,35 @@ function Navigation() {
 
           <Nav className="align-items-center">
             {!user && (
-              <LinkContainer to="/login">
-                <Nav.Link className="text-white">Login / Signup</Nav.Link>
-              </LinkContainer>
-            )}
-            {user && (
               <>
-                <Nav.Link
-                  style={{ position: "relative" }}
-                  onClick={handleToggleNotifications}
-                >
+                <Nav.Link onClick={handleToggleNotifications}>
                   <i
-                    className="fas fa-bell text-white"
+                    className="fas fa-bell text-white "
                     ref={bellRef}
                     data-count={unreadNotifications || null}
                   ></i>
                 </Nav.Link>
+                <LinkContainer to="/login">
+                  <Nav.Link>
+                    <i className="fas fa-user fa-lg text-white"></i>
+                  </Nav.Link>
+                </LinkContainer>
+              </>
+            )}
+            {user && !user.isAdmin && (
+              <LinkContainer to="/cart">
+                <Nav.Link>
+                  <i className="fas fa-shopping-cart"></i>
+                  {user?.cart?.count > 0 && (
+                    <span className="badge badge-warning" id="cartcount">
+                      {user.cart.count}
+                    </span>
+                  )}
+                </Nav.Link>
+              </LinkContainer>
+            )}
+            {user && (
+              <>
                 <Nav.Link className="text-white" onClick={handleLogout}>
                   Logout
                 </Nav.Link>
@@ -97,18 +110,6 @@ function Navigation() {
             <LinkContainer to="/category/all">
               <Nav.Link>Products</Nav.Link>
             </LinkContainer>
-            {user && !user.isAdmin && (
-              <LinkContainer to="/cart">
-                <Nav.Link>
-                  <i className="fas fa-shopping-cart"></i>
-                  {user?.cart?.count > 0 && (
-                    <span className="badge badge-warning" id="cartcount">
-                      {user.cart.count}
-                    </span>
-                  )}
-                </Nav.Link>
-              </LinkContainer>
-            )}
           </Nav>
         </Container>
       </Navbar>

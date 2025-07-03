@@ -6,7 +6,10 @@
 .logo {
   width: 50px;
 }
-
+.navbar-nav .nav-link.text-white {
+  color: white !important;
+  font-weight: 600;
+}
 #cartcount {
   font-size: 10px;
   background-color: red;
