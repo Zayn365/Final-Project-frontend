@@ -47,7 +47,7 @@ function Home() {
 
       {/* Last Products */}
       <div className="featured-products-container container mt-4">
-        <h2>Latest Products</h2>
+        <h3 className="text-center fw-bold mb-4">Latest Products</h3>
         <Row className="g-3 five-col-grid">
           {lastProducts.map((product) => (
             <Col
@@ -88,7 +88,7 @@ function Home() {
 
       {/* Categories */}
       <div className="recent-products-container container mt-4">
-        <h2>Categories</h2>
+        <h3 className="text-center fw-bold mb-4">Categories</h3>
         <Row className="g-4">
           {categories.map((category) => (
             <LinkContainer

@@ -6,7 +6,7 @@ const Location = () => {
   return (
     <div className="location-section-wrapper py-5 text-center">
       <Container>
-        <h4 className="text-black mb-4">Location</h4>
+        <h3 className="text-center fw-bold mb-4">Location</h3>
         <div className="d-flex justify-content-center">
           <div style={{ width: "100%", maxWidth: "80vw" }}>
             <iframe
