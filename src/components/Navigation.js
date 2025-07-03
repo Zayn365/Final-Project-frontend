@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { LinkContainer } from "react-router-bootstrap";
 import { logout, resetNotifications } from "../features/userSlice";
 import "./Navigation.css";
-
+import Logo from "../assets/images/logo.png";
 function Navigation() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -32,10 +32,10 @@ function Navigation() {
   }
 
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar style={{ backgroundColor: "#00214d" }} expand="lg">
       <Container>
         <LinkContainer to="/">
-          <Navbar.Brand>Ecomern</Navbar.Brand>
+          <img src={Logo} alt="logo" width={150} />
         </LinkContainer>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -55,7 +55,10 @@ function Navigation() {
             {user && !user.isAdmin && (
               <LinkContainer to="/cart">
                 <Nav.Link>
-                  <i className="fas fa-shopping-cart"></i>
+                  <i
+                    className="fas fa-shopping-cart"
+                    style={{ marginTop: "4px" }}
+                  ></i>
                   {user?.cart.count > 0 && (
                     <span className="badge badge-warning" id="cartcount">
                       {user.cart.count}
