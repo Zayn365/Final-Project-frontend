@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAddToCartMutation } from "../services/appApi";
@@ -9,6 +9,23 @@ function ProductPreview({ _id, category, name, pictures, price }) {
   const navigate = useNavigate();
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const user = useSelector((state) => state.user);
+  const [showLoginToast, setShowLoginToast] = useState(false);
+
+  console.log("TCL ~ handleAddToCart ~ user:", user);
+  const handleAddToCart = () => {
+    if (!user) {
+      setShowLoginToast(true);
+      setTimeout(() => setShowLoginToast(false), 3000); // hide after 3s
+      return;
+    } else {
+      addToCart({
+        userId: user._id,
+        productId: _id,
+        price: price,
+        image: pictures[0].url,
+      });
+    }
+  };
 
   return (
     <div>
@@ -20,8 +37,16 @@ function ProductPreview({ _id, category, name, pictures, price }) {
         />
       )}
 
+      {showLoginToast && (
+        <ToastMessage
+          bg="danger"
+          title="Login Required"
+          body="Login to add items to your cart"
+        />
+      )}
+
       <Card
-        className=" rounded p-3 d-flex flex-column justify-content-between"
+        className="rounded p-3 d-flex flex-column justify-content-between"
         style={{
           width: "16rem",
           margin: "10px",
@@ -63,14 +88,7 @@ function ProductPreview({ _id, category, name, pictures, price }) {
             <Button
               variant="danger"
               className="w-100 mb-2"
-              onClick={() =>
-                addToCart({
-                  userId: user._id,
-                  productId: _id,
-                  price: price,
-                  image: pictures[0].url,
-                })
-              }
+              onClick={handleAddToCart}
             >
               Add to cart
             </Button>
