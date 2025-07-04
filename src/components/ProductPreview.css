@@ -1,0 +1,6 @@
+.product-preview-img {
+  transition: transform 0.2s ease;
+}
+.product-preview-img:hover {
+  transform: scale(1.05);
+}

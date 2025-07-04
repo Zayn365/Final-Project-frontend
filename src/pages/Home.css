@@ -5,6 +5,9 @@
     width: 20%;
   }
 }
+.hover-red:hover {
+  color: #00214d !important;
+}
 
 .hero-carousel {
   margin-top: 0;

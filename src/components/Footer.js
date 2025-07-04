@@ -6,7 +6,10 @@ import "./Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="footer-section py-5 text-white">
+    <footer
+      className="footer-section py-5 text-white"
+      style={{ marginTop: "20px" }}
+    >
       <Container>
         <Row className="gy-4">
           {/* Left: Logo + Description */}

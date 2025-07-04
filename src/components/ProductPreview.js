@@ -1,22 +1,91 @@
 import React from "react";
-import { Badge, Card } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
+import { Card, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useAddToCartMutation } from "../services/appApi";
+import ToastMessage from "./ToastMessage";
+import { useSelector } from "react-redux";
 
 function ProductPreview({ _id, category, name, pictures, price }) {
-    return (
-        <LinkContainer to={`/product/${_id}`} style={{ cursor: "pointer", width: "13rem", margin: "10px" }}>
-            <Card style={{ width: "20rem", margin: "10px" }}>
-                <Card.Img variant="top" className="product-preview-img" src={pictures[0].url} style={{ height: "150px", objectFit: "scale-down" }} />
-                <Card.Body>
-                    <Card.Title>{name}</Card.Title>
-                    <Card.Text className="text-center h6 text-danger">Price : ${price}</Card.Text>
-                    <Badge bg="warning" text="dark">
-                        {category}
-                    </Badge>
-                </Card.Body>
-            </Card>
-        </LinkContainer>
-    );
+  const navigate = useNavigate();
+  const [addToCart, { isSuccess }] = useAddToCartMutation();
+  const user = useSelector((state) => state.user);
+
+  return (
+    <div>
+      {isSuccess && (
+        <ToastMessage
+          bg="success"
+          title="Added to cart"
+          body={`${name} is in your cart`}
+        />
+      )}
+
+      <Card
+        className=" rounded p-3 d-flex flex-column justify-content-between"
+        style={{
+          width: "16rem",
+          margin: "10px",
+          textAlign: "center",
+          minHeight: "420px",
+        }}
+      >
+        <Card.Img
+          variant="top"
+          src={pictures[0].url}
+          style={{ height: "220px", objectFit: "contain" }}
+        />
+
+        <Card.Body className="d-flex flex-column justify-content-between p-2">
+          <div>
+            <Card.Text className="h6 text-danger mb-1">Rs.{price}</Card.Text>
+
+            <Card.Title
+              className="fw-bold"
+              style={{
+                fontSize: "15px",
+                minHeight: "40px",
+                maxHeight: "40px",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+              }}
+              title={name}
+            >
+              {name}
+            </Card.Title>
+
+            <Card.Text className="text-uppercase text-muted small mb-3">
+              {category}
+            </Card.Text>
+          </div>
+
+          <div>
+            <Button
+              variant="danger"
+              className="w-100 mb-2"
+              onClick={() =>
+                addToCart({
+                  userId: user._id,
+                  productId: _id,
+                  price: price,
+                  image: pictures[0].url,
+                })
+              }
+            >
+              Add to cart
+            </Button>
+            <Button
+              variant="light"
+              className="w-100 border"
+              onClick={() => navigate(`/product/${_id}`)}
+            >
+              Quick view
+            </Button>
+          </div>
+        </Card.Body>
+      </Card>
+    </div>
+  );
 }
 
 export default ProductPreview;

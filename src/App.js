@@ -24,7 +24,7 @@ function App() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   useEffect(() => {
-    const socket = io("https://final-project-backend-ashy-five.vercel.app");
+    const socket = io("https://final-project-backend-m9nb.onrender.com");
     socket.off("notification").on("notification", (msgObj, user_id) => {
       // logic for notification
       if (user_id === user._id) {

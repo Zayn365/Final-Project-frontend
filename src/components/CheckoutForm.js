@@ -22,7 +22,7 @@ function CheckoutForm() {
     if (!stripe || !elements || user.cart.count <= 0) return;
     setPaying(true);
     const { client_secret } = await fetch(
-      "https://final-project-backend-ashy-five.vercel.app//create-payment",
+      "https://final-project-backend-m9nb.onrender.com//create-payment",
       {
         method: "POST",
         headers: {

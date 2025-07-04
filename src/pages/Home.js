@@ -70,9 +70,15 @@ function Home() {
               display: "block",
               textDecoration: "none",
               marginTop: "10px",
+              color: "#00214d",
             }}
           >
-            See more {">>"}
+            <span
+              className="text-danger hover-red"
+              style={{ cursor: "pointer" }}
+            >
+              View more {">>"}
+            </span>
           </Link>
         </div>
       </div>
