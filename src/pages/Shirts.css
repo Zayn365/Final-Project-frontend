@@ -1,0 +1,94 @@
+.category-page-container {
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+/* Sidebar styling */
+.side-menu .list-group-item {
+  font-size: 0.95rem;
+  border: none !important;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-width: 0;
+}
+
+.side-menu .list-group-item.activate {
+  color: #e0e0e0; /* slightly darker white */
+  font-weight: bold;
+  background-color: transparent;
+}
+
+/* Product header section */
+.product-header select {
+  font-size: 0.85rem;
+  padding: 2px 4px;
+}
+
+/* Product Card Styling */
+.product-card {
+  padding-top: 15px;
+  padding-bottom: 18px;
+}
+
+.product-card img {
+  max-height: 270px;
+  object-fit: contain;
+}
+
+/* Font styling for product info */
+.product-info {
+  font-size: 13px;
+  font-weight: 400;
+  color: #5a5a5a;
+  line-height: 1.4;
+  padding: 0 5px;
+}
+
+.product-info .info-row {
+  display: flex;
+  gap: 4px;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+.top-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.info-top {
+  display: flex;
+  justify-content: space-between;
+}
+.info-row {
+  display: flex;
+  gap: 6px;
+  font-size: 18px;
+}
+
+.label {
+  color: #5a5a5a; /* Grey color for labels */
+  font-weight: 400; /* Regular weight for labels */
+}
+
+.value {
+  color: #cc182c; /* Red color for values */
+  font-weight: 600; /* Bold weight for values */
+}
+
+/* Buttons */
+.choose-btn {
+  background-color: #cc182c;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 0;
+  color: white;
+}
+
+.quick-view-btn {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 0;
+  border: 1px solid #ccc;
+  color: #333;
+}

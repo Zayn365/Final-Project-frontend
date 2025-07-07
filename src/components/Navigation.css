@@ -2,7 +2,46 @@
   margin: 0 auto;
   display: block !important;
 }
+/* Fix icon group layout */
+/* Fix icon group layout - tighter spacing */
+.icon-group {
+  display: flex;
+  align-items: center;
+  /* gap: 4px; Reduced from 10px */
+  margin-left: 4px;
+}
 
+/* Standardized icon button style */
+.nav-icon {
+  font-size: 18px;
+  color: white;
+  padding: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Optional: subtle hover effect */
+.nav-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.top-header-bar {
+  background-color: #cc182c;
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 1rem;
+}
+.search-btn {
+  background-color: #fa7a0c !important;
+  font-size: 0.75rem;
+  height: 30px;
+  color: white;
+  border: none;
+}
 .logo {
   width: 50px;
 }

@@ -19,7 +19,7 @@ import { io } from "socket.io-client";
 import { addNotification } from "./features/userSlice";
 import Footer from "./components/Footer";
 import AdminLogin from "./pages/AdminLogin";
-
+import Shirts from "./pages/Shirts";
 function App() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -69,6 +69,7 @@ function App() {
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/new-product" element={<NewProduct />} />
+          <Route path="/shirts" element={<Shirts />} />
 
           <Route path="*" element={<Home />} />
         </Routes>

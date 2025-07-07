@@ -32,19 +32,71 @@ function Navigation() {
 
   return (
     <>
-      {/* Fixed Marquee Strip */}
+      {/* Top Red Bar with Search */}
       <div
-        className="py-1 px-3 text-white"
+        className="d-flex justify-content-end align-items-center px-3"
         style={{
           backgroundColor: "#cc182c",
-          fontSize: "0.9rem",
+          height: "40px",
         }}
       >
-        <marquee behavior="scroll" direction="left">
-          "Education is the passport to the future" | "Study hard, dream big" |
-          "Stationery is the first step to creativity" | "Books and pens pave
-          the path to success" | "Where school life begins, stationery matters!"
-        </marquee>
+        <Form className="d-flex" style={{ maxWidth: 300 }}>
+          <FormControl
+            type="search"
+            placeholder="I'm looking for..."
+            className="me-1"
+            style={{ height: "30px", fontSize: "0.85rem" }}
+          />
+          <button className="btn search-btn py-0 px-2" type="submit">
+            Search
+          </button>
+        </Form>
+        <div className="ms-3 d-flex align-items-center">
+          {!user && (
+            <>
+              <Nav.Link className="p-0" onClick={handleToggleNotifications}>
+                <i
+                  className="far fa-bell nav-icon"
+                  ref={bellRef}
+                  data-count={unreadNotifications || null}
+                ></i>
+              </Nav.Link>
+              <LinkContainer to="/login">
+                <Nav.Link className="p-0">
+                  <i className="far fa-user nav-icon"></i>
+                </Nav.Link>
+              </LinkContainer>
+            </>
+          )}
+
+          {user && !user.isAdmin && (
+            <>
+              <LinkContainer to="/cart">
+                <Nav.Link>
+                  <i className="far fa-shopping-bag nav-icon"></i>
+                  {user?.cart?.count > 0 && (
+                    <span className="badge badge-warning" id="cartcount">
+                      {user.cart.count}
+                    </span>
+                  )}
+                </Nav.Link>
+              </LinkContainer>
+              <Nav.Link onClick={handleToggleNotifications}>
+                <i
+                  className="far fa-bell nav-icon"
+                  ref={bellRef}
+                  data-count={unreadNotifications || null}
+                ></i>
+              </Nav.Link>
+            </>
+          )}
+
+          {user && (
+            <Nav.Link className="text-white" onClick={handleLogout}>
+              Logout
+            </Nav.Link>
+          )}
+        </div>
       </div>
 
       {/* Spacer to avoid content hiding under marquee */}
@@ -57,73 +109,11 @@ function Navigation() {
         }}
       >
         {/* Main Navbar */}
-        <Navbar style={{ backgroundColor: "#00214d" }} expand="lg">
+        <Navbar style={{ backgroundColor: "#3b3f46" }} expand="lg">
           <Container>
             <LinkContainer to="/">
-              <img src={Logo} alt="logo" width={150} />
+              <img src={Logo} alt="logo" width={180} />
             </LinkContainer>
-
-            <Form className="d-flex mx-3" style={{ flexGrow: 1 }}>
-              <FormControl
-                type="search"
-                placeholder="Search..."
-                className="me-2"
-                aria-label="Search"
-              />
-            </Form>
-
-            <Nav className="align-items-center">
-              {!user && (
-                <>
-                  <Nav.Link onClick={handleToggleNotifications}>
-                    <i
-                      className="fas fa-bell text-white"
-                      ref={bellRef}
-                      data-count={unreadNotifications || null}
-                    ></i>
-                  </Nav.Link>
-                  <LinkContainer to="/login">
-                    <Nav.Link>
-                      <i className="fas fa-user fa-lg text-white"></i>
-                    </Nav.Link>
-                  </LinkContainer>
-                </>
-              )}
-
-              {user && user.isAdmin && (
-                <LinkContainer to="/admin">
-                  <Nav.Link>Admin</Nav.Link>
-                </LinkContainer>
-              )}
-              {user && !user.isAdmin && (
-                <>
-                  <LinkContainer to="/cart">
-                    <Nav.Link>
-                      <i className="fas fa-shopping-cart"></i>
-                      {user?.cart?.count > 0 && (
-                        <span className="badge badge-warning" id="cartcount">
-                          {user.cart.count}
-                        </span>
-                      )}
-                    </Nav.Link>
-                  </LinkContainer>
-                  <Nav.Link onClick={handleToggleNotifications}>
-                    <i
-                      className="fas fa-bell text-white"
-                      ref={bellRef}
-                      data-count={unreadNotifications || null}
-                    ></i>
-                  </Nav.Link>
-                </>
-              )}
-              {user && (
-                <>
-                  <Nav.Link className="text-white" onClick={handleLogout}>
-                    Logout
-                  </Nav.Link>
-                </>
-              )}
-            </Nav>
           </Container>
         </Navbar>
 
