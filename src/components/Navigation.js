@@ -109,7 +109,14 @@ function Navigation() {
         }}
       >
         {/* Main Navbar */}
-        <Navbar style={{ backgroundColor: "#3b3f46" }} expand="lg">
+        <Navbar
+          style={{
+            backgroundColor: "#3b3f46",
+            marginBottom: "12px",
+            boxShadow: "0 18px 22px rgba(0, 0, 0, 0.21)",
+          }}
+          expand="lg"
+        >
           <Container>
             <LinkContainer to="/">
               <img src={Logo} alt="logo" width={180} />
@@ -118,7 +125,7 @@ function Navigation() {
         </Navbar>
 
         {/* Navigation Links */}
-        <Navbar bg="light" variant="light">
+        {/* <Navbar bg="light" variant="light">
           <Container>
             <Nav className="mx-auto">
               <LinkContainer to="/">
@@ -129,7 +136,7 @@ function Navigation() {
               </LinkContainer>
             </Nav>
           </Container>
-        </Navbar>
+        </Navbar> */}
 
         {/* Notification Dropdown */}
         <div
