@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import "./Shirts.css";
 
 const categories = [
@@ -19,30 +19,44 @@ const products = [
     size: "S",
     age: "11-12",
     price: "1200 TL",
+    useDropdown: true,
   },
   {
     name: "Bisiklet Yaka Kısakol T-Shirt",
     size: "M",
     age: "12-13",
     price: "1200 TL",
+    useDropdown: true,
   },
   {
     name: "Bisiklet Yaka Kısakol T-Shirt",
     size: "L",
     age: "13-14",
     price: "1200 TL",
+    useDropdown: false,
   },
   {
     name: "Bisiklet Yaka Kısakol T-Shirt",
     size: "XL",
     age: "14-15",
     price: "1200 TL",
+    useDropdown: false,
   },
 ];
+
+const sizeOptions = ["S", "M", "L", "XL"];
+const ageOptions = ["11-12", "12-13", "13-14", "14-15"];
 
 function StaticCategoryPage() {
   return (
     <div className="category-page-container">
+      <div className="mb-5">
+        <img
+          src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
+          className="d-block w-100"
+          alt="Office Accessories"
+        />{" "}
+      </div>
       <Container fluid className="py-4">
         <Row>
           {/* Sidebar */}
@@ -100,13 +114,35 @@ function StaticCategoryPage() {
                     <div className="product-info text-start">
                       <div className="top-info">
                         <div className="info-row info-top">
-                          <div>
+                          <div className="d-flex align-items-center">
                             <span className="label">Beden:</span>
-                            <span className="value">{product.size}</span>
+                            {product.useDropdown ? (
+                              <Form.Select
+                                size="sm"
+                                className="value-dropdown text-danger"
+                              >
+                                {sizeOptions.map((s, i) => (
+                                  <option key={i}>{s}</option>
+                                ))}
+                              </Form.Select>
+                            ) : (
+                              <span className="value">{product.size}</span>
+                            )}
                           </div>
-                          <div>
+                          <div className="d-flex align-items-center">
                             <span className="label">Yaş:</span>
-                            <span className="value">{product.age}</span>
+                            {product.useDropdown ? (
+                              <Form.Select
+                                size="sm"
+                                className="value-dropdown text-danger"
+                              >
+                                {ageOptions.map((a, i) => (
+                                  <option key={i}>{a}</option>
+                                ))}
+                              </Form.Select>
+                            ) : (
+                              <span className="value">{product.age}</span>
+                            )}
                           </div>
                         </div>
                         <div className="info-row">

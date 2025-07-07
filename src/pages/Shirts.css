@@ -10,10 +10,11 @@
   padding: 10px 15px;
   cursor: pointer;
   border-width: 0;
+  text-align: left;
 }
 
 .side-menu .list-group-item.activate {
-  color: #e0e0e0; /* slightly darker white */
+  color: #cc182c; /* slightly darker white */
   font-weight: bold;
   background-color: transparent;
 }
@@ -58,6 +59,7 @@
 .info-top {
   display: flex;
   justify-content: space-between;
+  padding-right: 20px;
 }
 .info-row {
   display: flex;
@@ -68,6 +70,7 @@
 .label {
   color: #5a5a5a; /* Grey color for labels */
   font-weight: 400; /* Regular weight for labels */
+  margin-right: 3px;
 }
 
 .value {
