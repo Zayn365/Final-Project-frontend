@@ -112,3 +112,19 @@
   min-width: 2em;
   font: bold 0.4em sans-serif;
 }
+.nav-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+#cartcount {
+  position: absolute;
+  bottom: -2px; /* Push badge below the icon */
+  right: -8px;
+  background: white;
+  color: black;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  padding: 2.2px 5px;
+  line-height: 1;
+  font-weight: 600;
+}

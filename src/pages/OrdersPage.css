@@ -1,0 +1,13 @@
+.order-table td {
+  vertical-align: middle;
+  font-size: 0.95rem;
+}
+
+.order-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.order-table img {
+  border: 1px solid #ccc;
+}

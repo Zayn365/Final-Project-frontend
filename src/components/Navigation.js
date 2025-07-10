@@ -72,12 +72,13 @@ function Navigation() {
           {user && !user.isAdmin && (
             <>
               <LinkContainer to="/cart">
-                <Nav.Link>
-                  <i className="far fa-shopping-bag nav-icon"></i>
+                <Nav.Link className="position-relative p-0">
+                  <i
+                    className="fas fa-shopping-cart nav-icon"
+                    style={{ fontSize: "1.2rem" }}
+                  ></i>
                   {user?.cart?.count > 0 && (
-                    <span className="badge badge-warning" id="cartcount">
-                      {user.cart.count}
-                    </span>
+                    <span id="cartcount">{user.cart.count}</span>
                   )}
                 </Nav.Link>
               </LinkContainer>
