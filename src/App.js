@@ -66,6 +66,7 @@ function App() {
             </>
           )}
           <Route path="/product/:id" element={<ProductPage />} />
+
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/new-product" element={<NewProduct />} />
