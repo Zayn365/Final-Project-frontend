@@ -82,7 +82,7 @@ function CartPage() {
                         style={{ width: 80, height: 80, objectFit: "cover" }}
                       />
                     </td>
-                    <td>${parseFloat(item.price).toFixed(2)}</td>
+                    <td>₺{parseFloat(item.price).toFixed(2)}</td>
                     <td>
                       <div className="quantity-indicator">
                         <i

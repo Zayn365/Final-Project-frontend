@@ -28,6 +28,7 @@ function ProductPage() {
   const [addToCart, { isSuccess }] = useAddToCartMutation();
 
   const handleDragStart = (e) => e.preventDefault();
+
   useEffect(() => {
     axios.get(`/products/${id}`).then(({ data }) => {
       setProduct(data.product);
@@ -35,9 +36,8 @@ function ProductPage() {
     });
   }, [id]);
 
-  if (!product) {
-    return <Loading />;
-  }
+  if (!product) return <Loading />;
+
   const responsive = {
     0: { items: 1 },
     568: { items: 2 },
@@ -49,17 +49,15 @@ function ProductPage() {
       className="product__carousel--image"
       src={picture.url}
       onDragStart={handleDragStart}
+      key={picture.url}
     />
   ));
 
-  let similarProducts = [];
-  if (similar) {
-    similarProducts = similar.map((product, idx) => (
-      <div className="item" data-value={idx}>
-        <SimilarProduct {...product} />
-      </div>
-    ));
-  }
+  const similarProducts = (similar || []).map((product, idx) => (
+    <div className="item" data-value={idx} key={product._id}>
+      <SimilarProduct {...product} />
+    </div>
+  ));
 
   return (
     <Container className="pt-4" style={{ position: "relative" }}>
@@ -71,48 +69,73 @@ function ProductPage() {
             controlsStrategy="alternate"
           />
         </Col>
+
         <Col lg={6} className="pt-4">
           <h1>{product.name}</h1>
           <p>
             <Badge bg="danger">{product.category}</Badge>
           </p>
           <p className="product__price">${product.price}</p>
-          <p style={{ textAlign: "justify" }} className="py-3">
+          <p className="py-3" style={{ textAlign: "justify" }}>
             <strong>Description:</strong> {product.description}
           </p>
+
           {user && !user.isAdmin && (
-            <ButtonGroup style={{ width: "90%" }}>
-              <Form.Select
-                size="lg"
-                style={{ width: "40%", borderRadius: "0" }}
-              >
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </Form.Select>
-              <Button
-                className="btn-danger"
-                size="lg"
-                onClick={() =>
-                  addToCart({
-                    userId: user._id,
-                    productId: id,
-                    price: product.price,
-                    image: product.pictures[0].url,
-                  })
-                }
-              >
-                Add to cart
-              </Button>
-            </ButtonGroup>
+            <Form className="mb-4">
+              <Row className="g-3 align-items-end">
+                <Col xs={12} md={6}>
+                  <Form.Label>Choose Size</Form.Label>
+                  <Form.Select size="lg">
+                    <option value="">-- Select size --</option>
+                    {(Array.isArray(product?.size)
+                      ? product.size
+                      : ["S", "M", "L"]
+                    ).map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+
+                <Col xs={6} md={3}>
+                  <Form.Label>Quantity</Form.Label>
+                  <Form.Select size="lg">
+                    {[1, 2, 3, 4, 5].map((q) => (
+                      <option key={q} value={q}>
+                        {q}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Col>
+
+                <Col xs={6} md={3}>
+                  <Button
+                    variant="danger"
+                    size="lg"
+                    className="w-100"
+                    onClick={() =>
+                      addToCart({
+                        userId: user._id,
+                        productId: id,
+                        price: product.price,
+                        image: product.pictures[0].url,
+                      })
+                    }
+                  >
+                    Add to cart
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
           )}
+
           {user && user.isAdmin && (
             <LinkContainer to={`/product/${product._id}/edit`}>
               <Button size="lg">Edit Product</Button>
             </LinkContainer>
           )}
+
           {isSuccess && (
             <ToastMessage
               bg="info"
@@ -122,6 +145,7 @@ function ProductPage() {
           )}
         </Col>
       </Row>
+
       <div className="my-4">
         <h2>Similar Products</h2>
         <div className="d-flex justify-content-center align-items-center flex-wrap">

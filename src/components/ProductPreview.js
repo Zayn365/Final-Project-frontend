@@ -88,16 +88,16 @@ function ProductPreview({ _id, category, name, pictures, price }) {
             <Button
               variant="danger"
               className="w-100 mb-2"
-              onClick={handleAddToCart}
+              onClick={() => navigate(`category/all`)}
             >
-              Add to cart
+              Show All
             </Button>
             <Button
               variant="light"
               className="w-100 border"
               onClick={() => navigate(`/product/${_id}`)}
             >
-              Quick view
+              Detaylar
             </Button>
           </div>
         </Card.Body>

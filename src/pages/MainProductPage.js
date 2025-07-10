@@ -216,7 +216,7 @@ function MainProductPage() {
                       className="quick-view-btn mt-2 w-100"
                       variant="light"
                     >
-                      Quick view
+                      Detaylar{" "}
                     </Button>
                   </div>
                 </Col>

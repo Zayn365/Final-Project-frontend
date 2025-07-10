@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "../axios";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import "./Shirts.css";
+import { useAddToCartMutation } from "../services/appApi";
+import { useSelector } from "react-redux";
+import ToastMessage from "../components/ToastMessage";
 
 function CategoryPage() {
   const { category = "all" } = useParams();
@@ -11,6 +14,11 @@ function CategoryPage() {
   const [perPage, setPerPage] = useState(48);
   const [sortBy, setSortBy] = useState("featured");
   const [pageIdx, setPageIdx] = useState(0);
+  const [showLoginToast, setShowLoginToast] = useState(false);
+
+  const navigate = useNavigate();
+  const [addToCart, { isSuccess }] = useAddToCartMutation();
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,15 +68,25 @@ function CategoryPage() {
   const pageEnd = Math.min(pageStart + perPage, sorted.length);
   const paged = sorted.slice(pageStart, pageEnd);
 
-  const sizeOptions = [
-    ...new Set(allProducts.map((p) => p.size).filter(Boolean)),
-  ];
-  const ageOptions = [
-    ...new Set(allProducts.map((p) => p.age).filter(Boolean)),
-  ];
+  const sizeOptions = ["S", "M", "L"];
 
   return (
     <div className="category-page-container">
+      {isSuccess && (
+        <ToastMessage
+          bg="success"
+          title="Added to cart"
+          body={`Added in your cart`}
+        />
+      )}
+      {showLoginToast && (
+        <ToastMessage
+          bg="danger"
+          title="Login Required"
+          body="Login to add items to your cart"
+        />
+      )}
+
       <div className="mb-5">
         <img
           src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
@@ -154,33 +172,15 @@ function CategoryPage() {
                         <div className="info-row info-top">
                           <div className="d-flex align-items-center">
                             <span className="label">Beden:</span>
-                            {prod.size ? (
-                              <span className="value">{prod.size}</span>
-                            ) : (
-                              <Form.Select
-                                size="sm"
-                                className="value-dropdown text-danger"
-                              >
-                                {sizeOptions.map((s) => (
-                                  <option key={s}>{s}</option>
-                                ))}
-                              </Form.Select>
-                            )}
-                          </div>
-                          <div className="d-flex align-items-center">
-                            <span className="label">Yaş:</span>
-                            {prod.age ? (
-                              <span className="value">{prod.age}</span>
-                            ) : (
-                              <Form.Select
-                                size="sm"
-                                className="value-dropdown text-danger"
-                              >
-                                {ageOptions.map((a) => (
-                                  <option key={a}>{a}</option>
-                                ))}
-                              </Form.Select>
-                            )}
+
+                            <Form.Select
+                              size="sm"
+                              className="value-dropdown text-danger"
+                            >
+                              {sizeOptions.map((s) => (
+                                <option key={s}>{s}</option>
+                              ))}
+                            </Form.Select>
                           </div>
                         </div>
                         <div className="info-row">
@@ -189,14 +189,33 @@ function CategoryPage() {
                         </div>
                       </div>
                     </div>
-                    <Button className="choose-btn mt-3 w-100" variant="danger">
+
+                    <Button
+                      className="choose-btn mt-3 w-100"
+                      variant="danger"
+                      onClick={() => {
+                        if (!user) {
+                          setShowLoginToast(true);
+                          setTimeout(() => setShowLoginToast(false), 3000);
+                          return;
+                        }
+                        addToCart({
+                          userId: user._id,
+                          productId: prod._id,
+                          price: prod.price,
+                          image: prod.pictures?.[0]?.url,
+                        });
+                      }}
+                    >
                       Choose options
                     </Button>
+
                     <Button
                       className="quick-view-btn mt-2 w-100"
                       variant="light"
+                      onClick={() => navigate(`/product/${prod._id}`)}
                     >
-                      Quick view
+                      Detaylar{" "}
                     </Button>
                   </div>
                 </Col>

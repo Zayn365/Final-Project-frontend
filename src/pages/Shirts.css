@@ -2,6 +2,20 @@
   background-color: #fff;
   min-height: 100vh;
 }
+.category-page-container {
+  min-height: 100vh;
+}
+
+.side-menu {
+  padding-left: 0;
+  border-right: 1px solid #ddd;
+  min-height: 100%;
+  background-color: #f8f9fa;
+}
+
+.side-menu .list-group-item a {
+  text-decoration: none;
+}
 
 /* Sidebar styling */
 .side-menu .list-group-item {
