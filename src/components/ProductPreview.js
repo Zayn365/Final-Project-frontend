@@ -80,7 +80,7 @@ function ProductPreview({ _id, category, name, pictures, price }) {
             </Card.Title>
 
             <Card.Text className="text-uppercase text-muted small mb-3">
-              {category}
+              {category.slice(0, 20)}
             </Card.Text>
           </div>
 
@@ -88,16 +88,16 @@ function ProductPreview({ _id, category, name, pictures, price }) {
             <Button
               variant="danger"
               className="w-100 mb-2"
-              onClick={() => navigate(`category/all`)}
+              onClick={() => navigate(`/category/all`)}
             >
-              Show All
+              Show More{" "}
             </Button>
             <Button
               variant="light"
               className="w-100 border"
               onClick={() => navigate(`/product/${_id}`)}
             >
-              Detaylar
+              Quick view
             </Button>
           </div>
         </Card.Body>

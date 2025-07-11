@@ -170,18 +170,24 @@ function CategoryPage() {
                     <div className="product-info text-start flex-grow-1">
                       <div className="top-info">
                         <div className="info-row info-top">
-                          <div className="d-flex align-items-center">
-                            <span className="label">Beden:</span>
-
-                            <Form.Select
-                              size="sm"
-                              className="value-dropdown text-danger"
-                            >
-                              {sizeOptions.map((s) => (
-                                <option key={s}>{s}</option>
-                              ))}
-                            </Form.Select>
-                          </div>
+                          {prod.class ? (
+                            <div className="d-flex align-items-center">
+                              <span className="label">sınıf:</span>
+                              <span className="value">{prod.class}</span>
+                            </div>
+                          ) : (
+                            <div className="d-flex align-items-center">
+                              <span className="label">Beden:</span>
+                              <Form.Select
+                                size="sm"
+                                className="value-dropdown text-danger"
+                              >
+                                {sizeOptions.map((s) => (
+                                  <option key={s}>{s}</option>
+                                ))}
+                              </Form.Select>
+                            </div>
+                          )}
                         </div>
                         <div className="info-row">
                           <span className="label">Fiyat:</span>
@@ -207,7 +213,7 @@ function CategoryPage() {
                         });
                       }}
                     >
-                      Choose options
+                      Add To Cart
                     </Button>
 
                     <Button

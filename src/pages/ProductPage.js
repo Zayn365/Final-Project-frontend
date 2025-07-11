@@ -2,15 +2,7 @@ import axios from "../axios";
 import React, { useEffect, useState } from "react";
 import AliceCarousel from "react-alice-carousel";
 import "react-alice-carousel/lib/alice-carousel.css";
-import {
-  Container,
-  Row,
-  Col,
-  Badge,
-  ButtonGroup,
-  Form,
-  Button,
-} from "react-bootstrap";
+import { Container, Row, Col, Badge, Button, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Loading from "../components/Loading";
@@ -25,6 +17,7 @@ function ProductPage() {
   const user = useSelector((state) => state.user);
   const [product, setProduct] = useState(null);
   const [similar, setSimilar] = useState(null);
+  const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
 
   const handleDragStart = (e) => e.preventDefault();
@@ -84,29 +77,61 @@ function ProductPage() {
             <Form className="mb-4">
               <Row className="g-3 align-items-end">
                 <Col xs={12} md={6}>
-                  <Form.Label>Choose Size</Form.Label>
-                  <Form.Select size="lg">
-                    <option value="">-- Select size --</option>
-                    {(Array.isArray(product?.size)
-                      ? product.size
-                      : ["S", "M", "L"]
-                    ).map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </Form.Select>
+                  {product.category.toLowerCase() === "books" ? (
+                    <>
+                      <Form.Label>Class</Form.Label>
+                      <div className="form-control bg-light">
+                        {product.class || "N/A"}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Form.Label>Choose Size</Form.Label>
+                      <Form.Select size="lg">
+                        <option value="">-- Select size --</option>
+                        {(Array.isArray(product?.size)
+                          ? product.size
+                          : ["S", "M", "L"]
+                        ).map((size) => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </>
+                  )}
                 </Col>
 
                 <Col xs={6} md={3}>
                   <Form.Label>Quantity</Form.Label>
-                  <Form.Select size="lg">
-                    {[1, 2, 3, 4, 5].map((q) => (
-                      <option key={q} value={q}>
-                        {q}
-                      </option>
-                    ))}
-                  </Form.Select>
+                  <div className="d-flex align-items-center">
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    >
+                      -
+                    </Button>
+                    <Form.Control
+                      type="number"
+                      value={quantity}
+                      min={1}
+                      max={99}
+                      onChange={(e) => {
+                        const val = Math.max(
+                          1,
+                          Math.min(99, parseInt(e.target.value) || 1)
+                        );
+                        setQuantity(val);
+                      }}
+                      className="mx-2 text-center"
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+                    >
+                      +
+                    </Button>
+                  </div>
                 </Col>
 
                 <Col xs={6} md={3}>
@@ -120,6 +145,7 @@ function ProductPage() {
                         productId: id,
                         price: product.price,
                         image: product.pictures[0].url,
+                        quantity,
                       })
                     }
                   >
