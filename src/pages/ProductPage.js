@@ -79,10 +79,15 @@ function ProductPage() {
                 <Col xs={12} md={6}>
                   {product.category.toLowerCase() === "books" ? (
                     <>
-                      <Form.Label>Class</Form.Label>
-                      <div className="form-control bg-light">
-                        {product.class || "N/A"}
-                      </div>
+                      <Form.Label>Sinif</Form.Label>
+                      <Form.Select size="lg">
+                        <option value="">-- Select sinif --</option>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((classNo) => (
+                          <option key={classNo} value={classNo}>
+                            {classNo}
+                          </option>
+                        ))}
+                      </Form.Select>
                     </>
                   ) : (
                     <>

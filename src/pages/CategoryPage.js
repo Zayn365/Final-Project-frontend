@@ -69,6 +69,7 @@ function CategoryPage() {
   const paged = sorted.slice(pageStart, pageEnd);
 
   const sizeOptions = ["S", "M", "L"];
+  const classOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
     <div className="category-page-container">
@@ -173,7 +174,14 @@ function CategoryPage() {
                           {prod.class ? (
                             <div className="d-flex align-items-center">
                               <span className="label">sınıf:</span>
-                              <span className="value">{prod.class}</span>
+                              <Form.Select
+                                size="sm"
+                                className="value-dropdown text-danger"
+                              >
+                                {classOptions.map((s) => (
+                                  <option key={s}>{s}</option>
+                                ))}
+                              </Form.Select>{" "}
                             </div>
                           ) : (
                             <div className="d-flex align-items-center">
