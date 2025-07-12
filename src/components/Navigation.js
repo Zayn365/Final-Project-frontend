@@ -1,6 +1,13 @@
 import React, { useRef, useState } from "react";
 import axios from "../axios";
-import { Navbar, Nav, Container, Form, FormControl } from "react-bootstrap";
+import {
+  Navbar,
+  Nav,
+  Container,
+  Form,
+  FormControl,
+  Dropdown,
+} from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { LinkContainer } from "react-router-bootstrap";
 import { logout, resetNotifications } from "../features/userSlice";
@@ -51,6 +58,7 @@ function Navigation() {
             Search
           </button>
         </Form>
+
         <div className="ms-3 d-flex align-items-center">
           {!user && (
             <>
@@ -93,14 +101,34 @@ function Navigation() {
           )}
 
           {user && (
-            <Nav.Link className="text-white" onClick={handleLogout}>
-              Logout
-            </Nav.Link>
+            <Dropdown align="end">
+              <Dropdown.Toggle
+                variant="link"
+                className="text-white nav-link p-0"
+                style={{ textDecoration: "none" }}
+              >
+                {user.name}
+              </Dropdown.Toggle>
+              <Dropdown.Menu style={{ zIndex: 9999 }}>
+                {!user.isAdmin && (
+                  <LinkContainer to="/orders">
+                    <Dropdown.Item>My Orders</Dropdown.Item>
+                  </LinkContainer>
+                )}
+                {user.isAdmin && (
+                  <LinkContainer to="/admin">
+                    <Dropdown.Item>Admin Panel</Dropdown.Item>
+                  </LinkContainer>
+                )}
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           )}
         </div>
       </div>
 
-      {/* Spacer to avoid content hiding under marquee */}
+      {/* Sticky Header */}
       <div
         style={{
           position: "sticky",
@@ -124,20 +152,6 @@ function Navigation() {
             </LinkContainer>
           </Container>
         </Navbar>
-
-        {/* Navigation Links */}
-        {/* <Navbar bg="light" variant="light">
-          <Container>
-            <Nav className="mx-auto">
-              <LinkContainer to="/">
-                <Nav.Link>Home</Nav.Link>
-              </LinkContainer>
-              <LinkContainer to="/category/all">
-                <Nav.Link>Products</Nav.Link>
-              </LinkContainer>
-            </Nav>
-          </Container>
-        </Navbar> */}
 
         {/* Notification Dropdown */}
         <div

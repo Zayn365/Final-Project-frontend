@@ -82,7 +82,10 @@ function ProductPage() {
                       <Form.Label>Sinif</Form.Label>
                       <Form.Select size="lg">
                         <option value="">-- Select sinif --</option>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((classNo) => (
+                        {(Array.isArray(product?.class)
+                          ? product.class
+                          : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                        ).map((classNo) => (
                           <option key={classNo} value={classNo}>
                             {classNo}
                           </option>
@@ -94,8 +97,8 @@ function ProductPage() {
                       <Form.Label>Choose Size</Form.Label>
                       <Form.Select size="lg">
                         <option value="">-- Select size --</option>
-                        {(Array.isArray(product?.size)
-                          ? product.size
+                        {(Array.isArray(product?.sizes)
+                          ? product.sizes
                           : ["S", "M", "L"]
                         ).map((size) => (
                           <option key={size} value={size}>
@@ -122,11 +125,10 @@ function ProductPage() {
                       min={1}
                       max={99}
                       onChange={(e) => {
-                        const val = Math.max(
-                          1,
-                          Math.min(99, parseInt(e.target.value) || 1)
-                        );
-                        setQuantity(val);
+                        const val = parseInt(e.target.value);
+                        if (!isNaN(val) && val >= 1 && val <= 99) {
+                          setQuantity(val);
+                        }
                       }}
                       className="mx-2 text-center"
                     />

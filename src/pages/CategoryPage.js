@@ -171,14 +171,17 @@ function CategoryPage() {
                     <div className="product-info text-start flex-grow-1">
                       <div className="top-info">
                         <div className="info-row info-top">
-                          {prod.class ? (
+                          {prod.category.toLowerCase() === "books" ? (
                             <div className="d-flex align-items-center">
                               <span className="label">sınıf:</span>
                               <Form.Select
                                 size="sm"
                                 className="value-dropdown text-danger"
                               >
-                                {classOptions.map((s) => (
+                                {(Array.isArray(prod?.class)
+                                  ? prod.class
+                                  : classOptions
+                                ).map((s) => (
                                   <option key={s}>{s}</option>
                                 ))}
                               </Form.Select>{" "}
@@ -190,7 +193,10 @@ function CategoryPage() {
                                 size="sm"
                                 className="value-dropdown text-danger"
                               >
-                                {sizeOptions.map((s) => (
+                                {(Array.isArray(prod?.sizes)
+                                  ? prod.sizes
+                                  : sizeOptions
+                                ).map((s) => (
                                   <option key={s}>{s}</option>
                                 ))}
                               </Form.Select>

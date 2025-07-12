@@ -62,15 +62,15 @@ function App() {
           {user && user.isAdmin && (
             <>
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/product/:id/edit" element={<EditProductPage />} />
+              {/* <Route path="/product/:id/edit" element={<EditProductPage />} /> */}
             </>
           )}
           <Route path="/product/:id" element={<ProductPage />} />
 
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/new-product" element={<NewProduct />} />
-          <Route path="/shirts" element={<Shirts />} />
+          {/* <Route path="/new-product" element={<NewProduct />} /> */}
+          {/* <Route path="/shirts" element={<Shirts />} /> */}
 
           <Route path="*" element={<Home />} />
         </Routes>
