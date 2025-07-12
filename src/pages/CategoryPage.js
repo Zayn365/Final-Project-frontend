@@ -7,7 +7,7 @@ import { useAddToCartMutation } from "../services/appApi";
 import { useSelector } from "react-redux";
 import ToastMessage from "../components/ToastMessage";
 
-function CategoryPage() {
+function CategoryPage({ NoHeader }) {
   const { category = "all" } = useParams();
   const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -87,14 +87,15 @@ function CategoryPage() {
           body="Login to add items to your cart"
         />
       )}
-
-      <div className="mb-5">
-        <img
-          src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
-          className="d-block w-100"
-          alt="Banner"
-        />
-      </div>
+      {!NoHeader && (
+        <div className="mb-5">
+          <img
+            src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
+            className="d-block w-100"
+            alt="Banner"
+          />
+        </div>
+      )}
 
       <Container fluid className="py-4">
         <Row>

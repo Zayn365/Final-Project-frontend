@@ -1,3 +1,4 @@
+// same imports...
 import React, { useState, useMemo } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import axios from "../axios";
@@ -10,7 +11,10 @@ const classOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 function AddProductModal({ show, handleClose }) {
   const products = useSelector((state) => state.products || []);
   const categoryTypes = useMemo(
-    () => Array.from(new Set(products.map((p) => p.category))).filter(Boolean),
+    () =>
+      Array.from(new Set(products.map((p) => p.category)))
+        .filter((v) => v && v.trim())
+        .sort(),
     [products]
   );
 
@@ -25,6 +29,8 @@ function AddProductModal({ show, handleClose }) {
   });
   const [customCategory, setCustomCategory] = useState("");
   const [useCustomCategory, setUseCustomCategory] = useState(false);
+  const [hasSize, setHasSize] = useState(false);
+  const [hasClass, setHasClass] = useState(false);
   const [imgToRemove, setImgToRemove] = useState(null);
   const [createProduct, { isLoading, isSuccess, isError, error }] =
     useCreateProductMutation();
@@ -41,6 +47,8 @@ function AddProductModal({ show, handleClose }) {
     });
     setUseCustomCategory(false);
     setCustomCategory("");
+    setHasClass(false);
+    setHasSize(false);
     handleClose();
   };
 
@@ -108,8 +116,8 @@ function AddProductModal({ show, handleClose }) {
       description,
       price,
       category: finalCategory,
-      sizes,
-      classNo: selectedClasses,
+      sizes: hasSize ? sizes : [],
+      classNo: hasClass ? selectedClasses : [],
       images,
     };
 
@@ -120,10 +128,10 @@ function AddProductModal({ show, handleClose }) {
     });
   };
 
-  const isClothing =
-    form.category.toLowerCase() ===
-    "Bisiklet Yaka Kısakol T-Shirt".toLowerCase();
-  const isBook = form.category.toLowerCase() === "Books".toLowerCase();
+  const isClothing = form.category.toLowerCase().includes("t-shirt");
+  const isBook = form.category.toLowerCase() === "books";
+  const showSizeInput = isClothing || hasSize;
+  const showClassInput = isBook || hasClass;
 
   return (
     <Modal show={show} onHide={handleClosing} size="lg" centered>
@@ -189,18 +197,34 @@ function AddProductModal({ show, handleClose }) {
               ))}
               <option value="__other__">Other (Specify Manually)</option>
             </Form.Select>
+
             {useCustomCategory && (
-              <Form.Control
-                className="mt-2"
-                placeholder="Enter custom category"
-                value={customCategory}
-                onChange={(e) => setCustomCategory(e.target.value)}
-                required
-              />
+              <>
+                <Form.Control
+                  className="mt-2"
+                  placeholder="Enter custom category"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  required
+                />
+                <Form.Check
+                  type="checkbox"
+                  label="Has Size?"
+                  className="mt-2"
+                  checked={hasSize}
+                  onChange={() => setHasSize((prev) => !prev)}
+                />
+                <Form.Check
+                  type="checkbox"
+                  label="Has Class?"
+                  checked={hasClass}
+                  onChange={() => setHasClass((prev) => !prev)}
+                />
+              </>
             )}
           </Form.Group>
 
-          {isClothing && (
+          {showSizeInput && (
             <Form.Group className="mb-3">
               <Form.Label>Sizes</Form.Label>
               <div className="d-flex flex-wrap gap-2">
@@ -229,7 +253,7 @@ function AddProductModal({ show, handleClose }) {
             </Form.Group>
           )}
 
-          {isBook && (
+          {showClassInput && (
             <Form.Group className="mb-3">
               <Form.Label>Class</Form.Label>
               <div className="d-flex flex-wrap gap-2">
@@ -240,15 +264,15 @@ function AddProductModal({ show, handleClose }) {
                     label={cls}
                     type="checkbox"
                     id={`class-${cls}`}
-                    checked={form.class.includes(String(cls))}
+                    checked={form.class.includes(cls)}
                     onChange={() => {
                       setForm((prev) => {
-                        const already = prev.class.includes(String(cls));
+                        const already = prev.class.includes(cls);
                         return {
                           ...prev,
                           class: already
-                            ? prev.class.filter((c) => c !== String(cls))
-                            : [...prev.class, String(cls)],
+                            ? prev.class.filter((c) => c !== cls)
+                            : [...prev.class, cls],
                         };
                       });
                     }}

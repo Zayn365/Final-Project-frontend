@@ -5,7 +5,6 @@ import axios from "../axios";
 
 const sizeOptions = ["S", "M", "L"];
 const classOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-const categoryTypes = ["Bisiklet Yaka Kısakol T-Shirt", "Books"];
 
 function EditProductModal({ show, handleClose, productId }) {
   const [updateProduct, { isError, error, isLoading, isSuccess }] =
@@ -19,6 +18,8 @@ function EditProductModal({ show, handleClose, productId }) {
   const [classNo, setClassNo] = useState([]);
   const [images, setImages] = useState([]);
   const [imgToRemove, setImgToRemove] = useState(null);
+  const [hasSize, setHasSize] = useState(false);
+  const [hasClass, setHasClass] = useState(false);
 
   useEffect(() => {
     if (!productId) return;
@@ -33,9 +34,17 @@ function EditProductModal({ show, handleClose, productId }) {
         setSizes(p.sizes || []);
         setClassNo(p.class || p.classNo || []);
         setImages(p.pictures || []);
+        setHasSize((p.sizes || []).length > 0);
+        setHasClass((p.class || p.classNo || []).length > 0);
       })
       .catch(console.error);
   }, [productId]);
+
+  const isBook = category.toLowerCase() === "books";
+  const isClothing = category.toLowerCase().includes("t-shirt");
+
+  const showSizes = isClothing || hasSize;
+  const showClasses = isBook || hasClass;
 
   function handleRemoveImg(imgObj) {
     setImgToRemove(imgObj.public_id);
@@ -83,8 +92,8 @@ function EditProductModal({ show, handleClose, productId }) {
       description,
       price,
       category,
-      sizes,
-      classNo,
+      sizes: hasSize ? sizes : [],
+      classNo: hasClass ? classNo : [],
       pictures: images,
     };
 
@@ -147,7 +156,24 @@ function EditProductModal({ show, handleClose, productId }) {
             />
           </Form.Group>
 
-          {category === "Bisiklet Yaka Kısakol T-Shirt" && (
+          {!isBook && !isClothing && (
+            <div className="d-flex gap-4 mb-3">
+              <Form.Check
+                type="checkbox"
+                label="Has Size?"
+                checked={hasSize}
+                onChange={() => setHasSize((prev) => !prev)}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Has Class?"
+                checked={hasClass}
+                onChange={() => setHasClass((prev) => !prev)}
+              />
+            </div>
+          )}
+
+          {showSizes && (
             <Form.Group className="mb-3">
               <Form.Label>Sizes</Form.Label>
               <div className="d-flex flex-wrap gap-2">
@@ -171,7 +197,7 @@ function EditProductModal({ show, handleClose, productId }) {
             </Form.Group>
           )}
 
-          {category === "Books" && (
+          {showClasses && (
             <Form.Group className="mb-3">
               <Form.Label>Class No</Form.Label>
               <div className="d-flex flex-wrap gap-2">

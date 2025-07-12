@@ -11,6 +11,7 @@ import ProductPreview from "../components/ProductPreview";
 import BrandGrid from "../components/BrandGrid";
 import Testimonials from "../components/Testimonials";
 import Location from "../components/Location";
+import CategoryPage from "./CategoryPage";
 
 function Home() {
   const dispatch = useDispatch();
@@ -44,9 +45,9 @@ function Home() {
           </div>
         </Carousel.Item>
       </Carousel>
-
+      <CategoryPage NoHeader={true} />
       {/* Last Products */}
-      <div className="featured-products-container container mt-4">
+      {/* <div className="featured-products-container container mt-4">
         <h3 className="text-center fw-bold mb-4">Latest Products</h3>
         <Row className="g-3 five-col-grid">
           {lastProducts.map((product) => (
@@ -81,7 +82,7 @@ function Home() {
             </span>
           </Link>
         </div>
-      </div>
+      </div> */}
 
       {/* Sale Banner */}
       {/* <div className="sale__banner--container mt-4">
@@ -93,7 +94,7 @@ function Home() {
       </div> */}
 
       {/* Categories */}
-      <div className="recent-products-container container mt-4">
+      {/* <div className="recent-products-container container mt-4">
         <h3 className="text-center fw-bold mb-4">Categories</h3>
         <Row className="g-4">
           {categories.map((category) => (
@@ -118,15 +119,15 @@ function Home() {
             </LinkContainer>
           ))}
         </Row>
-      </div>
+      </div> */}
 
       {/* Brands */}
-      <BrandGrid />
+      {/* <BrandGrid /> */}
 
       {/* Testimonials */}
       <Testimonials />
       {/* Testimonials */}
-      <Location />
+      {/* <Location /> */}
     </div>
   );
 }
