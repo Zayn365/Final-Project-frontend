@@ -99,7 +99,7 @@ function ProductPage() {
                         <option value="">-- Select size --</option>
                         {(Array.isArray(product?.sizes)
                           ? product.sizes
-                          : ["S", "M", "L"]
+                          : ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
                         ).map((size) => (
                           <option key={size} value={size}>
                             {size}

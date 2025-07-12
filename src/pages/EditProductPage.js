@@ -5,7 +5,7 @@ import { useUpdateProductMutation } from "../services/appApi";
 import axios from "../axios";
 import "./NewProduct.css";
 
-const sizeOptions = ["S", "M", "L"];
+const sizeOptions = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
 const classOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const categoryTypes = ["Bisiklet Yaka Kısakol T-Shirt", "Books"];
 

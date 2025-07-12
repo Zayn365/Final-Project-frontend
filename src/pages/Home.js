@@ -125,7 +125,7 @@ function Home() {
       {/* <BrandGrid /> */}
 
       {/* Testimonials */}
-      <Testimonials />
+      {/* <Testimonials /> */}
       {/* Testimonials */}
       {/* <Location /> */}
     </div>
