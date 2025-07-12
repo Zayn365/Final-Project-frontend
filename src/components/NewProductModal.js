@@ -1,43 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import axios from "../axios";
+import { useSelector } from "react-redux";
 import { useCreateProductMutation } from "../services/appApi";
 
-const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
-const ageOptions = ["11", "11-12", "11-14", "15"];
-const categoryTypes = [
-  "clothing",
-  "books",
-  "technology",
-  "phones",
-  "laptops",
-  "tablets",
-];
+const sizeOptions = ["S", "M", "L"];
+const classOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
 function AddProductModal({ show, handleClose }) {
+  const products = useSelector((state) => state.products || []);
+  const categoryTypes = useMemo(
+    () => Array.from(new Set(products.map((p) => p.category))).filter(Boolean),
+    [products]
+  );
+
   const [form, setForm] = useState({
     name: "",
     description: "",
     price: "",
     category: "",
     sizes: [],
-    age: [],
+    class: [],
     images: [],
   });
+  const [customCategory, setCustomCategory] = useState("");
+  const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [imgToRemove, setImgToRemove] = useState(null);
   const [createProduct, { isLoading, isSuccess, isError, error }] =
     useCreateProductMutation();
 
+  const handleClosing = () => {
+    setForm({
+      name: "",
+      description: "",
+      price: "",
+      category: "",
+      sizes: [],
+      class: [],
+      images: [],
+    });
+    setUseCustomCategory(false);
+    setCustomCategory("");
+    handleClose();
+  };
+
   const handleInput = (field) => (e) => {
     const value = e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleMultiSelect = (field) => (e) => {
-    const selected = Array.from(e.target.selectedOptions).map(
-      (opt) => opt.value
-    );
-    setForm((prev) => ({ ...prev, [field]: selected }));
   };
 
   const handleUpload = () => {
@@ -77,23 +86,47 @@ function AddProductModal({ show, handleClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const { name, description, price, category, images } = form;
-    if (!name || !description || !price || !category || !images.length) {
+    const {
+      name,
+      description,
+      price,
+      category,
+      images,
+      sizes,
+      class: selectedClasses,
+    } = form;
+
+    const finalCategory = useCustomCategory ? customCategory : category;
+
+    if (!name || !description || !price || !finalCategory || !images.length) {
       alert("Please fill all required fields");
       return;
     }
 
-    createProduct(form).then(({ data }) => {
+    const payload = {
+      name,
+      description,
+      price,
+      category: finalCategory,
+      sizes,
+      classNo: selectedClasses,
+      images,
+    };
+
+    createProduct(payload).then(({ data }) => {
       if (data.length > 0) {
-        handleClose();
+        handleClosing();
       }
     });
   };
 
-  const isClothing = form.category === "clothing";
+  const isClothing =
+    form.category.toLowerCase() ===
+    "Bisiklet Yaka Kısakol T-Shirt".toLowerCase();
+  const isBook = form.category.toLowerCase() === "Books".toLowerCase();
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered>
+    <Modal show={show} onHide={handleClosing} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>Add New Product</Modal.Title>
       </Modal.Header>
@@ -133,11 +166,20 @@ function AddProductModal({ show, handleClose }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Product Type</Form.Label>
+            <Form.Label>Category</Form.Label>
             <Form.Select
               value={form.category}
-              onChange={handleInput("category")}
-              required
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "__other__") {
+                  setUseCustomCategory(true);
+                  setForm((prev) => ({ ...prev, category: "" }));
+                } else {
+                  setUseCustomCategory(false);
+                  setForm((prev) => ({ ...prev, category: value }));
+                }
+              }}
+              required={!useCustomCategory}
             >
               <option value="">-- Select Type --</option>
               {categoryTypes.map((type) => (
@@ -145,29 +187,75 @@ function AddProductModal({ show, handleClose }) {
                   {type}
                 </option>
               ))}
+              <option value="__other__">Other (Specify Manually)</option>
             </Form.Select>
+            {useCustomCategory && (
+              <Form.Control
+                className="mt-2"
+                placeholder="Enter custom category"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                required
+              />
+            )}
           </Form.Group>
 
           {isClothing && (
-            <>
-              <Form.Group className="mb-3">
-                <Form.Label>Sizes (multiple)</Form.Label>
-                <Form.Select multiple onChange={handleMultiSelect("sizes")}>
-                  {sizeOptions.map((size) => (
-                    <option key={size}>{size}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Sizes</Form.Label>
+              <div className="d-flex flex-wrap gap-2">
+                {sizeOptions.map((size) => (
+                  <Form.Check
+                    key={size}
+                    inline
+                    label={size}
+                    type="checkbox"
+                    id={`size-${size}`}
+                    checked={form.sizes.includes(size)}
+                    onChange={() => {
+                      setForm((prev) => {
+                        const already = prev.sizes.includes(size);
+                        return {
+                          ...prev,
+                          sizes: already
+                            ? prev.sizes.filter((s) => s !== size)
+                            : [...prev.sizes, size],
+                        };
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            </Form.Group>
+          )}
 
-              <Form.Group className="mb-3">
-                <Form.Label>Ages (multiple)</Form.Label>
-                <Form.Select multiple onChange={handleMultiSelect("age")}>
-                  {ageOptions.map((age) => (
-                    <option key={age}>{age}</option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </>
+          {isBook && (
+            <Form.Group className="mb-3">
+              <Form.Label>Class</Form.Label>
+              <div className="d-flex flex-wrap gap-2">
+                {classOptions.map((cls) => (
+                  <Form.Check
+                    key={cls}
+                    inline
+                    label={cls}
+                    type="checkbox"
+                    id={`class-${cls}`}
+                    checked={form.class.includes(String(cls))}
+                    onChange={() => {
+                      setForm((prev) => {
+                        const already = prev.class.includes(String(cls));
+                        return {
+                          ...prev,
+                          class: already
+                            ? prev.class.filter((c) => c !== String(cls))
+                            : [...prev.class, String(cls)],
+                        };
+                      });
+                    }}
+                  />
+                ))}
+              </div>
+            </Form.Group>
           )}
 
           <Form.Group className="mb-3">

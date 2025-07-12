@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { Table, Button, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { useDeleteProductMutation } from "../services/appApi";
 import "./DashboardProducts.css";
 import AddProductModal from "../components/NewProductModal";
+import EditProductModal from "../components/EditProductModal"; // <-- Import here
 
 function DashboardProducts() {
   const products = useSelector((state) => state.products);
@@ -12,6 +12,10 @@ function DashboardProducts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deletProduct, { isLoading }] = useDeleteProductMutation();
   const [showAddModal, setShowAddModal] = useState(false);
+
+  // 🆕 Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
   function handleDeleteProduct(id) {
     if (window.confirm("Are you sure?"))
@@ -61,57 +65,67 @@ function DashboardProducts() {
             <th>Category</th>
             <th>Price</th>
             <th>Sizes</th>
-            <th>Age</th>
+            <th>Class</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filteredProducts.map(
-            ({ pictures, _id, name, price, sizes, age, category }) => (
-              <tr key={_id}>
-                <td>
-                  <img
-                    src={pictures[0]?.url}
-                    className="dashboard-product-preview"
-                    style={{
-                      width: "60px",
-                      height: "60px",
-                      objectFit: "contain",
-                    }}
-                    alt="preview"
-                  />
-                </td>
-                <td>{_id}</td>
-                <td>{name}</td>
-                <td>{category}</td>
-                <td>{price}</td>
-                <td>{(sizes || []).join(", ")}</td>
-                <td>{(age || []).join(", ")}</td>
-                <td className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => handleDeleteProduct(_id)}
-                    disabled={isLoading}
-                  >
-                    Delete
-                  </Button>
-                  <Link
-                    to={`/product/${_id}/edit`}
-                    className="btn btn-warning btn-sm"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            )
-          )}
+          {filteredProducts.map((data) => (
+            <tr key={data._id}>
+              <td>
+                <img
+                  src={data.pictures[0]?.url}
+                  className="dashboard-product-preview"
+                  style={{
+                    width: "60px",
+                    height: "60px",
+                    objectFit: "contain",
+                  }}
+                  alt="preview"
+                />
+              </td>
+              <td>{data._id}</td>
+              <td>{data.name}</td>
+              <td>{data.category}</td>
+              <td>{data.price}</td>
+              <td>{(data.sizes || ["N/A"]).join(", ")}</td>
+              <td>{(data.class || data.classNo || ["N/A"]).join(", ")}</td>
+              <td className="d-flex gap-2">
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => handleDeleteProduct(data._id)}
+                  disabled={isLoading}
+                >
+                  Delete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="warning"
+                  onClick={() => {
+                    setSelectedProductId(data._id);
+                    setShowEditModal(true);
+                  }}
+                >
+                  Edit
+                </Button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </Table>
 
+      {/* Add Modal */}
       <AddProductModal
         show={showAddModal}
         handleClose={() => setShowAddModal(false)}
+      />
+
+      {/* Edit Modal */}
+      <EditProductModal
+        show={showEditModal}
+        handleClose={() => setShowEditModal(false)}
+        productId={selectedProductId}
       />
     </div>
   );
