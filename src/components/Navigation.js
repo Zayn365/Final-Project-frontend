@@ -13,6 +13,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { logout, resetNotifications } from "../features/userSlice";
 import Logo from "../assets/images/logo.png";
 import "./Navigation.css";
+import { useNavigate } from "react-router-dom";
 
 function Navigation() {
   const user = useSelector((state) => state.user);
@@ -20,7 +21,15 @@ function Navigation() {
   const bellRef = useRef(null);
   const notificationRef = useRef(null);
   const [bellPos, setBellPos] = useState({});
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/category/${encodeURIComponent(search.trim().toLowerCase())}`);
+    }
+  };
   const handleLogout = () => dispatch(logout());
 
   const unreadNotifications = user?.notifications?.filter(
@@ -47,15 +56,21 @@ function Navigation() {
           height: "40px",
         }}
       >
-        <Form className="d-flex" style={{ maxWidth: 300 }}>
+        <Form
+          className="d-flex"
+          onSubmit={handleSubmit}
+          style={{ maxWidth: 300 }}
+        >
           <FormControl
             type="search"
-            placeholder="I'm looking for..."
+            placeholder="Aradığım ürün..."
             className="me-1"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             style={{ height: "30px", fontSize: "0.85rem" }}
           />
           <button className="btn search-btn py-0 px-2" type="submit">
-            Search
+            Ara
           </button>
         </Form>
 
@@ -112,16 +127,16 @@ function Navigation() {
               <Dropdown.Menu style={{ zIndex: 9999 }}>
                 {!user.isAdmin && (
                   <LinkContainer to="/orders">
-                    <Dropdown.Item>My Orders</Dropdown.Item>
+                    <Dropdown.Item>My Siparişler</Dropdown.Item>
                   </LinkContainer>
                 )}
                 {user.isAdmin && (
                   <LinkContainer to="/admin">
-                    <Dropdown.Item>Admin Panel</Dropdown.Item>
+                    <Dropdown.Item>Yönetim Paneli</Dropdown.Item>
                   </LinkContainer>
                 )}
                 <Dropdown.Divider />
-                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                <Dropdown.Item onClick={handleLogout}>Çıkış</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           )}

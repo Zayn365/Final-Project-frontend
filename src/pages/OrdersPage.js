@@ -35,7 +35,7 @@ function OrdersPage() {
 
   return (
     <Container className="py-4">
-      <h2 className="text-center mb-4">Your Orders</h2>
+      <h2 className="text-center mb-4">Your Siparişler</h2>
       <Table
         responsive
         bordered
@@ -48,7 +48,7 @@ function OrdersPage() {
             <th>Status</th>
             <th>Date</th>
             <th>Items</th>
-            <th>Products</th>
+            <th>Ürünler</th>
             <th>Shipping To</th>
             <th>Total</th>
           </tr>

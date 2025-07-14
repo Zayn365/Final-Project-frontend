@@ -115,33 +115,38 @@ function MainProductPage() {
 
               <div className="d-flex align-items-center gap-3 text-muted small">
                 <div>
-                  Showing {sorted.length ? pageStart + 1 : 0} – {pageEnd} of{" "}
-                  {sorted.length} products
+                  {sorted.length ? pageStart + 1 : 0} – {pageEnd} arası, toplam{" "}
+                  {sorted.length} ürün gösteriliyor
                 </div>
-
                 <div>
-                  Display:&nbsp;
-                  <select value={perPage} onChange={handlePerPage}>
+                  Göster:{" "}
+                  <select
+                    value={perPage}
+                    onChange={(e) => {
+                      setPerPage(+e.target.value);
+                      setPageIdx(0);
+                    }}
+                  >
                     {[12, 24, 48, 96].map((v) => (
                       <option key={v}>{v}</option>
                     ))}
                   </select>
                 </div>
-
                 <div>
-                  Sort by:&nbsp;
-                  <select value={sortBy} onChange={handleSort}>
-                    <option value="featured">Featured</option>
-                    <option value="priceAsc">Price (low → high)</option>
-                    <option value="priceDesc">Price (high → low)</option>
-                    <option value="az">Name A-Z</option>
-                    <option value="za">Name Z-A</option>
+                  Sırala:{" "}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="featured">Öne Çıkanlar</option>
+                    <option value="priceAsc">Fiyat (artan)</option>
+                    <option value="priceDesc">Fiyat (azalan)</option>
+                    <option value="az">İsim A-Z</option>
+                    <option value="za">İsim Z-A</option>
                   </select>
                 </div>
-
                 <div className="d-none d-md-block">
-                  View:&nbsp;
-                  <i className="fas fa-th" />
+                  Görünüm: <i className="fas fa-th" />
                 </div>
               </div>
             </div>

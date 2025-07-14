@@ -108,7 +108,7 @@ function EditProductPage() {
             {isError && <Alert variant="danger">{error.data}</Alert>}
 
             <Form.Group className="mb-3">
-              <Form.Label>Product name</Form.Label>
+              <Form.Label>Ürün Adı</Form.Label>
               <Form.Control
                 type="text"
                 value={name}
@@ -118,7 +118,7 @@ function EditProductPage() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
+              <Form.Label>Açıklama</Form.Label>
               <Form.Control
                 as="textarea"
                 style={{ height: "100px" }}
@@ -129,7 +129,7 @@ function EditProductPage() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Price</Form.Label>
+              <Form.Label>Fiyat</Form.Label>
               <Form.Control
                 type="number"
                 value={price}
@@ -139,7 +139,7 @@ function EditProductPage() {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
+              <Form.Label>Kategori</Form.Label>
               <Form.Select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -205,7 +205,7 @@ function EditProductPage() {
 
             <Form.Group className="mb-3">
               <Button type="button" onClick={showWidget}>
-                Upload Images
+                Resim Yükle
               </Button>
               <div className="images-preview-container mt-2">
                 {images.map((img) => (

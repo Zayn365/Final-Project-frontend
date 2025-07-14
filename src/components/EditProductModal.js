@@ -107,7 +107,7 @@ function EditProductModal({ show, handleClose, productId }) {
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Edit Product</Modal.Title>
+        <Modal.Title>Ürün Düzenle</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
@@ -115,7 +115,7 @@ function EditProductModal({ show, handleClose, productId }) {
           {isError && <Alert variant="danger">{error.data}</Alert>}
 
           <Form.Group className="mb-3">
-            <Form.Label>Product name</Form.Label>
+            <Form.Label>Ürün Adı</Form.Label>
             <Form.Control
               type="text"
               value={name}
@@ -125,7 +125,7 @@ function EditProductModal({ show, handleClose, productId }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
+            <Form.Label>Açıklama</Form.Label>
             <Form.Control
               as="textarea"
               style={{ height: "100px" }}
@@ -136,7 +136,7 @@ function EditProductModal({ show, handleClose, productId }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Price</Form.Label>
+            <Form.Label>Fiyat</Form.Label>
             <Form.Control
               type="number"
               value={price}
@@ -146,7 +146,7 @@ function EditProductModal({ show, handleClose, productId }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Category</Form.Label>
+            <Form.Label>Kategori</Form.Label>
             <Form.Control
               type="text"
               placeholder="Enter or edit category"
@@ -224,7 +224,7 @@ function EditProductModal({ show, handleClose, productId }) {
 
           <Form.Group className="mb-3">
             <Button type="button" onClick={showWidget}>
-              Upload Images
+              Resim Yükle
             </Button>
             <div className="d-flex flex-wrap gap-2 mt-2">
               {images.map((img) => (

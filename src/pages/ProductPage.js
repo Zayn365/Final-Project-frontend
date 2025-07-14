@@ -70,7 +70,7 @@ function ProductPage() {
           </p>
           <p className="product__price">${product.price}</p>
           <p className="py-3" style={{ textAlign: "justify" }}>
-            <strong>Description:</strong> {product.description}
+            <strong>Açıklama:</strong> {product.description}
           </p>
 
           {user && !user.isAdmin && (
@@ -156,7 +156,7 @@ function ProductPage() {
                       })
                     }
                   >
-                    Add to cart
+                    Sepete Ekle{" "}
                   </Button>
                 </Col>
               </Row>
@@ -180,7 +180,7 @@ function ProductPage() {
       </Row>
 
       <div className="my-4">
-        <h2>Similar Products</h2>
+        <h2>Benzer Ürünler</h2>
         <div className="d-flex justify-content-center align-items-center flex-wrap">
           <AliceCarousel
             mouseTracking

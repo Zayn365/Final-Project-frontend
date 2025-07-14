@@ -52,7 +52,7 @@ function CartPage() {
                 <tr>
                   <th></th>
                   <th>Product</th>
-                  <th>Price</th>
+                  <th>Fiyat</th>
                   <th>Quantity</th>
                   <th>Subtotal</th>
                 </tr>

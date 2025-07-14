@@ -40,22 +40,22 @@ function ClientsAdminPage() {
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <Form.Control
           type="search"
-          placeholder="Search by name or email..."
+          placeholder="İsimle Ara"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ maxWidth: "300px" }}
         />
         <div className="text-muted small">
-          Showing {filteredUsers.length} result(s)
+          {filteredUsers.length} sonuç gösteriliyor
         </div>
       </div>
 
       <Table responsive striped bordered hover className="bg-white shadow-sm">
         <thead className="table-light">
           <tr>
-            <th>Client ID</th>
-            <th>Client Name</th>
-            <th>Email</th>
+            <th>Müşteri No</th>
+            <th>Müşteri Adı</th>
+            <th>E-posta</th>
           </tr>
         </thead>
         <tbody>

@@ -43,9 +43,18 @@ function CategoryPage({ NoHeader }) {
 
   const filtered = useMemo(() => {
     if (category.toLowerCase() === "all") return allProducts;
-    return allProducts.filter(
+
+    // Try exact match
+    const exactMatch = allProducts.filter(
       (p) => p.category?.toLowerCase() === category.toLowerCase()
     );
+    if (exactMatch.length > 0) return exactMatch;
+
+    // Fallback: partial match (includes)
+    const partialMatch = allProducts.filter((p) =>
+      p.category?.toLowerCase().includes(category.toLowerCase())
+    );
+    return partialMatch;
   }, [allProducts, category]);
 
   const sorted = useMemo(() => {
@@ -112,23 +121,25 @@ function CategoryPage({ NoHeader }) {
                       : ""
                   }`}
                 >
-                  {cat}
+                  {cat.toLowerCase() === "all" ? "Hepsi" : cat}
                 </Link>
               ))}
             </ul>
           </Col>
 
-          {/* Products */}
+          {/* Ürünler */}
           <Col md={10}>
             <div className="product-header d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-              <h4 className="text-danger mb-0 text-capitalize">{category}</h4>
+              <h4 className="text-danger mb-0 text-capitalize">
+                {category.toLowerCase() === "all" ? "Hepsi" : category}
+              </h4>
               <div className="d-flex align-items-center gap-3 text-muted small">
                 <div>
-                  Showing {sorted.length ? pageStart + 1 : 0} – {pageEnd} of{" "}
-                  {sorted.length} products
+                  {sorted.length ? pageStart + 1 : 0} – {pageEnd} arası, toplam{" "}
+                  {sorted.length} ürün gösteriliyor
                 </div>
                 <div>
-                  Display:{" "}
+                  Göster:{" "}
                   <select
                     value={perPage}
                     onChange={(e) => {
@@ -142,25 +153,31 @@ function CategoryPage({ NoHeader }) {
                   </select>
                 </div>
                 <div>
-                  Sort by:{" "}
+                  Sırala:{" "}
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                   >
-                    <option value="featured">Featured</option>
-                    <option value="priceAsc">Price (low → high)</option>
-                    <option value="priceDesc">Price (high → low)</option>
-                    <option value="az">Name A-Z</option>
-                    <option value="za">Name Z-A</option>
+                    <option value="featured">Öne Çıkanlar</option>
+                    <option value="priceAsc">Fiyat (artan)</option>
+                    <option value="priceDesc">Fiyat (azalan)</option>
+                    <option value="az">İsim A-Z</option>
+                    <option value="za">İsim Z-A</option>
                   </select>
                 </div>
                 <div className="d-none d-md-block">
-                  View: <i className="fas fa-th" />
+                  Görünüm: <i className="fas fa-th" />
                 </div>
               </div>
             </div>
 
             <Row>
+              {paged.length === 0 && (
+                <div className="text-center text-muted py-5">
+                  <h5>Ürün bulunamadı</h5>
+                  <p>Aramanızla eşleşen ürün bulunamadı.</p>
+                </div>
+              )}
               {paged.map((prod) => (
                 <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
                   <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">

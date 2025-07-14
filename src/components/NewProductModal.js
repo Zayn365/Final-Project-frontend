@@ -136,15 +136,15 @@ function AddProductModal({ show, handleClose }) {
   return (
     <Modal show={show} onHide={handleClosing} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Add New Product</Modal.Title>
+        <Modal.Title>Ürün Ekle</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
-          {isSuccess && <Alert variant="success">Product created!</Alert>}
+          {isSuccess && <Alert variant="success">Ürün oluşturuldu!</Alert>}
           {isError && <Alert variant="danger">{error.data}</Alert>}
 
           <Form.Group className="mb-3">
-            <Form.Label>Product Name</Form.Label>
+            <Form.Label>Ürün Adı</Form.Label>
             <Form.Control
               value={form.name}
               onChange={handleInput("name")}
@@ -153,7 +153,7 @@ function AddProductModal({ show, handleClose }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Description</Form.Label>
+            <Form.Label>Açıklama</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
@@ -164,7 +164,7 @@ function AddProductModal({ show, handleClose }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Price</Form.Label>
+            <Form.Label>Fiyat</Form.Label>
             <Form.Control
               type="number"
               value={form.price}
@@ -174,7 +174,7 @@ function AddProductModal({ show, handleClose }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Category</Form.Label>
+            <Form.Label>Kategori</Form.Label>
             <Form.Select
               value={form.category}
               onChange={(e) => {
@@ -189,13 +189,13 @@ function AddProductModal({ show, handleClose }) {
               }}
               required={!useCustomCategory}
             >
-              <option value="">-- Select Type --</option>
+              <option value="">-- Seçiniz --</option>
               {categoryTypes.map((type) => (
                 <option value={type} key={type}>
                   {type}
                 </option>
               ))}
-              <option value="__other__">Other (Specify Manually)</option>
+              <option value="__other__">Diğer (Specify Manually)</option>
             </Form.Select>
 
             {useCustomCategory && (
@@ -284,7 +284,7 @@ function AddProductModal({ show, handleClose }) {
 
           <Form.Group className="mb-3">
             <Button type="button" onClick={handleUpload}>
-              Upload Images
+              Resim Yükle
             </Button>
             <div className="d-flex flex-wrap gap-2 mt-2">
               {form.images.map((img) => (
@@ -312,7 +312,7 @@ function AddProductModal({ show, handleClose }) {
           </Form.Group>
 
           <Button type="submit" disabled={isLoading}>
-            Create Product
+            Ürün Ekle
           </Button>
         </Form>
       </Modal.Body>

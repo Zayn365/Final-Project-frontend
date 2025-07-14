@@ -34,17 +34,17 @@ function DashboardProducts() {
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <Form.Control
           type="search"
-          placeholder="Search by name..."
+          placeholder="İsimle Ara..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ maxWidth: "300px" }}
         />
         <div className="d-flex gap-2 align-items-center">
           <div className="text-muted small">
-            Showing {filteredProducts.length} result(s)
+            {filteredProducts.length} sonuç gösteriliyor
           </div>
           <Button variant="success" onClick={() => setShowAddModal(true)}>
-            <i className="fa fa-plus"></i> Add Product
+            <i className="fa fa-plus"></i> Ürün Ekle
           </Button>
         </div>
       </div>
@@ -59,14 +59,14 @@ function DashboardProducts() {
       >
         <thead className="table-light">
           <tr>
-            <th>Image</th>
-            <th>Product ID</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Sizes</th>
-            <th>Class</th>
-            <th>Actions</th>
+            <th>Görsel</th>
+            <th>Ürün No</th>
+            <th>İsim</th>
+            <th>Kategori</th>
+            <th>Fiyat</th>
+            <th>Bedenler</th>
+            <th>Sınıf</th>
+            <th>İşlemler</th>
           </tr>
         </thead>
         <tbody>
@@ -107,7 +107,7 @@ function DashboardProducts() {
                     setShowEditModal(true);
                   }}
                 >
-                  Edit
+                  Düzenle
                 </Button>
               </td>
             </tr>

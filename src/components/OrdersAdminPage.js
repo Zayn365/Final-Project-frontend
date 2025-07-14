@@ -65,26 +65,26 @@ function OrdersAdminPage() {
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <Form.Control
           type="search"
-          placeholder="Search by client name or address..."
+          placeholder="İsimle Ara..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ maxWidth: "300px" }}
         />
         <div className="text-muted small">
-          Showing {filteredOrders.length} result(s)
+          {filteredOrders.length} sonuç gösteriliyor
         </div>
       </div>
 
       <Table responsive striped bordered hover className="bg-white shadow-sm">
         <thead>
           <tr>
-            <th>Order ID</th>
-            <th>Client Name</th>
-            <th>Items</th>
-            <th>Order Total</th>
-            <th>Address</th>
-            <th>Status</th>
-            <th>Details</th>
+            <th>Sipariş No</th>
+            <th>Müşteri Adı</th>
+            <th>Ürünler</th>
+            <th>Sipariş Tutarı</th>
+            <th>Adres</th>
+            <th>Durum</th>
+            <th>Detaylar</th>
           </tr>
         </thead>
         <tbody>
@@ -138,7 +138,7 @@ function OrdersAdminPage() {
               <p>
                 <span>{order.count} x </span> {order.name}
               </p>
-              <p>Price: ${Number(order.price) * order.count}</p>
+              <p>Fiyat: ${Number(order.price) * order.count}</p>
             </div>
           ))}
         </Modal.Body>

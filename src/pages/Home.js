@@ -46,9 +46,9 @@ function Home() {
         </Carousel.Item>
       </Carousel>
       <CategoryPage NoHeader={true} />
-      {/* Last Products */}
+      {/* Last Ürünler */}
       {/* <div className="featured-products-container container mt-4">
-        <h3 className="text-center fw-bold mb-4">Latest Products</h3>
+        <h3 className="text-center fw-bold mb-4">Latest Ürünler</h3>
         <Row className="g-3 five-col-grid">
           {lastProducts.map((product) => (
             <Col
