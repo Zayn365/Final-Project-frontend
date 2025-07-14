@@ -45,12 +45,12 @@ function OrdersPage() {
         <thead>
           <tr>
             <th>#</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Items</th>
+            <th>Durum</th>
+            <th>Tarih</th>
+            <th>Adet</th>
             <th>Ürünler</th>
-            <th>Shipping To</th>
-            <th>Total</th>
+            <th>Gönderim Adresi</th>
+            <th>Toplam</th>
           </tr>
         </thead>
         <tbody>
