@@ -97,7 +97,7 @@ function DashboardProducts() {
                   onClick={() => handleDeleteProduct(data._id)}
                   disabled={isLoading}
                 >
-                  Delete
+                  Sil
                 </Button>
                 <Button
                   size="sm"

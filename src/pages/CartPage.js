@@ -33,10 +33,10 @@ function CartPage() {
     <Container className="cart-container py-4" style={{ minHeight: "95vh" }}>
       <Row>
         <Col>
-          <h1 className="h3 mb-3">Your Shopping Cart</h1>
+          <h1 className="h3 mb-3">Alışveriş Sepetiniz</h1>
           {cartItems.length === 0 ? (
             <Alert variant="info">
-              Your cart is currently empty. Add some products to proceed.
+              Sepetiniz şu anda boş. Devam etmek için ürün ekleyin.
             </Alert>
           ) : (
             <Elements stripe={stripePromise}>
@@ -51,10 +51,10 @@ function CartPage() {
               <thead>
                 <tr>
                   <th></th>
-                  <th>Product</th>
+                  <th>Ürün</th>
                   <th>Fiyat</th>
-                  <th>Quantity</th>
-                  <th>Subtotal</th>
+                  <th>Adet</th>
+                  <th>Ara Toplam</th>
                 </tr>
               </thead>
               <tbody>
@@ -119,7 +119,7 @@ function CartPage() {
               </tbody>
             </Table>
             <h4 className="text-end pt-3">
-              Total: ₺{user.cart.total?.toFixed(2)}
+              Toplam: ₺{user.cart.total?.toFixed(2)}
             </h4>
           </Col>
         )}

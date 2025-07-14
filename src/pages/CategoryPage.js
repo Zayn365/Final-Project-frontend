@@ -245,7 +245,7 @@ function CategoryPage({ NoHeader }) {
                         });
                       }}
                     >
-                      Add To Cart
+                      Sepete Ekle{" "}
                     </Button>
 
                     <Button
