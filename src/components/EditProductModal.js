@@ -3,7 +3,21 @@ import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { useUpdateProductMutation } from "../services/appApi";
 import axios from "../axios";
 
-const sizeOptions = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+const sizeOptions = [
+  "5-6",
+  "7-8",
+  "9-10",
+  "11-12",
+  "13-14",
+  "15-16",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "2XL",
+  "3XL",
+  "4XL",
+];
 const classOptions = [
   "3 YAŞ",
   "4 YAŞ",
