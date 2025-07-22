@@ -177,8 +177,8 @@ function ProductPage() {
           )}
 
           {user && user.isAdmin && (
-            <LinkContainer to={`/product/${product._id}/edit`}>
-              <Button size="lg">Edit Product</Button>
+            <LinkContainer to={`/admin`}>
+              <Button size="lg">Ürünü Düzenle</Button>
             </LinkContainer>
           )}
 
