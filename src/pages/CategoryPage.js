@@ -56,7 +56,6 @@ function CategoryPage({ NoHeader }) {
     );
     return partialMatch;
   }, [allProducts, category]);
-  console.log("TCL ~ filtered ~ filtered:", filtered);
 
   const sorted = useMemo(() => {
     switch (sortBy) {
