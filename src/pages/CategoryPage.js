@@ -191,7 +191,7 @@ function CategoryPage({ NoHeader }) {
                         <div className="info-row info-top">
                           {prod.class.length > 0 || prod.hasClass === true ? (
                             <div className="d-flex align-items-center">
-                              <span className="label">sınıf:</span>
+                              <span className="label">Sınıf:</span>
                               <span>
                                 {Array.isArray(prod?.class)
                                   ? prod.class[0]

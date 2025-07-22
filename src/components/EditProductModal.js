@@ -4,8 +4,29 @@ import { useUpdateProductMutation } from "../services/appApi";
 import axios from "../axios";
 
 const sizeOptions = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
-const classOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-
+const classOptions = [
+  "3 YAŞ",
+  "4 YAŞ",
+  "5 YAŞ",
+  "1.Sınıf",
+  "2.SINIF",
+  "3 .Sınıf",
+  "4 .Sınıf",
+  "5.Sınıf",
+  "6.Sınıf",
+  "7.Sınıf",
+  "8.SINIF",
+  "ANADOLU 9.SINIF",
+  "ANADOLU 10.SINIF",
+  "ANADOLU 11.SINIF EA",
+  "ANADOLU 11.SINIF SAY.",
+  "ANADOLU 12. SINIF SAY.",
+  "ANADOLU 12.SINIF EA",
+  "FEN 9.SINIF",
+  "FEN 10.SINIF",
+  "FEN 11.SINIF SAY.",
+  "FEN 12. SINIF SAY.",
+];
 function EditProductModal({ show, handleClose, productId }) {
   const [updateProduct, { isError, error, isLoading, isSuccess }] =
     useUpdateProductMutation();
@@ -100,6 +121,7 @@ function EditProductModal({ show, handleClose, productId }) {
     updateProduct(payload).then(({ data }) => {
       if (data) {
         handleClose();
+        window.location.reload();
       }
     });
   }
@@ -160,13 +182,13 @@ function EditProductModal({ show, handleClose, productId }) {
             <div className="d-flex gap-4 mb-3">
               <Form.Check
                 type="checkbox"
-                label="Has Size?"
+                label="Beden?"
                 checked={hasSize}
                 onChange={() => setHasSize((prev) => !prev)}
               />
               <Form.Check
                 type="checkbox"
-                label="Has Class?"
+                label="Sinif?"
                 checked={hasClass}
                 onChange={() => setHasClass((prev) => !prev)}
               />
@@ -196,32 +218,28 @@ function EditProductModal({ show, handleClose, productId }) {
               </div>
             </Form.Group>
           )}
-
           {showClasses && (
             <Form.Group className="mb-3">
               <Form.Label>Class No</Form.Label>
               <div className="d-flex flex-wrap gap-2">
-                {classOptions.map((c) => (
+                {classOptions.map((cls) => (
                   <Form.Check
-                    key={c}
+                    key={cls}
                     inline
-                    label={c}
+                    label={cls}
                     type="checkbox"
-                    checked={classNo.includes(String(c))}
+                    id={`class-${cls}`}
+                    checked={classNo[0] === cls}
                     onChange={() =>
-                      setClassNo((prev) => {
-                        const val = String(c);
-                        return prev.includes(val)
-                          ? prev.filter((x) => x !== val)
-                          : [...prev, val];
-                      })
+                      setClassNo(
+                        (prev) => (prev[0] === cls ? [] : [cls]) // deselect if clicked again
+                      )
                     }
                   />
                 ))}
               </div>
             </Form.Group>
           )}
-
           <Form.Group className="mb-3">
             <Button type="button" onClick={showWidget}>
               Resim Yükle

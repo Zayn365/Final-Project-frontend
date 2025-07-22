@@ -1,5 +1,5 @@
 // same imports...
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import axios from "../axios";
 import { useSelector } from "react-redux";
@@ -155,6 +155,39 @@ function AddProductModal({ show, handleClose }) {
   const isBook = form.category.toLowerCase() === "books";
   const showSizeInput = isClothing || hasSize;
   const showClassInput = isBook || hasClass;
+  useEffect(() => {
+    const finalCategory = useCustomCategory ? customCategory : form.category;
+
+    if (!finalCategory) return;
+
+    const matchedProduct = products.find(
+      (p) => p.category?.toLowerCase() === finalCategory.toLowerCase()
+    );
+
+    if (matchedProduct) {
+      if (
+        (matchedProduct.class && matchedProduct.class.length > 0) ||
+        matchedProduct.hasClass
+      ) {
+        setHasClass(true);
+        setForm((prev) => ({
+          ...prev,
+          class: matchedProduct.classNo || [],
+        }));
+      }
+
+      if (
+        (matchedProduct.sizes && matchedProduct.sizes.length > 0) ||
+        matchedProduct.hasSize
+      ) {
+        setHasSize(true);
+        setForm((prev) => ({
+          ...prev,
+          sizes: matchedProduct.sizes || [],
+        }));
+      }
+    }
+  }, [form.category, customCategory, useCustomCategory, products]);
 
   return (
     <Modal show={show} onHide={handleClosing} size="lg" centered>
