@@ -78,7 +78,21 @@ function CategoryPage({ NoHeader }) {
   const pageEnd = Math.min(pageStart + perPage, sorted.length);
   const paged = sorted.slice(pageStart, pageEnd);
 
-  const sizeOptions = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+  const sizeOptions = [
+    "5-6",
+    "7-8",
+    "9-10",
+    "11-12",
+    "13-14",
+    "15-16",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "2XL",
+    "3XL",
+    "4XL",
+  ];
   const classOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   return (
