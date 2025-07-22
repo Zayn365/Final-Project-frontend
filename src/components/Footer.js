@@ -106,7 +106,7 @@ const Footer = () => {
         <hr className="border-light my-4" />
         <Row>
           <Col className="text-center small">
-            <p className="mb-1">BİRİKİM OKULLARI</p>
+            <p className="mb-1">BİKEV OKULLARI</p>
             <p>Tüm Hakları Saklıdır — 2025-26</p>
           </Col>
         </Row>

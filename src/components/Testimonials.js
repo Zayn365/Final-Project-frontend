@@ -13,7 +13,7 @@ const Testimonials = () => {
             letterSpacing: "2px",
           }}
         >
-          BİRİKİM OKULLARI
+          BİKEV OKULLARI
         </h1>
 
         {/* Headline & Intro */}
@@ -22,7 +22,7 @@ const Testimonials = () => {
         </h2>
         <p className="mt-3 text-center">
           <span style={{ color: "red", fontWeight: "bold" }}>
-            BİRİKİM OKULLARI
+            BİKEV OKULLARI
           </span>{" "}
           is the leading online stationery items store in Turkey. Get the finest
           shopping experience for stationery customers! Our dedication to

@@ -12,7 +12,12 @@ import BrandGrid from "../components/BrandGrid";
 import Testimonials from "../components/Testimonials";
 import Location from "../components/Location";
 import CategoryPage from "./CategoryPage";
-
+import firstImage from "../assets/imagesSlider/1.jpeg";
+import secondImage from "../assets/imagesSlider/2.jpeg";
+import thirdImage from "../assets/imagesSlider/3.jpeg";
+import forthImage from "../assets/imagesSlider/4.jpeg";
+import fifthImage from "../assets/imagesSlider/5.jpeg";
+import sixthImage from "../assets/imagesSlider/6.jpeg";
 function Home() {
   const dispatch = useDispatch();
   const products = useSelector((state) => state.products);
@@ -29,7 +34,7 @@ function Home() {
         <Carousel.Item>
           <div className="hero-slide">
             <img
-              src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0008.jpg?v=1741775104&width=2000"
+              src={firstImage}
               className="d-block w-100"
               alt="Office Accessories"
             />
@@ -38,7 +43,43 @@ function Home() {
         <Carousel.Item>
           <div className="hero-slide">
             <img
-              src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
+              src={secondImage}
+              className="d-block w-100"
+              alt="Office Accessories"
+            />
+          </div>
+        </Carousel.Item>
+        <Carousel.Item>
+          <div className="hero-slide">
+            <img
+              src={thirdImage}
+              className="d-block w-100"
+              alt="Office Accessories"
+            />
+          </div>
+        </Carousel.Item>
+        <Carousel.Item>
+          <div className="hero-slide">
+            <img
+              src={forthImage}
+              className="d-block w-100"
+              alt="Office Accessories"
+            />
+          </div>
+        </Carousel.Item>
+        <Carousel.Item>
+          <div className="hero-slide">
+            <img
+              src={fifthImage}
+              className="d-block w-100"
+              alt="Office Accessories"
+            />
+          </div>
+        </Carousel.Item>
+        <Carousel.Item>
+          <div className="hero-slide">
+            <img
+              src={sixthImage}
               className="d-block w-100"
               alt="Office Accessories"
             />
