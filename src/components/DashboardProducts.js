@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { Table, Button, Form } from "react-bootstrap";
+import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useDeleteProductMutation } from "../services/appApi";
 import "./DashboardProducts.css";
 import AddProductModal from "../components/NewProductModal";
-import EditProductModal from "../components/EditProductModal"; // <-- Import here
+import EditProductModal from "../components/EditProductModal";
 
 function DashboardProducts() {
   const products = useSelector((state) => state.products);
@@ -12,10 +12,12 @@ function DashboardProducts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [deletProduct, { isLoading }] = useDeleteProductMutation();
   const [showAddModal, setShowAddModal] = useState(false);
-
-  // 🆕 Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage, setProductsPerPage] = useState(10);
 
   function handleDeleteProduct(id) {
     if (window.confirm("Are you sure?"))
@@ -28,23 +30,67 @@ function DashboardProducts() {
     );
   }, [products, searchTerm]);
 
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const currentProducts = filteredProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
+
+  const renderPagination = () => {
+    const pages = [];
+
+    for (let page = 1; page <= totalPages; page++) {
+      pages.push(
+        <Pagination.Item
+          key={page}
+          active={page === currentPage}
+          onClick={() => setCurrentPage(page)}
+        >
+          {page}
+        </Pagination.Item>
+      );
+    }
+
+    return <Pagination>{pages}</Pagination>;
+  };
+
   return (
     <div>
       {/* Search & Tools */}
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-5">
         <Form.Control
           type="search"
           placeholder="İsimle Ara..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset to first page on search
+          }}
           style={{ maxWidth: "300px" }}
         />
-        <div className="d-flex gap-2 align-items-center">
+        <div className="d-flex flex-wrap gap-3 align-items-center justify-content-end mb-3">
+          <Form.Select
+            size="sm"
+            value={productsPerPage}
+            onChange={(e) => {
+              setProductsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            style={{ minWidth: "120px" }}
+          >
+            {[5, 10, 20, 50].map((num) => (
+              <option key={num} value={num}>
+                {num} / Sayfa
+              </option>
+            ))}
+          </Form.Select>
+
           <div className="text-muted small">
-            {filteredProducts.length} sonuç gösteriliyor
+            Toplam <strong>{filteredProducts.length}</strong> ürün
           </div>
+
           <Button variant="success" onClick={() => setShowAddModal(true)}>
-            <i className="fa fa-plus"></i> Ürün Ekle
+            <i className="fa fa-plus me-1"></i> Ürün Ekle
           </Button>
         </div>
       </div>
@@ -70,7 +116,7 @@ function DashboardProducts() {
           </tr>
         </thead>
         <tbody>
-          {filteredProducts.map((data) => (
+          {currentProducts.map((data) => (
             <tr key={data._id}>
               <td>
                 <img
@@ -114,6 +160,9 @@ function DashboardProducts() {
           ))}
         </tbody>
       </Table>
+
+      {/* Pagination */}
+      <div className="d-flex justify-content-end">{renderPagination()}</div>
 
       {/* Add Modal */}
       <AddProductModal

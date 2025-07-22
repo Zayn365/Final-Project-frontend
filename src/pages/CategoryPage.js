@@ -56,6 +56,7 @@ function CategoryPage({ NoHeader }) {
     );
     return partialMatch;
   }, [allProducts, category]);
+  console.log("TCL ~ filtered ~ filtered:", filtered);
 
   const sorted = useMemo(() => {
     switch (sortBy) {
@@ -189,10 +190,15 @@ function CategoryPage({ NoHeader }) {
                     <div className="product-info text-start flex-grow-1">
                       <div className="top-info">
                         <div className="info-row info-top">
-                          {prod.category.toLowerCase() === "books" ? (
+                          {prod.class.length > 0 || prod.hasClass === true ? (
                             <div className="d-flex align-items-center">
                               <span className="label">sınıf:</span>
-                              <Form.Select
+                              <span>
+                                {Array.isArray(prod?.class)
+                                  ? prod.class[0]
+                                  : "Mevcut değil"}
+                              </span>
+                              {/* <Form.Select
                                 size="sm"
                                 className="value-dropdown text-danger"
                               >
@@ -202,7 +208,7 @@ function CategoryPage({ NoHeader }) {
                                 ).map((s) => (
                                   <option key={s}>{s}</option>
                                 ))}
-                              </Form.Select>{" "}
+                              </Form.Select>{" "} */}
                             </div>
                           ) : (
                             <div className="d-flex align-items-center">

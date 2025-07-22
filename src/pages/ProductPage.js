@@ -51,7 +51,7 @@ function ProductPage() {
       <SimilarProduct {...product} />
     </div>
   ));
-
+  console.log(product);
   return (
     <Container className="pt-4" style={{ position: "relative" }}>
       <Row>
@@ -68,7 +68,7 @@ function ProductPage() {
           <p>
             <Badge bg="danger">{product.category}</Badge>
           </p>
-          <p className="product__price">${product.price}</p>
+          <p className="product__price">₺{product.price}</p>
           <p className="py-3" style={{ textAlign: "justify" }}>
             <strong>Açıklama:</strong> {product.description}
           </p>
@@ -77,10 +77,23 @@ function ProductPage() {
             <Form className="mb-4">
               <Row className="g-3 align-items-end">
                 <Col xs={12} md={6}>
-                  {product.category.toLowerCase() === "books" ? (
+                  {product.class.length > 0 || product.hasClass === true ? (
                     <>
-                      <Form.Label>Sinif</Form.Label>
-                      <Form.Select size="lg">
+                      <Form.Label>Sinif: </Form.Label>
+                      <span
+                        className={
+                          product?.class[0]
+                            ? "text-dark"
+                            : "text-muted fst-italic"
+                        }
+                      >
+                        {" "}
+                        {Array.isArray(product?.class)
+                          ? product.class[0]
+                          : "Mevcut değil"}
+                      </span>
+                      {/* <Form
+                      {/* <Form.Select size="lg">
                         <option value="">-- Select sinif --</option>
                         {(Array.isArray(product?.class)
                           ? product.class
@@ -90,7 +103,7 @@ function ProductPage() {
                             {classNo}
                           </option>
                         ))}
-                      </Form.Select>
+                      </Form.Select> */}
                     </>
                   ) : (
                     <>

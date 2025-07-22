@@ -6,8 +6,29 @@ import { useSelector } from "react-redux";
 import { useCreateProductMutation } from "../services/appApi";
 
 const sizeOptions = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
-const classOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-
+const classOptions = [
+  "3 YAŞ",
+  "4 YAŞ",
+  "5 YAŞ",
+  "1.Sınıf",
+  "2.SINIF",
+  "3 .Sınıf",
+  "4 .Sınıf",
+  "5.Sınıf",
+  "6.Sınıf",
+  "7.Sınıf",
+  "8.SINIF",
+  "ANADOLU 9.SINIF",
+  "ANADOLU 10.SINIF",
+  "ANADOLU 11.SINIF EA",
+  "ANADOLU 11.SINIF SAY.",
+  "ANADOLU 12. SINIF SAY.",
+  "ANADOLU 12.SINIF EA",
+  "FEN 9.SINIF",
+  "FEN 10.SINIF",
+  "FEN 11.SINIF SAY.",
+  "FEN 12. SINIF SAY.",
+];
 function AddProductModal({ show, handleClose }) {
   const products = useSelector((state) => state.products || []);
   const categoryTypes = useMemo(
@@ -119,6 +140,8 @@ function AddProductModal({ show, handleClose }) {
       sizes: hasSize ? sizes : [],
       classNo: hasClass ? selectedClasses : [],
       images,
+      hasClass,
+      hasSize,
     };
 
     createProduct(payload).then(({ data }) => {
@@ -185,6 +208,8 @@ function AddProductModal({ show, handleClose }) {
                 } else {
                   setUseCustomCategory(false);
                   setForm((prev) => ({ ...prev, category: value }));
+                  setHasClass(false);
+                  setHasSize(false);
                 }
               }}
               required={!useCustomCategory}
@@ -209,16 +234,28 @@ function AddProductModal({ show, handleClose }) {
                 />
                 <Form.Check
                   type="checkbox"
-                  label="Has Size?"
+                  label="Beden?"
                   className="mt-2"
                   checked={hasSize}
-                  onChange={() => setHasSize((prev) => !prev)}
+                  onChange={() => {
+                    setHasSize((prev) => !prev);
+                    if (!hasSize) {
+                      setHasClass(false);
+                      setForm((prev) => ({ ...prev, class: [] }));
+                    }
+                  }}
                 />
                 <Form.Check
                   type="checkbox"
-                  label="Has Class?"
+                  label="Sınıf?"
                   checked={hasClass}
-                  onChange={() => setHasClass((prev) => !prev)}
+                  onChange={() => {
+                    setHasClass((prev) => !prev);
+                    if (!hasClass) {
+                      setHasSize(false);
+                      setForm((prev) => ({ ...prev, sizes: [] }));
+                    }
+                  }}
                 />
               </>
             )}
@@ -226,7 +263,7 @@ function AddProductModal({ show, handleClose }) {
 
           {showSizeInput && (
             <Form.Group className="mb-3">
-              <Form.Label>Sizes</Form.Label>
+              <Form.Label>Beden</Form.Label>
               <div className="d-flex flex-wrap gap-2">
                 {sizeOptions.map((size) => (
                   <Form.Check
@@ -252,10 +289,30 @@ function AddProductModal({ show, handleClose }) {
               </div>
             </Form.Group>
           )}
-
+          {/* {showClassInput && (
+            <Form.Group className="mb-3">
+              <Form.Label>Sınıf</Form.Label>
+              <Form.Select
+                value={form.class || ""}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    class: e.target.value,
+                  }))
+                }
+              >
+                <option value="">Sınıf Seçiniz</option>
+                {classOptions.map((cls) => (
+                  <option key={cls} value={cls}>
+                    {cls}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          )} */}
           {showClassInput && (
             <Form.Group className="mb-3">
-              <Form.Label>Class</Form.Label>
+              <Form.Label>Sınıf</Form.Label>
               <div className="d-flex flex-wrap gap-2">
                 {classOptions.map((cls) => (
                   <Form.Check
