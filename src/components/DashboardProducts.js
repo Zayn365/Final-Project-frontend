@@ -15,19 +15,34 @@ function DashboardProducts() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
-
+  const [filteredCategory, setFilterCategory] = useState("");
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(10);
-
+  const categoryOptions = useMemo(() => {
+    const cats = Array.from(
+      new Set(
+        products
+          .map((p) => p.category)
+          .filter(Boolean) // drop null/undefined/empty
+          .map((c) => c.trim())
+      )
+    );
+    return cats.sort((a, b) => a.localeCompare(b, "tr")); // optional Turkish sort
+  }, [products]);
   function handleDeleteProduct(id) {
     if (window.confirm("Are you sure?"))
       deletProduct({ product_id: id, user_id: user._id });
   }
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    return products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (filteredCategory &&
+          product.category
+            .toLowerCase()
+            .includes(filteredCategory.toLowerCase()))
     );
   }, [products, searchTerm]);
 
@@ -85,7 +100,17 @@ function DashboardProducts() {
               </option>
             ))}
           </Form.Select>
-
+          <Form.Select
+            value={filteredCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">{/* placeholder */}Kategori Seçin</option>
+            {categoryOptions.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </Form.Select>
           <div className="text-muted small">
             Toplam <strong>{filteredProducts.length}</strong> ürün
           </div>
