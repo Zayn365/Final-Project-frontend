@@ -5,6 +5,7 @@ import { useDeleteProductMutation } from "../services/appApi";
 import "./DashboardProducts.css";
 import AddProductModal from "../components/NewProductModal";
 import EditProductModal from "../components/EditProductModal";
+import { formatWithCommas, unformatNumber } from "../hooks/formatFuctions";
 
 function DashboardProducts() {
   const products = useSelector((state) => state.products);
@@ -133,7 +134,7 @@ function DashboardProducts() {
               <td>{data._id}</td>
               <td>{data.name}</td>
               <td>{data.category}</td>
-              <td>{data.price}</td>
+              <td>{formatWithCommas(unformatNumber(String(data.price)))}</td>
               <td>{(data.sizes || ["N/A"]).join(", ")}</td>
               <td>{(data.class || data.classNo || ["N/A"]).join(", ")}</td>
               <td className="d-flex gap-2">

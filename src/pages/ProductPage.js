@@ -11,6 +11,7 @@ import "./ProductPage.css";
 import { LinkContainer } from "react-router-bootstrap";
 import { useAddToCartMutation } from "../services/appApi";
 import ToastMessage from "../components/ToastMessage";
+import { formatWithCommas, unformatNumber } from "../hooks/formatFuctions";
 
 function ProductPage() {
   const { id } = useParams();
@@ -19,7 +20,6 @@ function ProductPage() {
   const [similar, setSimilar] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
-
   const handleDragStart = (e) => e.preventDefault();
 
   useEffect(() => {
@@ -68,7 +68,9 @@ function ProductPage() {
           <p>
             <Badge bg="danger">{product.category}</Badge>
           </p>
-          <p className="product__price">₺{product.price}</p>
+          <p className="product__price">
+            ₺ {formatWithCommas(unformatNumber(String(product.price)))}{" "}
+          </p>
           <p className="py-3" style={{ textAlign: "justify" }}>
             <strong>Açıklama:</strong> {product.description}
           </p>

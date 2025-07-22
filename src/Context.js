@@ -1,10 +1,11 @@
-import React, { createContext } from 'react';
-import HelperFunc from './hooks/HelperFunc'
+import React, { createContext } from "react";
+import HelperFunc from "./hooks/HelperFunc";
 
 const ContextValue = createContext();
 
 const ContextMain = ({ children }) => {
-  const [loginEmail,
+  const [
+    loginEmail,
     setLoginEmail,
     loginPassword,
     setLoginPassword,
@@ -23,7 +24,8 @@ const ContextMain = ({ children }) => {
     Error,
     error,
     isLoading,
-    isError] = HelperFunc();
+    isError,
+  ] = HelperFunc();
 
   const value = [
     loginEmail,
@@ -45,13 +47,11 @@ const ContextMain = ({ children }) => {
     Error,
     error,
     isLoading,
-    isError
+    isError,
   ];
 
   return (
-    <ContextValue.Provider value={value}>
-      {children}
-    </ContextValue.Provider>
+    <ContextValue.Provider value={value}>{children}</ContextValue.Provider>
   );
 };
 

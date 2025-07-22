@@ -6,6 +6,7 @@ import "./Shirts.css";
 import { useAddToCartMutation } from "../services/appApi";
 import { useSelector } from "react-redux";
 import ToastMessage from "../components/ToastMessage";
+import { formatWithCommas, unformatNumber } from "../hooks/formatFuctions";
 
 function CategoryPage({ NoHeader }) {
   const { category = "all" } = useParams();
@@ -15,7 +16,7 @@ function CategoryPage({ NoHeader }) {
   const [sortBy, setSortBy] = useState("featured");
   const [pageIdx, setPageIdx] = useState(0);
   const [showLoginToast, setShowLoginToast] = useState(false);
-
+  console.log("TCL ~ CategoryPage ~ unformatNumber:", unformatNumber);
   const navigate = useNavigate();
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const user = useSelector((state) => state.user);
@@ -228,7 +229,12 @@ function CategoryPage({ NoHeader }) {
                         </div>
                         <div className="info-row">
                           <span className="label">Fiyat:</span>
-                          <span className="value">{prod.price} TL</span>
+                          <span className="value">
+                            {formatWithCommas(
+                              unformatNumber(String(prod.price))
+                            )}{" "}
+                            TL
+                          </span>
                         </div>
                       </div>
                     </div>

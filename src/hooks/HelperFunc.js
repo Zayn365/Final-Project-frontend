@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useLoginMutation, useSignupMutation } from '../services/appApi';
+import { useState } from "react";
+import { useLoginMutation, useSignupMutation } from "../services/appApi";
 
 function HelperFunc() {
   const [loginEmail, setLoginEmail] = useState("");
