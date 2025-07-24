@@ -7,6 +7,7 @@ import categories from "../categories";
 import "./Home.css";
 import { useDispatch, useSelector } from "react-redux";
 import { updateProducts } from "../features/productSlice";
+import { updateCampaigns } from "../features/campaignSlice";
 import ProductPreview from "../components/ProductPreview";
 import BrandGrid from "../components/BrandGrid";
 import Testimonials from "../components/Testimonials";
@@ -25,6 +26,7 @@ function Home() {
 
   useEffect(() => {
     axios.get("/products").then(({ data }) => dispatch(updateProducts(data)));
+    axios.get("/campaigns").then(({ data }) => dispatch(updateCampaigns(data)));
   }, []);
 
   return (

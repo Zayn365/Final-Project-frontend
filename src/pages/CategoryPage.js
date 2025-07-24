@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "../axios";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { Container, Row, Col, Button, Form, Badge } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "./Shirts.css";
 import { useAddToCartMutation } from "../services/appApi";
@@ -16,10 +16,10 @@ function CategoryPage({ NoHeader }) {
   const [sortBy, setSortBy] = useState("featured");
   const [pageIdx, setPageIdx] = useState(0);
   const [showLoginToast, setShowLoginToast] = useState(false);
-  console.log("TCL ~ CategoryPage ~ unformatNumber:", unformatNumber);
   const navigate = useNavigate();
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const user = useSelector((state) => state.user);
+  const campaigns = useSelector((state) => state.campaigns || []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,13 +45,11 @@ function CategoryPage({ NoHeader }) {
   const filtered = useMemo(() => {
     if (category.toLowerCase() === "all") return allProducts;
 
-    // Try exact match
     const exactMatch = allProducts.filter(
       (p) => p.category?.toLowerCase() === category.toLowerCase()
     );
     if (exactMatch.length > 0) return exactMatch;
 
-    // Fallback: partial match (includes)
     const partialMatch = allProducts.filter((p) =>
       p.category?.toLowerCase().includes(category.toLowerCase())
     );
@@ -123,7 +121,6 @@ function CategoryPage({ NoHeader }) {
 
       <Container fluid className="py-4">
         <Row>
-          {/* Sidebar */}
           <Col md={2}>
             <ul className="list-group side-menu">
               {categories.map((cat) => (
@@ -142,7 +139,6 @@ function CategoryPage({ NoHeader }) {
             </ul>
           </Col>
 
-          {/* Ürünler */}
           <Col md={10}>
             <div className="product-header d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
               <h4 className="text-danger mb-0 text-capitalize">
@@ -193,99 +189,122 @@ function CategoryPage({ NoHeader }) {
                   <p>Aramanızla eşleşen ürün bulunamadı.</p>
                 </div>
               )}
-              {paged.map((prod) => (
-                <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
-                  <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
-                    <img
-                      src={prod.pictures?.[0]?.url}
-                      alt={prod.name}
-                      className="img-fluid mb-3"
-                    />
-                    <div className="product-info text-start flex-grow-1">
-                      <div className="top-info">
-                        <div className="info-row info-top">
-                          {prod.class.length > 0 || prod.hasClass === true ? (
-                            <div className="d-flex align-items-center">
-                              <span className="label">Sınıf:</span>
-                              <span>
-                                {Array.isArray(prod?.class)
-                                  ? prod.class[0]
-                                  : "Mevcut değil"}
-                              </span>
-                              {/* <Form.Select
-                                size="sm"
-                                className="value-dropdown text-danger"
-                              >
-                                {(Array.isArray(prod?.class)
-                                  ? prod.class
-                                  : classOptions
-                                ).map((s) => (
-                                  <option key={s}>{s}</option>
-                                ))}
-                              </Form.Select>{" "} */}
-                            </div>
-                          ) : (
-                            <div className="d-flex align-items-center">
-                              <span className="label">Beden:</span>
-                              <Form.Select
-                                size="sm"
-                                className="value-dropdown text-danger"
-                              >
-                                {(Array.isArray(prod?.sizes)
-                                  ? prod.sizes
-                                  : sizeOptions
-                                ).map((s) => (
-                                  <option key={s}>{s}</option>
-                                ))}
-                              </Form.Select>
-                            </div>
+              {paged.map((prod) => {
+                let campaignAmount;
+                const campaign = campaigns.find((c) =>
+                  c.products?.includes(prod._id)
+                );
+
+                let finalPrice = Number(prod.price) || 0;
+
+                if (
+                  campaign &&
+                  typeof campaign.amount === "number" &&
+                  !isNaN(campaign.amount)
+                ) {
+                  if (campaign.type === "percentage") {
+                    console.log("TCL ~ {paged.map ~ finalPrice:", finalPrice);
+                    campaignAmount = campaign.amount;
+                    finalPrice -= (finalPrice * campaign.amount) / 100;
+                  } else if (campaign.type === "fixed") {
+                    campaignAmount = campaign.amount;
+                    finalPrice -= campaign.amount;
+                  }
+                  finalPrice = Math.max(finalPrice, 0);
+                }
+
+                return (
+                  <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
+                    <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
+                      <img
+                        src={prod.pictures?.[0]?.url}
+                        alt={prod.name}
+                        className="img-fluid mb-3"
+                      />
+                      <div className="product-info text-start flex-grow-1">
+                        <div className="top-info">
+                          <div className="info-row info-top">
+                            {prod.class.length > 0 || prod.hasClass === true ? (
+                              <div className="d-flex align-items-center">
+                                <span className="label">Sınıf:</span>
+                                <span>
+                                  {Array.isArray(prod?.class)
+                                    ? prod.class[0]
+                                    : "Mevcut değil"}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="d-flex align-items-center">
+                                <span className="label">Beden:</span>
+                                <Form.Select
+                                  size="sm"
+                                  className="value-dropdown text-danger"
+                                >
+                                  {(Array.isArray(prod?.sizes)
+                                    ? prod.sizes
+                                    : sizeOptions
+                                  ).map((s) => (
+                                    <option key={s}>{s}</option>
+                                  ))}
+                                </Form.Select>
+                              </div>
+                            )}
+                          </div>
+                          {campaignAmount && (
+                            <Col
+                              sm={12}
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Badge bg="success">
+                                ₺{campaignAmount} İNDİRİM
+                              </Badge>
+                            </Col>
                           )}
-                        </div>
-                        <div className="info-row">
-                          <span className="label">Fiyat:</span>
-                          <span className="value">
-                            {formatWithCommas(
-                              unformatNumber(String(prod.price))
-                            )}{" "}
-                            TL
-                          </span>
+                          <div className="info-row">
+                            <span className="label">Fiyat:</span>
+                            <span className="value">
+                              {formatWithCommas(finalPrice.toFixed(0))} TL
+                            </span>
+                          </div>
                         </div>
                       </div>
+
+                      <Button
+                        className="choose-btn mt-3 w-100"
+                        variant="danger"
+                        onClick={() => {
+                          if (!user) {
+                            setShowLoginToast(true);
+                            setTimeout(() => setShowLoginToast(false), 3000);
+                            return;
+                          }
+                          addToCart({
+                            userId: user._id,
+                            productId: prod._id,
+                            price: finalPrice,
+                            image: prod.pictures?.[0]?.url,
+                          });
+                        }}
+                      >
+                        Sepete Ekle{" "}
+                      </Button>
+
+                      <Button
+                        className="quick-view-btn mt-2 w-100"
+                        variant="light"
+                        onClick={() => navigate(`/product/${prod._id}`)}
+                      >
+                        Detaylar{" "}
+                      </Button>
                     </div>
-
-                    <Button
-                      className="choose-btn mt-3 w-100"
-                      variant="danger"
-                      onClick={() => {
-                        if (!user) {
-                          setShowLoginToast(true);
-                          setTimeout(() => setShowLoginToast(false), 3000);
-                          return;
-                        }
-                        addToCart({
-                          userId: user._id,
-                          productId: prod._id,
-                          price: prod.price,
-                          image: prod.pictures?.[0]?.url,
-                        });
-                      }}
-                    >
-                      Sepete Ekle{" "}
-                    </Button>
-
-                    <Button
-                      className="quick-view-btn mt-2 w-100"
-                      variant="light"
-                      onClick={() => navigate(`/product/${prod._id}`)}
-                    >
-                      Detaylar{" "}
-                    </Button>
-                  </div>
-                </Col>
-              ))}
+                  </Col>
+                );
+              })}
             </Row>
 
-            {/* Pagination */}
             {pageCount > 1 && (
               <div className="d-flex justify-content-center gap-3 mt-4">
                 <Button

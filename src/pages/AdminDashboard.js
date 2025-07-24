@@ -3,6 +3,7 @@ import { Container, Nav, Tab, Col, Row } from "react-bootstrap";
 import ClientsAdminPage from "../components/ClientsAdminPage";
 import DashboardProducts from "../components/DashboardProducts";
 import OrdersAdminPage from "../components/OrdersAdminPage";
+import DashboardCampaign from "../components/DashboardCampaign";
 function AdminDashboard() {
   return (
     <Container fluid className="py-4 px-5 bg-light min-vh-100">
@@ -20,6 +21,9 @@ function AdminDashboard() {
               <Nav.Item>
                 <Nav.Link eventKey="clients">Kullanıcılar</Nav.Link>
               </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="campaign">Campaign</Nav.Link>
+              </Nav.Item>
             </Nav>
           </Col>
           <Col sm={9}>
@@ -32,6 +36,9 @@ function AdminDashboard() {
               </Tab.Pane>
               <Tab.Pane eventKey="clients">
                 <ClientsAdminPage />
+              </Tab.Pane>
+              <Tab.Pane eventKey="campaign">
+                <DashboardCampaign />
               </Tab.Pane>
             </Tab.Content>
           </Col>

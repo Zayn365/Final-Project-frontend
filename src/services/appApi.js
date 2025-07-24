@@ -92,6 +92,39 @@ export const appApi = createApi({
         body,
       }),
     }),
+    // 📦 campaigns
+    createCampaign: builder.mutation({
+      query: (campaign) => ({
+        url: "/campaigns",
+        method: "POST",
+        body: campaign,
+      }),
+    }),
+    getAllCampaigns: builder.query({
+      query: () => ({
+        url: "/campaigns",
+        method: "GET",
+      }),
+    }),
+    getCampaignById: builder.query({
+      query: (id) => ({
+        url: `/campaigns/single/${id}`,
+        method: "GET",
+      }),
+    }),
+    updateCampaign: builder.mutation({
+      query: ({ id, ...updates }) => ({
+        url: `/campaigns/${id}`,
+        method: "PUT",
+        body: updates,
+      }),
+    }),
+    deleteCampaign: builder.mutation({
+      query: (id) => ({
+        url: `/campaigns/${id}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -106,6 +139,11 @@ export const {
   useCreateOrderMutation,
   useDeleteProductMutation,
   useUpdateProductMutation,
+  useCreateCampaignMutation,
+  useGetAllCampaignsQuery,
+  useGetCampaignByIdQuery,
+  useUpdateCampaignMutation,
+  useDeleteCampaignMutation,
 } = appApi;
 
 export default appApi;
