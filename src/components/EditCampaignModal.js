@@ -48,7 +48,7 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
     const { data } = await updateCampaign(payload);
     if (data) {
       handleCloseModal();
-      window.location.reload();
+      // window.location.reload();
     }
   };
 
@@ -85,8 +85,9 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
               onChange={handleChange("type")}
               required
             >
-              <option value="percentage">percentage</option>
-              <option value="fixed">fixed</option>
+              {" "}
+              <option value="percentage">Yüzde</option>
+              <option value="fixed">Tutar</option>
             </Form.Select>
           </Form.Group>
 
@@ -121,64 +122,41 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Ürünler</Form.Label>
+            <Form.Label>Kategoriler</Form.Label>
 
-            {/* Selected product pills */}
             <div className="d-flex flex-wrap gap-2 mb-2">
-              {form.products.map((id) => {
-                const p = products.find((prod) => prod._id === id);
-                return (
-                  <div
-                    key={id}
-                    className="d-flex align-items-center border rounded p-1 pe-2"
-                  >
-                    <img
-                      src={p?.pictures?.[0]?.url}
-                      alt=""
-                      style={{
-                        width: 30,
-                        height: 30,
-                        objectFit: "cover",
-                        marginRight: 5,
-                        borderRadius: 4,
-                      }}
-                    />
-                    <span className="me-2">{p?.name}</span>
-                    <i
-                      className="fa fa-times text-danger"
-                      style={{ cursor: "pointer" }}
-                      onClick={() =>
-                        setForm((prev) => ({
-                          ...prev,
-                          products: prev.products.filter((pid) => pid !== id),
-                        }))
-                      }
-                    />
-                  </div>
-                );
-              })}
+              {form.products[0] && (
+                <div className="d-flex align-items-center border rounded p-1 pe-2">
+                  <span className="me-2">{form.products[0]}</span>
+                  <i
+                    className="fa fa-times text-danger"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        products: [],
+                      }))
+                    }
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Product selector */}
             <Form.Select
               onChange={(e) => {
-                const selectedId = e.target.value;
-                if (
-                  selectedId &&
-                  !form.products.includes(selectedId) &&
-                  products.find((p) => p._id === selectedId)
-                ) {
+                const selectedCategory = e.target.value;
+                if (selectedCategory) {
                   setForm((prev) => ({
                     ...prev,
-                    products: [...prev.products, selectedId],
+                    products: [selectedCategory], // only one selected
                   }));
                 }
               }}
             >
-              <option value="">Ürün Seçiniz</option>
-              {products.map((prod) => (
-                <option key={prod._id} value={prod._id}>
-                  {prod.name}
+              <option value="">Kategori Seçiniz</option>
+              {[...new Set(products.map((p) => p.category))].map((category) => (
+                <option key={category} value={category}>
+                  {category}
                 </option>
               ))}
             </Form.Select>

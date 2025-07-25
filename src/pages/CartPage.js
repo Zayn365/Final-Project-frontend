@@ -27,13 +27,22 @@ function CartPage() {
 
   // Utility: Get discounted price if campaign exists
   const getDiscountedPrice = (product) => {
-    if (campaigns.length <= 0) return parseFloat(product.price);
+    if (campaigns.length <= 0 || !product.category) {
+      return parseFloat(product.price);
+    }
+
     const campaign = campaigns.find(
-      (c) => Array.isArray(c.products) && c.products.includes(product._id)
+      (c) => Array.isArray(c.products) && c.products.includes(product.category)
     );
+
     if (!campaign) return parseFloat(product.price);
 
-    console.log("Applying campaign for:", product.name, campaign.amount);
+    console.log(
+      "Applying campaign for category:",
+      product.category,
+      "→",
+      campaign.amount
+    );
 
     if (campaign.type === "percentage") {
       return parseFloat(product.price) * (1 - campaign.amount / 100);

@@ -21,6 +21,7 @@ function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const handleDragStart = (e) => e.preventDefault();
+  const campaigns = useSelector((state) => state.campaigns || []);
 
   useEffect(() => {
     axios.get(`/products/${id}`).then(({ data }) => {
@@ -68,9 +69,48 @@ function ProductPage() {
           <p>
             <Badge bg="danger">{product.category}</Badge>
           </p>
-          <p className="product__price">
-            ₺ {formatWithCommas(unformatNumber(String(product.price)))}{" "}
-          </p>
+          {(() => {
+            let finalPrice = Number(product.price) || 0;
+            let campaignAmount;
+            const campaign = campaigns.find(
+              (c) => product.category && c.products?.includes(product.category)
+            );
+
+            if (
+              campaign &&
+              typeof campaign.amount === "number" &&
+              !isNaN(campaign.amount)
+            ) {
+              if (campaign.type === "percentage") {
+                campaignAmount = `${campaign.amount}%`;
+                finalPrice -= (finalPrice * campaign.amount) / 100;
+              } else if (campaign.type === "fixed") {
+                campaignAmount = `₺${campaign.amount}`;
+                finalPrice -= campaign.amount;
+              }
+              finalPrice = Math.max(finalPrice, 0);
+            }
+
+            return (
+              <div className="d-flex flex-column align-items-center text-center mb-3">
+                {campaignAmount && (
+                  <Badge bg="success" className="mb-2">
+                    {campaignAmount} İNDİRİM
+                  </Badge>
+                )}
+
+                <p className="product__price mb-0">
+                  ₺ {formatWithCommas(finalPrice.toFixed(0))}{" "}
+                  {campaignAmount && (
+                    <span className="text-muted text-decoration-line-through ms-2 small">
+                      ₺ {formatWithCommas(Number(product.price).toFixed(0))}
+                    </span>
+                  )}
+                </p>
+              </div>
+            );
+          })()}
+
           <p className="py-3" style={{ textAlign: "justify" }}>
             <strong>Açıklama:</strong> {product.description}
           </p>

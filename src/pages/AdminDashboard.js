@@ -22,7 +22,7 @@ function AdminDashboard() {
                 <Nav.Link eventKey="clients">Kullanıcılar</Nav.Link>
               </Nav.Item>
               <Nav.Item>
-                <Nav.Link eventKey="campaign">Campaign</Nav.Link>
+                <Nav.Link eventKey="campaign">Kampanya</Nav.Link>
               </Nav.Item>
             </Nav>
           </Col>

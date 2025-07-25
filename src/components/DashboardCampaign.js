@@ -10,8 +10,9 @@ import EditCampaignModal from "./EditCampaignModal";
 
 function DashboardCampaigns() {
   const campaigns = useSelector((state) => state.campaigns || []);
-  const products = useSelector((state) => state.products || []);
-
+  console.log("TCL ~ DashboardCampaigns ~ campaigns:", campaigns);
+  // const products = useSelector((state) => state.products || []);
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteCampaign, { isLoading }] = useDeleteCampaignMutation();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -19,15 +20,27 @@ function DashboardCampaigns() {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [campaignsPerPage, setCampaignsPerPage] = useState(10);
+  const { data } = useGetAllCampaignsQuery();
+  const [selectedCategory, setSelectedCategory] = useState("");
 
+  useEffect(() => {
+    if (data) {
+      dispatch({ type: "campaigns/set", payload: data }); // optional, if needed
+    }
+  }, [data, dispatch]);
   const filteredCampaigns = useMemo(() => {
     return (
       campaigns.length > 0 &&
-      campaigns?.filter((c) =>
-        c.type?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      campaigns.filter((c) => {
+        const matchesType = c.type
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const matchesCategory =
+          !selectedCategory || c.products?.includes(selectedCategory);
+        return matchesType && matchesCategory;
+      })
     );
-  }, [campaigns, searchTerm]);
+  }, [campaigns, searchTerm, selectedCategory]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / campaignsPerPage);
   const currentCampaigns =
@@ -86,6 +99,24 @@ function DashboardCampaigns() {
               </option>
             ))}
           </Form.Select>
+          <Form.Select
+            size="sm"
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCurrentPage(1);
+            }}
+            style={{ minWidth: "200px" }}
+          >
+            <option value="">Tüm Kategoriler</option>
+            {[...new Set(campaigns.flatMap((c) => c.products || []))].map(
+              (category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              )
+            )}
+          </Form.Select>
           <div className="text-muted small">
             Toplam <strong>{filteredCampaigns.length}</strong> kampanya
           </div>
@@ -109,7 +140,7 @@ function DashboardCampaigns() {
             <th>Miktar</th>
             <th>Başlangıç</th>
             <th>Bitiş</th>
-            <th>Ürünler</th>
+            <th>Kampanya</th>
             <th>İşlemler</th>
           </tr>
         </thead>
@@ -118,40 +149,20 @@ function DashboardCampaigns() {
             currentCampaigns.map((c) => (
               <tr key={c._id}>
                 <td>{c._id}</td>
-                <td>{c.type}</td>
+                <td>{c.type === "percentage" ? "Yüzde" : "Tutar"}</td>
                 <td>{c.amount}</td>
                 <td>{c.start_Date}</td>
                 <td>{c.end_date}</td>
                 <td>
                   <div className="d-flex flex-wrap gap-2">
-                    {(c.products || []).map((pid) => {
-                      const prod = products.find((p) => p._id === pid);
-                      return (
-                        <div
-                          key={pid}
-                          className="d-flex align-items-center border rounded p-1 pe-2"
-                          title={prod?.name || "Ürün adı bulunamadı"}
-                        >
-                          <img
-                            src={prod?.pictures?.[0]?.url}
-                            alt={prod?.name}
-                            style={{
-                              width: 30,
-                              height: 30,
-                              objectFit: "cover",
-                              marginRight: 5,
-                              borderRadius: 4,
-                            }}
-                          />
-                          <span
-                            className="small text-truncate"
-                            style={{ maxWidth: "120px" }}
-                          >
-                            {prod?.name || pid}
-                          </span>
-                        </div>
-                      );
-                    })}
+                    {(c.products || []).map((category) => (
+                      <span
+                        key={category}
+                        className="badge bg-primary text-light p-2"
+                      >
+                        {category}
+                      </span>
+                    ))}
                   </div>
                 </td>
 

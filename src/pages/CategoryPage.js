@@ -192,9 +192,8 @@ function CategoryPage({ NoHeader }) {
               {paged.map((prod) => {
                 let campaignAmount;
                 const campaign = campaigns.find((c) =>
-                  c.products?.includes(prod._id)
+                  c.products?.includes(prod.category)
                 );
-
                 let finalPrice = Number(prod.price) || 0;
 
                 if (
