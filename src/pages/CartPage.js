@@ -10,19 +10,45 @@ import {
 } from "../services/appApi";
 import "./CartPage.css";
 
-const stripePromise = loadStripe(
-  "pk_test_51QM6P3G00VUibJn8VLhisXcULn8mq8mouOEmH4lIFqL6iptyBYLYkiSR66YxyjyJTvfr4Q9lVYiyeJhtD42OMKQG00qNiRS25v"
-);
+const stripePromise = loadStripe("pk_test_..."); // shortened for clarity
 
 function CartPage() {
   const user = useSelector((state) => state.user);
   const products = useSelector((state) => state.products);
+  const campaigns = useSelector((state) => state.campaigns); // 👈 get campaign state
+  console.log("TCL ~ CartPage ~ campaigns:", campaigns);
+
   const [increaseCart] = useIncreaseCartProductMutation();
   const [decreaseCart] = useDecreaseCartProductMutation();
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
 
   const userCart = user.cart;
   const cartItems = products.filter((product) => userCart[product._id]);
+
+  // Utility: Get discounted price if campaign exists
+  const getDiscountedPrice = (product) => {
+    if (campaigns.length <= 0) return parseFloat(product.price);
+    const campaign = campaigns.find(
+      (c) => Array.isArray(c.products) && c.products.includes(product._id)
+    );
+    if (!campaign) return parseFloat(product.price);
+
+    console.log("Applying campaign for:", product.name, campaign.amount);
+
+    if (campaign.type === "percentage") {
+      return parseFloat(product.price) * (1 - campaign.amount / 100);
+    } else if (campaign.type === "fixed") {
+      return Math.max(parseFloat(product.price) - campaign.amount, 0);
+    }
+
+    return parseFloat(product.price);
+  };
+  // Total price with campaign discounts
+  const total = cartItems.reduce((acc, item) => {
+    const quantity = userCart[item._id];
+    const discountedPrice = getDiscountedPrice(item);
+    return acc + discountedPrice * quantity;
+  }, 0);
 
   const handleDecrease = (product) => {
     if (user.cart[product.productId] <= 1) return;
@@ -58,69 +84,88 @@ function CartPage() {
                 </tr>
               </thead>
               <tbody>
-                {cartItems.map((item) => (
-                  <tr key={item._id}>
-                    <td>
-                      {!isLoading && (
-                        <i
-                          className="fa fa-times text-danger"
-                          style={{ cursor: "pointer" }}
-                          onClick={() =>
-                            removeFromCart({
-                              productId: item._id,
-                              price: item.price,
-                              userId: user._id,
-                            })
-                          }
-                        ></i>
-                      )}
-                    </td>
-                    <td>
-                      <img
-                        src={item.pictures[0]?.url}
-                        alt={item.name}
-                        style={{ width: 80, height: 80, objectFit: "cover" }}
-                      />
-                    </td>
-                    <td>₺{parseFloat(item.price).toFixed(2)}</td>
-                    <td>
-                      <div className="quantity-indicator">
-                        <i
-                          className="fa fa-minus-circle"
-                          onClick={() =>
-                            handleDecrease({
-                              productId: item._id,
-                              price: item.price,
-                              userId: user._id,
-                            })
-                          }
-                        ></i>
-                        <span>{user.cart[item._id]}</span>
-                        <i
-                          className="fa fa-plus-circle"
-                          onClick={() =>
-                            increaseCart({
-                              productId: item._id,
-                              price: item.price,
-                              userId: user._id,
-                            })
-                          }
-                        ></i>
-                      </div>
-                    </td>
-                    <td>
-                      ₺
-                      {(parseFloat(item.price) * user.cart[item._id]).toFixed(
-                        2
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {cartItems.map((item) => {
+                  const quantity = userCart[item._id];
+                  const originalPrice = parseFloat(item.price);
+                  const discountedPrice = getDiscountedPrice(item);
+                  const hasDiscount = discountedPrice < originalPrice;
+
+                  return (
+                    <tr key={item._id}>
+                      <td>
+                        {!isLoading && (
+                          <i
+                            className="fa fa-times text-danger"
+                            style={{ cursor: "pointer" }}
+                            onClick={() =>
+                              removeFromCart({
+                                productId: item._id,
+                                price: item.price,
+                                userId: user._id,
+                              })
+                            }
+                          ></i>
+                        )}
+                      </td>
+                      <td>
+                        <img
+                          src={item.pictures[0]?.url}
+                          alt={item.name}
+                          style={{
+                            width: 80,
+                            height: 80,
+                            objectFit: "cover",
+                          }}
+                        />
+                      </td>
+                      <td>
+                        ₺
+                        {hasDiscount ? (
+                          <>
+                            <span className="text-muted text-decoration-line-through">
+                              {originalPrice.toFixed(2)}
+                            </span>{" "}
+                            <span className="text-success fw-bold">
+                              {discountedPrice.toFixed(2)}
+                            </span>
+                          </>
+                        ) : (
+                          originalPrice.toFixed(2)
+                        )}
+                      </td>
+                      <td>
+                        <div className="quantity-indicator">
+                          <i
+                            className="fa fa-minus-circle"
+                            onClick={() =>
+                              handleDecrease({
+                                productId: item._id,
+                                price: item.price,
+                                userId: user._id,
+                              })
+                            }
+                          ></i>
+                          <span>{quantity}</span>
+                          <i
+                            className="fa fa-plus-circle"
+                            onClick={() =>
+                              increaseCart({
+                                productId: item._id,
+                                price: item.price,
+                                userId: user._id,
+                              })
+                            }
+                          ></i>
+                        </div>
+                      </td>
+                      <td>₺{(discountedPrice * quantity).toFixed(2)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
-            <h4 className="text-end pt-3">
-              Toplam: ₺{user.cart.total?.toFixed(2)}
-            </h4>
+
+            <h4 className="text-end pt-3">Toplam: ₺{total.toFixed(2)}</h4>
           </Col>
         )}
       </Row>

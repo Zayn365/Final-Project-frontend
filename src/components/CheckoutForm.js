@@ -55,7 +55,6 @@ function CheckoutForm() {
     const paymentIntent = { status: "succeeded" };
 
     setPaying(false);
-
     if (paymentIntent) {
       const fullAddress = `${street}, ${area}, ${city} ${zipCode}, ${country}`;
       createOrder({
