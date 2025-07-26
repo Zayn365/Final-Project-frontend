@@ -9,39 +9,58 @@ import AddCampaignModal from "./NewCampaignModal";
 import EditCampaignModal from "./EditCampaignModal";
 
 function DashboardCampaigns() {
-  const campaigns = useSelector((state) => state.campaigns || []);
-  // const products = useSelector((state) => state.products || []);
   const dispatch = useDispatch();
+  const campaigns = useSelector((state) => state.campaigns || []);
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteCampaign, { isLoading }] = useDeleteCampaignMutation();
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [campaignsPerPage, setCampaignsPerPage] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [campaignsPerPage, setCampaignsPerPage] = useState(10);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [deleteCampaign, { isLoading }] = useDeleteCampaignMutation();
+
+  const [studentsData, setStudentsData] = useState([]);
+
+  useEffect(() => {
+    fetch("/students_parents.json")
+      .then((res) => res.json())
+      .then((data) => setStudentsData(data))
+      .catch((err) => console.error("Failed to load students data", err));
+  }, []);
 
   const filteredCampaigns = useMemo(() => {
-    return (
-      campaigns.length > 0 &&
-      campaigns.filter((c) => {
-        const matchesType = c.type
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        const matchesCategory =
-          !selectedCategory || c.products?.includes(selectedCategory);
-        return matchesType && matchesCategory;
-      })
-    );
+    return campaigns.filter((c) => {
+      const matchesType = c.type
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        !selectedCategory || c.products?.includes(selectedCategory);
+      return matchesType && matchesCategory;
+    });
   }, [campaigns, searchTerm, selectedCategory]);
 
   const totalPages = Math.ceil(filteredCampaigns.length / campaignsPerPage);
-  const currentCampaigns =
-    filteredCampaigns.length > 0 &&
-    filteredCampaigns.slice(
-      (currentPage - 1) * campaignsPerPage,
-      currentPage * campaignsPerPage
+  const currentCampaigns = filteredCampaigns.slice(
+    (currentPage - 1) * campaignsPerPage,
+    currentPage * campaignsPerPage
+  );
+
+  const uniqueCategories = useMemo(() => {
+    return Array.from(
+      new Set(
+        campaigns
+          .flatMap((c) => c.products || [])
+          .filter((cat) => typeof cat === "string")
+      )
     );
+  }, [campaigns]);
+
+  const handleDelete = (id) => {
+    if (window.confirm("Silmek istediğinizden emin misiniz?")) {
+      deleteCampaign(id);
+    }
+  };
 
   const renderPagination = () => (
     <Pagination>
@@ -57,15 +76,9 @@ function DashboardCampaigns() {
     </Pagination>
   );
 
-  const handleDelete = (id) => {
-    if (window.confirm("Silmek istediğinizden emin misiniz?")) {
-      deleteCampaign(id);
-    }
-  };
-
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-5">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-4">
         <Form.Control
           type="search"
           placeholder="Tip ile ara..."
@@ -76,7 +89,8 @@ function DashboardCampaigns() {
           }}
           style={{ maxWidth: "300px" }}
         />
-        <div className="d-flex flex-wrap gap-3 align-items-center justify-content-end mb-3">
+
+        <div className="d-flex flex-wrap gap-3 align-items-center">
           <Form.Select
             size="sm"
             value={campaignsPerPage}
@@ -92,6 +106,7 @@ function DashboardCampaigns() {
               </option>
             ))}
           </Form.Select>
+
           <Form.Select
             size="sm"
             value={selectedCategory}
@@ -102,18 +117,17 @@ function DashboardCampaigns() {
             style={{ minWidth: "200px" }}
           >
             <option value="">Tüm Kategoriler</option>
-            {(campaigns || [])
-              .flatMap((c) => c.products || [])
-              .filter((val, index, self) => val && self.indexOf(val) === index)
-              .map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
+            {uniqueCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
           </Form.Select>
+
           <div className="text-muted small">
             Toplam <strong>{filteredCampaigns.length}</strong> kampanya
           </div>
+
           <Button variant="success" onClick={() => setShowAddModal(true)}>
             <i className="fa fa-plus me-1" /> Kampanya Ekle
           </Button>
@@ -134,13 +148,13 @@ function DashboardCampaigns() {
             <th>Miktar</th>
             <th>Başlangıç</th>
             <th>Bitiş</th>
-            <th>Kampanya</th>
-            <th>Kullanıcı</th> {/* ← Başlık Türkçe olarak "Kullanıcı" */}
+            <th>Kategori</th>
+            <th>Kullanıcılar</th>
             <th>İşlemler</th>
           </tr>
         </thead>
         <tbody>
-          {currentCampaigns.length > 0 &&
+          {currentCampaigns.length > 0 ? (
             currentCampaigns.map((c) => (
               <tr key={c._id}>
                 <td>{c._id}</td>
@@ -149,18 +163,34 @@ function DashboardCampaigns() {
                 <td>{c.start_Date}</td>
                 <td>{c.end_date}</td>
                 <td>
-                  <div className="d-flex flex-wrap gap-2">
-                    {(c.products || []).map((category) => (
+                  <div className="d-flex flex-wrap gap-1">
+                    {(c.products || []).map((cat) => (
                       <span
-                        key={category}
-                        className="badge bg-primary text-light p-2"
+                        key={cat}
+                        className="badge bg-primary text-light p-1 px-2"
                       >
-                        {category}
+                        {cat}
                       </span>
                     ))}
                   </div>
                 </td>
-                <td>{c.selectedUser || "-"}</td>
+                <td>
+                  <div className="d-flex flex-wrap gap-1">
+                    {(c.selectedUsers || []).map((tc) => {
+                      const student = studentsData.find(
+                        (s) => s.Ogrenci_TC === tc
+                      );
+                      return (
+                        <span
+                          key={tc}
+                          className="badge bg-secondary text-light p-1 px-2"
+                        >
+                          {student ? `${student.Ad} (${tc})` : tc}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </td>
                 <td className="d-flex gap-2">
                   <Button
                     size="sm"
@@ -182,7 +212,14 @@ function DashboardCampaigns() {
                   </Button>
                 </td>
               </tr>
-            ))}
+            ))
+          ) : (
+            <tr>
+              <td colSpan="8" className="text-center text-muted py-3">
+                Hiç kampanya bulunamadı.
+              </td>
+            </tr>
+          )}
         </tbody>
       </Table>
 

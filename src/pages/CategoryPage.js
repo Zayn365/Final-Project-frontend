@@ -233,7 +233,8 @@ function CategoryPage() {
                 const campaign = campaigns.find(
                   (c) =>
                     c.products?.includes(prod.category) &&
-                    c.selectedUser === user?.tc_id
+                    Array.isArray(c.selectedUsers) &&
+                    c.selectedUsers.includes(user?.tc_id)
                 );
                 let finalPrice = Number(prod.price) || 0;
 

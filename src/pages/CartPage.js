@@ -32,8 +32,8 @@ function CartPage() {
 
     const campaign = campaigns.find(
       (c) =>
-        product.category &&
-        c.products?.includes(product.category) &&
+        Array.isArray(c.products) &&
+        c.products.includes(product.category) &&
         c.selectedUser === user?.tc_id
     );
 

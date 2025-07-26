@@ -13,11 +13,10 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
     start_Date: "",
     end_date: "",
     products: [],
-    selectedUser: "",
+    selectedUsers: [],
   });
 
   const [students, setStudents] = useState([]);
-  console.log("TCL ~ EditCampaignModal ~ students:", students);
   const [searchUser, setSearchUser] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
 
@@ -42,9 +41,9 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
         start_Date: data.start_Date,
         end_date: data.end_date,
         products: data.products || [],
-        selectedUser: data.selectedUser || "",
+        selectedUsers: data.selectedUsers || [],
       });
-      setSearchUser(""); // reset search
+      setSearchUser("");
     });
   }, [campaignId, show]);
 
@@ -91,7 +90,7 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
       start_Date: "",
       end_date: "",
       products: [],
-      selectedUser: "",
+      selectedUsers: [],
     });
 
   const handleCloseModal = () => {
@@ -195,30 +194,35 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
           <Form.Group className="mb-3">
             <Form.Label>Kullanıcı Seç</Form.Label>
             <Select
-              className="basic-single"
-              classNamePrefix="select"
+              isMulti
               isSearchable
-              options={students.map((s) => ({
-                label: `${s.Ogrenci_Adı} (${s.Ogrenci_TC})`,
-                value: s.Ogrenci_TC,
-              }))}
-              value={
-                students.find((s) => s.Ogrenci_TC === form.selectedUser)
+              options={[
+                ...students
+                  .filter(
+                    (v, i, self) =>
+                      self.findIndex((s) => s.Ogrenci_TC === v.Ogrenci_TC) === i
+                  )
+                  .map((s) => ({
+                    label: `${s.Ogrenci_Adı} (${s.Ogrenci_TC})`,
+                    value: s.Ogrenci_TC,
+                  })),
+              ]}
+              value={form.selectedUsers.map((tc) => {
+                const student = students.find((s) => s.Ogrenci_TC === tc);
+                return student
                   ? {
-                      label: students.find(
-                        (s) => s.Ogrenci_TC === form.selectedUser
-                      )?.Ogrenci_Adı,
-                      value: form.selectedUser,
+                      label: `${student.Ogrenci_Adı} (${student.Ogrenci_TC})`,
+                      value: student.Ogrenci_TC,
                     }
-                  : null
-              }
-              onChange={(selectedOption) =>
+                  : { label: tc, value: tc };
+              })}
+              onChange={(selectedOptions) =>
                 setForm((prev) => ({
                   ...prev,
-                  selectedUser: selectedOption?.value || "",
+                  selectedUsers: selectedOptions.map((opt) => opt.value),
                 }))
               }
-              placeholder="Kullanıcı ara ve seç"
+              placeholder="Kullanıcıları ara ve seç"
             />
           </Form.Group>
 
