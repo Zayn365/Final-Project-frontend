@@ -135,15 +135,16 @@ function CategoryPage() {
       {isSuccess && (
         <ToastMessage
           bg="success"
-          title="Added to cart"
-          body={`Added in your cart`}
+          title="Sepete Eklendi"
+          body={`sepetinize eklendi`}
         />
       )}
+
       {showLoginToast && (
         <ToastMessage
           bg="danger"
-          title="Login Required"
-          body="Login to add items to your cart"
+          title="Giriş Gerekli"
+          body="Ürün eklemek için giriş yapmalısınız"
         />
       )}
       {/* {!NoHeader && (

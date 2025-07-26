@@ -229,9 +229,9 @@ function ProductPage() {
 
           {isSuccess && (
             <ToastMessage
-              bg="info"
-              title="Added to cart"
-              body={`${product.name} is in your cart`}
+              bg="success"
+              title="Sepete Eklendi"
+              body={`${product.name} sepetinize eklendi`}
             />
           )}
         </Col>

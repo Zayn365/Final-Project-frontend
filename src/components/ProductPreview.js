@@ -31,16 +31,16 @@ function ProductPreview({ _id, category, name, pictures, price }) {
       {isSuccess && (
         <ToastMessage
           bg="success"
-          title="Added to cart"
-          body={`${name} is in your cart`}
+          title="Sepete Eklendi"
+          body={`${name} sepetinize eklendi`}
         />
       )}
 
       {showLoginToast && (
         <ToastMessage
           bg="danger"
-          title="Login Required"
-          body="Login to add items to your cart"
+          title="Giriş Gerekli"
+          body="Ürün eklemek için giriş yapmalısınız"
         />
       )}
 

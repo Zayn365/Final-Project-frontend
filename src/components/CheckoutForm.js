@@ -16,7 +16,6 @@ function CheckoutForm() {
   const [createOrder, { isLoading, isError, isSuccess }] =
     useCreateOrderMutation();
 
-  // Form fields
   const [firstName, setFirstName] = useState(user.name?.split(" ")[0] || "");
   const [lastName, setLastName] = useState(user.name?.split(" ")[1] || "");
   const [street, setStreet] = useState("");
@@ -24,34 +23,14 @@ function CheckoutForm() {
   const [city, setCity] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [country, setCountry] = useState("");
-
   const [paying, setPaying] = useState(false);
 
   async function handlePay(e) {
     e.preventDefault();
     if (!stripe || !elements || user.cart.count <= 0) return;
-    // ⚠️ MUTE PAYMENT CALL FOR NOW — Enable in production
-    // const { client_secret } = await fetch(
-    //   "https://final-project-backend-m9nb.onrender.com/create-payment",
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: "Bearer ",
-    //     },
-    //     body: JSON.stringify({ amount: user.cart.total }),
-    //   }
-    // ).then((res) => res.json());
-
-    // const { paymentIntent } = await stripe.confirmCardPayment(client_secret, {
-    //   payment_method: {
-    //     card: elements.getElement(CardElement),
-    //   },
-    // });
 
     setPaying(true);
 
-    // Mute payment
     const paymentIntent = { status: "succeeded" };
 
     setPaying(false);
@@ -66,7 +45,7 @@ function CheckoutForm() {
         schoolName: user.k12?.schoolName || "",
       }).then((res) => {
         if (!isLoading && !isError) {
-          setAlertMessage(`Payment ${paymentIntent.status}`);
+          setAlertMessage(`Ödeme durumu: ${paymentIntent.status}`);
           setShowToast(true);
           setTimeout(() => {
             navigate("/orders");
@@ -81,8 +60,8 @@ function CheckoutForm() {
       {showToast && (
         <ToastMessage
           bg="success"
-          title="Order Placed Successfully"
-          body="Your order has been placed and is being processed."
+          title="Sipariş Başarıyla Oluşturuldu"
+          body="Siparişiniz alındı ve işleme alındı."
         />
       )}
       <Col className="cart-payment-container">
@@ -92,14 +71,13 @@ function CheckoutForm() {
         >
           {alertMessage && <Alert variant="success">{alertMessage}</Alert>}
 
-          {/* Name + Email */}
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group controlId="firstName">
-                <Form.Label>First Name</Form.Label>
+                <Form.Label>Ad</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="First Name"
+                  placeholder="Adınızı girin"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
@@ -108,10 +86,10 @@ function CheckoutForm() {
             </Col>
             <Col md={6}>
               <Form.Group controlId="lastName">
-                <Form.Label>Last Name</Form.Label>
+                <Form.Label>Soyad</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Last Name"
+                  placeholder="Soyadınızı girin"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   required
@@ -121,16 +99,15 @@ function CheckoutForm() {
           </Row>
 
           <Form.Group controlId="email" className="mb-3">
-            <Form.Label>Email</Form.Label>
+            <Form.Label>E-posta</Form.Label>
             <Form.Control type="email" value={user.email} disabled />
           </Form.Group>
 
-          {/* Address */}
           <Form.Group controlId="street" className="mb-3">
-            <Form.Label>Street Address</Form.Label>
+            <Form.Label>Sokak Adresi</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Street Address"
+              placeholder="Sokak adresinizi girin"
               value={street}
               onChange={(e) => setStreet(e.target.value)}
               required
@@ -140,10 +117,10 @@ function CheckoutForm() {
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group controlId="area">
-                <Form.Label>Area</Form.Label>
+                <Form.Label>Bölge</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Area"
+                  placeholder="Bölgenizi girin"
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
                   required
@@ -152,10 +129,10 @@ function CheckoutForm() {
             </Col>
             <Col md={6}>
               <Form.Group controlId="city">
-                <Form.Label>City</Form.Label>
+                <Form.Label>Şehir</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="City"
+                  placeholder="Şehrinizi girin"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   required
@@ -167,10 +144,10 @@ function CheckoutForm() {
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group controlId="zipCode">
-                <Form.Label>Zip Code</Form.Label>
+                <Form.Label>Posta Kodu</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Zip Code"
+                  placeholder="Posta kodunuzu girin"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   required
@@ -179,10 +156,10 @@ function CheckoutForm() {
             </Col>
             <Col md={6}>
               <Form.Group controlId="country">
-                <Form.Label>Country</Form.Label>
+                <Form.Label>Ülke</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Country"
+                  placeholder="Ülkenizi girin"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   required
@@ -191,20 +168,20 @@ function CheckoutForm() {
             </Col>
           </Row>
 
-          {/* Card Field */}
+          {/* Kredi Kartı Alanı (isteğe bağlı) */}
           {/* <Form.Group controlId="cardDetails" className="mb-4">
-          <Form.Label>Card Details</Form.Label>
-          <div
-            style={{
-              padding: "10px",
-              border: "1px solid #ced4da",
-              borderRadius: "5px",
-              backgroundColor: "#f8f9fa",
-            }}
-          >
-            <CardElement id="card-element" />
-          </div>
-        </Form.Group> */}
+            <Form.Label>Kart Bilgileri</Form.Label>
+            <div
+              style={{
+                padding: "10px",
+                border: "1px solid #ced4da",
+                borderRadius: "5px",
+                backgroundColor: "#f8f9fa",
+              }}
+            >
+              <CardElement id="card-element" />
+            </div>
+          </Form.Group> */}
 
           <div className="d-grid">
             <Button
@@ -213,7 +190,7 @@ function CheckoutForm() {
               size="lg"
               disabled={user.cart.count <= 0 || paying || isSuccess}
             >
-              {paying ? "Processing..." : "Şimdi Sipariş Ver"}
+              {paying ? "İşleniyor..." : "Şimdi Sipariş Ver"}
             </Button>
           </div>
         </Form>

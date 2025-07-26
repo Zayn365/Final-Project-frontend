@@ -56,7 +56,7 @@ function Navigation() {
           height: "40px",
         }}
       >
-        <Form
+        {/* <Form
           className="d-flex"
           onSubmit={handleSubmit}
           style={{ maxWidth: 300 }}
@@ -72,7 +72,7 @@ function Navigation() {
           <button className="btn search-btn py-0 px-2" type="submit">
             Ara
           </button>
-        </Form>
+        </Form> */}
 
         <div className="ms-3 d-flex align-items-center">
           {!user && (
@@ -127,7 +127,7 @@ function Navigation() {
               <Dropdown.Menu style={{ zIndex: 9999 }}>
                 {!user.isAdmin && (
                   <LinkContainer to="/orders">
-                    <Dropdown.Item>My Siparişler</Dropdown.Item>
+                    <Dropdown.Item>Siparişler</Dropdown.Item>
                   </LinkContainer>
                 )}
                 {user.isAdmin && (
