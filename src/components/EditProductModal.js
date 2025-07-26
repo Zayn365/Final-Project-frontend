@@ -41,6 +41,7 @@ const classOptions = [
   "FEN 11.SINIF SAY.",
   "FEN 12. SINIF SAY.",
 ];
+
 function EditProductModal({ show, handleClose, productId }) {
   const [updateProduct, { isError, error, isLoading, isSuccess }] =
     useUpdateProductMutation();
@@ -54,7 +55,6 @@ function EditProductModal({ show, handleClose, productId }) {
   const [images, setImages] = useState([]);
   const [imgToRemove, setImgToRemove] = useState(null);
   const [hasSize, setHasSize] = useState(false);
-  const [hasClass, setHasClass] = useState(false);
 
   useEffect(() => {
     if (!productId) return;
@@ -70,16 +70,9 @@ function EditProductModal({ show, handleClose, productId }) {
         setClassNo(p.class || p.classNo || []);
         setImages(p.pictures || []);
         setHasSize((p.sizes || []).length > 0);
-        setHasClass((p.class || p.classNo || []).length > 0);
       })
       .catch(console.error);
   }, [productId]);
-
-  const isBook = category.toLowerCase() === "books";
-  const isClothing = category.toLowerCase().includes("t-shirt");
-
-  const showSizes = isClothing || hasSize;
-  const showClasses = isBook || hasClass;
 
   function handleRemoveImg(imgObj) {
     setImgToRemove(imgObj.public_id);
@@ -115,6 +108,19 @@ function EditProductModal({ show, handleClose, productId }) {
     widget.open();
   }
 
+  function resetAndClose() {
+    setName("");
+    setDescription("");
+    setPrice("");
+    setCategory("");
+    setSizes([]);
+    setClassNo([]);
+    setImages([]);
+    setImgToRemove(null);
+    setHasSize(false);
+    handleClose();
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     if (!name || !description || !price || !category || !images.length) {
@@ -128,20 +134,22 @@ function EditProductModal({ show, handleClose, productId }) {
       price,
       category,
       sizes: hasSize ? sizes : [],
-      classNo: hasClass ? classNo : [],
+      classNo,
       pictures: images,
+      hasClass: true,
+      hasSize,
     };
 
     updateProduct(payload).then(({ data }) => {
       if (data) {
-        handleClose();
+        resetAndClose();
         window.location.reload();
       }
     });
   }
 
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered>
+    <Modal show={show} onHide={resetAndClose} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>Ürün Düzenle</Modal.Title>
       </Modal.Header>
@@ -185,33 +193,23 @@ function EditProductModal({ show, handleClose, productId }) {
             <Form.Label>Kategori</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Enter or edit category"
               value={category}
               required
               onChange={(e) => setCategory(e.target.value)}
             />
           </Form.Group>
 
-          {!isBook && !isClothing && (
-            <div className="d-flex gap-4 mb-3">
-              <Form.Check
-                type="checkbox"
-                label="Beden?"
-                checked={hasSize}
-                onChange={() => setHasSize((prev) => !prev)}
-              />
-              <Form.Check
-                type="checkbox"
-                label="Sinif?"
-                checked={hasClass}
-                onChange={() => setHasClass((prev) => !prev)}
-              />
-            </div>
-          )}
+          <Form.Check
+            type="checkbox"
+            className="mb-3"
+            label="Beden?"
+            checked={hasSize}
+            onChange={() => setHasSize((prev) => !prev)}
+          />
 
-          {showSizes && (
+          {hasSize && (
             <Form.Group className="mb-3">
-              <Form.Label>Sizes</Form.Label>
+              <Form.Label>Beden</Form.Label>
               <div className="d-flex flex-wrap gap-2">
                 {sizeOptions.map((s) => (
                   <Form.Check
@@ -232,28 +230,29 @@ function EditProductModal({ show, handleClose, productId }) {
               </div>
             </Form.Group>
           )}
-          {showClasses && (
-            <Form.Group className="mb-3">
-              <Form.Label>Class No</Form.Label>
-              <div className="d-flex flex-wrap gap-2">
-                {classOptions.map((cls) => (
-                  <Form.Check
-                    key={cls}
-                    inline
-                    label={cls}
-                    type="checkbox"
-                    id={`class-${cls}`}
-                    checked={classNo[0] === cls}
-                    onChange={() =>
-                      setClassNo(
-                        (prev) => (prev[0] === cls ? [] : [cls]) // deselect if clicked again
-                      )
-                    }
-                  />
-                ))}
-              </div>
-            </Form.Group>
-          )}
+
+          <Form.Group className="mb-3">
+            <Form.Label>Sınıf</Form.Label>
+            <div className="d-flex flex-wrap gap-2">
+              {classOptions.map((cls) => (
+                <Form.Check
+                  key={cls}
+                  inline
+                  label={cls}
+                  type="checkbox"
+                  checked={classNo.includes(cls)}
+                  onChange={() => {
+                    setClassNo((prev) =>
+                      prev.includes(cls)
+                        ? prev.filter((c) => c !== cls)
+                        : [...prev, cls]
+                    );
+                  }}
+                />
+              ))}
+            </div>
+          </Form.Group>
+
           <Form.Group className="mb-3">
             <Button type="button" onClick={showWidget}>
               Resim Yükle
@@ -284,7 +283,7 @@ function EditProductModal({ show, handleClose, productId }) {
           </Form.Group>
 
           <Button type="submit" disabled={isLoading || isSuccess}>
-            Update Product
+            Ürünü Güncelle
           </Button>
         </Form>
       </Modal.Body>

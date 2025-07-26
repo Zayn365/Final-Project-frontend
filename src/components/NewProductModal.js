@@ -1,4 +1,3 @@
-// same imports...
 import React, { useState, useMemo, useEffect } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import axios from "../axios";
@@ -20,6 +19,7 @@ const sizeOptions = [
   "3XL",
   "4XL",
 ];
+
 const classOptions = [
   "3 YAŞ",
   "4 YAŞ",
@@ -43,6 +43,7 @@ const classOptions = [
   "FEN 11.SINIF SAY.",
   "FEN 12. SINIF SAY.",
 ];
+
 function AddProductModal({ show, handleClose }) {
   const products = useSelector((state) => state.products || []);
   const categoryTypes = useMemo(
@@ -62,10 +63,10 @@ function AddProductModal({ show, handleClose }) {
     class: [],
     images: [],
   });
+
   const [customCategory, setCustomCategory] = useState("");
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [hasSize, setHasSize] = useState(false);
-  const [hasClass, setHasClass] = useState(false);
   const [imgToRemove, setImgToRemove] = useState(null);
   const [createProduct, { isLoading, isSuccess, isError, error }] =
     useCreateProductMutation();
@@ -80,9 +81,8 @@ function AddProductModal({ show, handleClose }) {
       class: [],
       images: [],
     });
-    setUseCustomCategory(false);
     setCustomCategory("");
-    setHasClass(false);
+    setUseCustomCategory(false);
     setHasSize(false);
     handleClose();
   };
@@ -152,23 +152,19 @@ function AddProductModal({ show, handleClose }) {
       price,
       category: finalCategory,
       sizes: hasSize ? sizes : [],
-      classNo: hasClass ? selectedClasses : [],
+      classNo: selectedClasses,
       images,
-      hasClass,
+      hasClass: true,
       hasSize,
     };
 
     createProduct(payload).then(({ data }) => {
-      if (data.length > 0) {
+      if (data?.length > 0 || data?.success) {
         handleClosing();
       }
     });
   };
 
-  const isClothing = form.category.toLowerCase().includes("t-shirt");
-  const isBook = form.category.toLowerCase() === "books";
-  const showSizeInput = isClothing || hasSize;
-  const showClassInput = isBook || hasClass;
   useEffect(() => {
     const finalCategory = useCustomCategory ? customCategory : form.category;
 
@@ -183,7 +179,6 @@ function AddProductModal({ show, handleClose }) {
         (matchedProduct.class && matchedProduct.class.length > 0) ||
         matchedProduct.hasClass
       ) {
-        setHasClass(true);
         setForm((prev) => ({
           ...prev,
           class: matchedProduct.classNo || [],
@@ -255,7 +250,6 @@ function AddProductModal({ show, handleClose }) {
                 } else {
                   setUseCustomCategory(false);
                   setForm((prev) => ({ ...prev, category: value }));
-                  setHasClass(false);
                   setHasSize(false);
                 }
               }}
@@ -267,7 +261,7 @@ function AddProductModal({ show, handleClose }) {
                   {type}
                 </option>
               ))}
-              <option value="__other__">Diğer (Specify Manually)</option>
+              <option value="__other__">Diğer (Manuel Kategori)</option>
             </Form.Select>
 
             {useCustomCategory && (
@@ -286,29 +280,16 @@ function AddProductModal({ show, handleClose }) {
                   checked={hasSize}
                   onChange={() => {
                     setHasSize((prev) => !prev);
-                    if (!hasSize) {
-                      setHasClass(false);
-                      setForm((prev) => ({ ...prev, class: [] }));
-                    }
                   }}
                 />
-                <Form.Check
-                  type="checkbox"
-                  label="Sınıf?"
-                  checked={hasClass}
-                  onChange={() => {
-                    setHasClass((prev) => !prev);
-                    if (!hasClass) {
-                      setHasSize(false);
-                      setForm((prev) => ({ ...prev, sizes: [] }));
-                    }
-                  }}
-                />
+                <Form.Text className="text-muted">
+                  Sınıf her ürün için zorunludur.
+                </Form.Text>
               </>
             )}
           </Form.Group>
 
-          {showSizeInput && (
+          {hasSize && (
             <Form.Group className="mb-3">
               <Form.Label>Beden</Form.Label>
               <div className="d-flex flex-wrap gap-2">
@@ -336,55 +317,33 @@ function AddProductModal({ show, handleClose }) {
               </div>
             </Form.Group>
           )}
-          {/* {showClassInput && (
-            <Form.Group className="mb-3">
-              <Form.Label>Sınıf</Form.Label>
-              <Form.Select
-                value={form.class || ""}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    class: e.target.value,
-                  }))
-                }
-              >
-                <option value="">Sınıf Seçiniz</option>
-                {classOptions.map((cls) => (
-                  <option key={cls} value={cls}>
-                    {cls}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          )} */}
-          {showClassInput && (
-            <Form.Group className="mb-3">
-              <Form.Label>Sınıf</Form.Label>
-              <div className="d-flex flex-wrap gap-2">
-                {classOptions.map((cls) => (
-                  <Form.Check
-                    key={cls}
-                    inline
-                    label={cls}
-                    type="checkbox"
-                    id={`class-${cls}`}
-                    checked={form.class.includes(cls)}
-                    onChange={() => {
-                      setForm((prev) => {
-                        const already = prev.class.includes(cls);
-                        return {
-                          ...prev,
-                          class: already
-                            ? prev.class.filter((c) => c !== cls)
-                            : [...prev.class, cls],
-                        };
-                      });
-                    }}
-                  />
-                ))}
-              </div>
-            </Form.Group>
-          )}
+
+          <Form.Group className="mb-3">
+            <Form.Label>Sınıf</Form.Label>
+            <div className="d-flex flex-wrap gap-2">
+              {classOptions.map((cls) => (
+                <Form.Check
+                  key={cls}
+                  inline
+                  label={cls}
+                  type="checkbox"
+                  id={`class-${cls}`}
+                  checked={form.class.includes(cls)}
+                  onChange={() => {
+                    setForm((prev) => {
+                      const already = prev.class.includes(cls);
+                      return {
+                        ...prev,
+                        class: already
+                          ? prev.class.filter((c) => c !== cls)
+                          : [...prev.class, cls],
+                      };
+                    });
+                  }}
+                />
+              ))}
+            </div>
+          </Form.Group>
 
           <Form.Group className="mb-3">
             <Button type="button" onClick={handleUpload}>

@@ -1,38 +1,48 @@
 .category-page-container {
-    min-height: 90vh;
+  min-height: 90vh;
 }
 
 .category-banner-container {
-    height: 200px;
-    background-color: #182e39;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
+  height: 200px;
+  background-color: #182e39;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
 }
 
 .all-banner-container {
-    background-image: url('../../public/product.jpg');
-    background-position: center;
-    background-size: cover;
-    /* background-position-y: -100px; */
-
+  background-image: url("../../public/product.jpg");
+  background-position: center;
+  background-size: cover;
+  /* background-position-y: -100px; */
 }
 .phones-banner-container {
-    background-image: url('../../public/phone-banner.jpg');
-    background-position: top;
-    background-size: cover;
-    background-position-y: -100px;
+  background-image: url("../../public/phone-banner.jpg");
+  background-position: top;
+  background-size: cover;
+  background-position-y: -100px;
 }
 
 .laptops-banner-container {
-    background-image: url('../../public/laptops-banner.jpg');
-    background-position: center;
-    background-size: cover;
+  background-image: url("../../public/laptops-banner.jpg");
+  background-position: center;
+  background-size: cover;
 }
 
 .technology-banner-container {
-    background-image: url('../../public/tech-banner.jpg');
-    background-position: center;
-    background-size: cover;
+  background-image: url("../../public/tech-banner.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.label {
+  font-weight: 500;
+  min-width: 50px;
 }

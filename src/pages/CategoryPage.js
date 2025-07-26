@@ -273,22 +273,25 @@ function CategoryPage() {
                           </div>
                         </div>
                         <div className="top-info">
-                          <div className="info-row info-top">
-                            {prod.class.length > 0 || prod.hasClass === true ? (
-                              <div className="d-flex align-items-center">
-                                <span className="label">Sınıf:</span>
-                                <span>
-                                  {Array.isArray(prod?.class)
-                                    ? prod.class[0]
-                                    : "Mevcut değil"}
-                                </span>
-                              </div>
-                            ) : (
+                          <div className="info-row info-top flex-column">
+                            {prod.hasClass &&
+                              Array.isArray(prod.class) &&
+                              prod.class.length > 0 && (
+                                <div className="d-flex align-items-center mb-1">
+                                  <span className="label">Sınıf:</span>
+                                  <span className="ms-1">
+                                    {prod.class[0] || "Mevcut değil"}
+                                  </span>
+                                </div>
+                              )}
+
+                            {prod.hasSize && (
                               <div className="d-flex align-items-center">
                                 <span className="label">Beden:</span>
                                 <Form.Select
                                   size="sm"
-                                  className="value-dropdown text-danger"
+                                  className="value-dropdown text-danger ms-2"
+                                  style={{ width: "auto" }}
                                 >
                                   {(Array.isArray(prod?.sizes)
                                     ? prod.sizes
@@ -300,6 +303,7 @@ function CategoryPage() {
                               </div>
                             )}
                           </div>
+
                           {campaignAmount && (
                             <Col
                               sm={12}

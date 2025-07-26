@@ -120,60 +120,48 @@ function ProductPage() {
 
           {user && !user.isAdmin && (
             <Form className="mb-4">
-              <Row className="g-3 align-items-end">
-                <Col xs={12} md={6}>
-                  {product.class.length > 0 || product.hasClass === true ? (
-                    <>
-                      <Form.Label>Sinif: </Form.Label>
-                      <span
-                        className={
-                          product?.class[0]
-                            ? "text-dark"
-                            : "text-muted fst-italic"
-                        }
-                      >
-                        {" "}
-                        {Array.isArray(product?.class)
-                          ? product.class[0]
-                          : "Mevcut değil"}
-                      </span>
-                      {/* <Form
-                      {/* <Form.Select size="lg">
-                        <option value="">-- Select sinif --</option>
-                        {(Array.isArray(product?.class)
-                          ? product.class
-                          : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                        ).map((classNo) => (
-                          <option key={classNo} value={classNo}>
-                            {classNo}
-                          </option>
-                        ))}
-                      </Form.Select> */}
-                    </>
-                  ) : (
-                    <>
-                      <Form.Label>Choose Size</Form.Label>
-                      <Form.Select size="lg">
-                        <option value="">-- Select size --</option>
-                        {(Array.isArray(product?.sizes)
-                          ? product.sizes
-                          : ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
-                        ).map((size) => (
-                          <option key={size} value={size}>
-                            {size}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </>
+              <Row className="g-3 align-items-end text-center">
+                {/* Sınıf */}
+                {product.hasClass &&
+                  Array.isArray(product.class) &&
+                  product.class.length > 0 && (
+                    <Col xs={12} md={4}>
+                      <Form.Label>Sınıf:</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={product.class[0] || "Mevcut değil"}
+                        readOnly
+                        className="w-100 text-center"
+                      />
+                    </Col>
                   )}
-                </Col>
 
-                <Col xs={6} md={3}>
-                  <Form.Label>Quantity</Form.Label>
-                  <div className="d-flex align-items-center">
+                {/* Beden */}
+                {product.hasSize && (
+                  <Col xs={12} md={4}>
+                    <Form.Label>Beden:</Form.Label>
+                    <Form.Select className="w-100 text-center">
+                      <option value="">-- Select size --</option>
+                      {(Array.isArray(product?.sizes)
+                        ? product.sizes
+                        : ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
+                      ).map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Col>
+                )}
+
+                {/* Miktar */}
+                <Col xs={12} md={4}>
+                  <Form.Label>Miktar:</Form.Label>
+                  <div className="d-flex justify-content-between align-items-center w-100 gap-2">
                     <Button
                       variant="outline-secondary"
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="flex-grow-1"
                     >
                       -
                     </Button>
@@ -188,18 +176,20 @@ function ProductPage() {
                           setQuantity(val);
                         }
                       }}
-                      className="mx-2 text-center"
+                      className="text-center flex-grow-2"
                     />
                     <Button
                       variant="outline-secondary"
                       onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+                      className="flex-grow-1"
                     >
                       +
                     </Button>
                   </div>
                 </Col>
 
-                <Col xs={6} md={3}>
+                {/* Add to Cart Button */}
+                <Col xs={12}>
                   <Button
                     variant="danger"
                     size="lg"
@@ -214,7 +204,7 @@ function ProductPage() {
                       })
                     }
                   >
-                    Sepete Ekle{" "}
+                    Sepete Ekle
                   </Button>
                 </Col>
               </Row>
