@@ -1,20 +1,20 @@
 import React, { useState, useContext } from "react";
 import { Button, Col, Container, Form, Row, Alert } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
-import { useLoginMutation } from "../services/appApi";
+import { Link } from "react-router-dom";
+import { useLoginWithK12Mutation } from "../services/appApi";
 import { ContextValue } from "../Context";
 import logo from "../assets/images/logo.png"; // Replace with actual path
 
-function Login() {
+function K12Login() {
   const x = useContext(ContextValue);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [login, { isError, isLoading, error }] = useLoginMutation();
-  const navigate = useNavigate();
+  const [loginWithK12, { isError, isLoading, error }] =
+    useLoginWithK12Mutation();
+
   function handleLogin(e) {
     e.preventDefault();
-    login({ email, password });
-    navigate("/admin");
+    loginWithK12({ username, password });
   }
 
   return (
@@ -29,17 +29,17 @@ function Login() {
             style={{ width: "80%", maxWidth: "400px" }}
             onSubmit={handleLogin}
           >
-            <h2 className="mb-4 text-center">Hesabınıza Giriş Yapın</h2>
+            <h2 className="mb-4 text-center">Veli Girişi</h2>
             {isError && <Alert variant="danger">{error.data}</Alert>}
 
             <Form.Group className="mb-3 text-start">
-              <Form.Label>E-posta Adresi</Form.Label>
+              <Form.Label>Kullanıcı Adı</Form.Label>
               <Form.Control
-                type="email"
-                placeholder="E-posta girin"
-                value={email}
+                type="text"
+                placeholder="Kullanıcı Adı"
+                value={username}
                 required
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </Form.Group>
 
@@ -59,6 +59,10 @@ function Login() {
                 Giriş Yap
               </Button>
             </div>
+
+            <p className="text-center text-muted">
+              Lütfen giriş yapmak için K12NET kullanıcı bilgilerinizi kullanın.
+            </p>
           </Form>
         </Col>
 
@@ -79,4 +83,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default K12Login;

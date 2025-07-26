@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useUpdateCampaignMutation } from "../services/appApi";
 import axios from "../axios";
+import debounce from "lodash.debounce";
+import Select from "react-select";
 
 function EditCampaignModal({ show, handleClose, campaignId }) {
   const [form, setForm] = useState({
@@ -11,13 +13,25 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
     start_Date: "",
     end_date: "",
     products: [],
+    selectedUser: "",
   });
+
+  const [students, setStudents] = useState([]);
+  console.log("TCL ~ EditCampaignModal ~ students:", students);
+  const [searchUser, setSearchUser] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   const products = useSelector((state) => state.products || []);
   const [updateCampaign, { isLoading, isSuccess, isError, error }] =
     useUpdateCampaignMutation();
 
-  // Load campaign data when modal is shown
+  useEffect(() => {
+    fetch("/students_parents.json")
+      .then((res) => res.json())
+      .then(setStudents)
+      .catch((err) => console.error("Failed to load students JSON", err));
+  }, []);
+
   useEffect(() => {
     if (!campaignId || !show) return;
 
@@ -28,9 +42,28 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
         start_Date: data.start_Date,
         end_date: data.end_date,
         products: data.products || [],
+        selectedUser: data.selectedUser || "",
       });
+      setSearchUser(""); // reset search
     });
   }, [campaignId, show]);
+
+  useEffect(() => {
+    if (!searchUser) {
+      setFilteredUsers([]);
+      return;
+    }
+
+    const filtered = students.filter((student) =>
+      student.Ogrenci_Adı?.toLowerCase().includes(searchUser.toLowerCase())
+    );
+    setFilteredUsers(filtered.slice(0, 20));
+  }, [searchUser, students]);
+
+  const debouncedSearch = useMemo(
+    () => debounce((value) => setSearchUser(value), 300),
+    []
+  );
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -48,7 +81,6 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
     const { data } = await updateCampaign(payload);
     if (data) {
       handleCloseModal();
-      // window.location.reload();
     }
   };
 
@@ -59,6 +91,7 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
       start_Date: "",
       end_date: "",
       products: [],
+      selectedUser: "",
     });
 
   const handleCloseModal = () => {
@@ -85,7 +118,6 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
               onChange={handleChange("type")}
               required
             >
-              {" "}
               <option value="percentage">Yüzde</option>
               <option value="fixed">Tutar</option>
             </Form.Select>
@@ -123,7 +155,6 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
 
           <Form.Group className="mb-3">
             <Form.Label>Kategoriler</Form.Label>
-
             <div className="d-flex flex-wrap gap-2 mb-2">
               {form.products[0] && (
                 <div className="d-flex align-items-center border rounded p-1 pe-2">
@@ -141,14 +172,13 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
                 </div>
               )}
             </div>
-
             <Form.Select
               onChange={(e) => {
                 const selectedCategory = e.target.value;
                 if (selectedCategory) {
                   setForm((prev) => ({
                     ...prev,
-                    products: [selectedCategory], // only one selected
+                    products: [selectedCategory],
                   }));
                 }
               }}
@@ -160,6 +190,36 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
                 </option>
               ))}
             </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Kullanıcı Seç</Form.Label>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              isSearchable
+              options={students.map((s) => ({
+                label: `${s.Ogrenci_Adı} (${s.Ogrenci_TC})`,
+                value: s.Ogrenci_TC,
+              }))}
+              value={
+                students.find((s) => s.Ogrenci_TC === form.selectedUser)
+                  ? {
+                      label: students.find(
+                        (s) => s.Ogrenci_TC === form.selectedUser
+                      )?.Ogrenci_Adı,
+                      value: form.selectedUser,
+                    }
+                  : null
+              }
+              onChange={(selectedOption) =>
+                setForm((prev) => ({
+                  ...prev,
+                  selectedUser: selectedOption?.value || "",
+                }))
+              }
+              placeholder="Kullanıcı ara ve seç"
+            />
           </Form.Group>
 
           <Button type="submit" disabled={isLoading}>

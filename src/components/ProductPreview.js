@@ -11,7 +11,6 @@ function ProductPreview({ _id, category, name, pictures, price }) {
   const user = useSelector((state) => state.user);
   const [showLoginToast, setShowLoginToast] = useState(false);
 
-  console.log("TCL ~ handleAddToCart ~ user:", user);
   const handleAddToCart = () => {
     if (!user) {
       setShowLoginToast(true);

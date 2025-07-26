@@ -16,7 +16,6 @@ function CartPage() {
   const user = useSelector((state) => state.user);
   const products = useSelector((state) => state.products);
   const campaigns = useSelector((state) => state.campaigns); // 👈 get campaign state
-  console.log("TCL ~ CartPage ~ campaigns:", campaigns);
 
   const [increaseCart] = useIncreaseCartProductMutation();
   const [decreaseCart] = useDecreaseCartProductMutation();
@@ -32,7 +31,10 @@ function CartPage() {
     }
 
     const campaign = campaigns.find(
-      (c) => Array.isArray(c.products) && c.products.includes(product.category)
+      (c) =>
+        product.category &&
+        c.products?.includes(product.category) &&
+        c.selectedUser === user?.tc_id
     );
 
     if (!campaign) return parseFloat(product.price);

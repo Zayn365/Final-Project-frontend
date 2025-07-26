@@ -10,7 +10,6 @@ import EditCampaignModal from "./EditCampaignModal";
 
 function DashboardCampaigns() {
   const campaigns = useSelector((state) => state.campaigns || []);
-  console.log("TCL ~ DashboardCampaigns ~ campaigns:", campaigns);
   // const products = useSelector((state) => state.products || []);
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,14 +19,8 @@ function DashboardCampaigns() {
   const [selectedCampaignId, setSelectedCampaignId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [campaignsPerPage, setCampaignsPerPage] = useState(10);
-  const { data } = useGetAllCampaignsQuery();
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  useEffect(() => {
-    if (data) {
-      dispatch({ type: "campaigns/set", payload: data }); // optional, if needed
-    }
-  }, [data, dispatch]);
   const filteredCampaigns = useMemo(() => {
     return (
       campaigns.length > 0 &&
@@ -109,13 +102,14 @@ function DashboardCampaigns() {
             style={{ minWidth: "200px" }}
           >
             <option value="">Tüm Kategoriler</option>
-            {[...new Set(campaigns.flatMap((c) => c.products || []))].map(
-              (category) => (
+            {(campaigns || [])
+              .flatMap((c) => c.products || [])
+              .filter((val, index, self) => val && self.indexOf(val) === index)
+              .map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
-              )
-            )}
+              ))}
           </Form.Select>
           <div className="text-muted small">
             Toplam <strong>{filteredCampaigns.length}</strong> kampanya
@@ -141,6 +135,7 @@ function DashboardCampaigns() {
             <th>Başlangıç</th>
             <th>Bitiş</th>
             <th>Kampanya</th>
+            <th>Kullanıcı</th> {/* ← Başlık Türkçe olarak "Kullanıcı" */}
             <th>İşlemler</th>
           </tr>
         </thead>
@@ -165,7 +160,7 @@ function DashboardCampaigns() {
                     ))}
                   </div>
                 </td>
-
+                <td>{c.selectedUser || "-"}</td>
                 <td className="d-flex gap-2">
                   <Button
                     size="sm"

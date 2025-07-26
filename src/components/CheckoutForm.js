@@ -62,6 +62,8 @@ function CheckoutForm() {
         cart: user.cart,
         address: fullAddress,
         country,
+        username: user.name,
+        schoolName: user.k12?.schoolName || "",
       }).then((res) => {
         if (!isLoading && !isError) {
           setAlertMessage(`Payment ${paymentIntent.status}`);
@@ -211,7 +213,7 @@ function CheckoutForm() {
               size="lg"
               disabled={user.cart.count <= 0 || paying || isSuccess}
             >
-              {paying ? "Processing..." : "Pay Now"}
+              {paying ? "Processing..." : "Şimdi Sipariş Ver"}
             </Button>
           </div>
         </Form>

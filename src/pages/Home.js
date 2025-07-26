@@ -88,7 +88,7 @@ function Home() {
           </div>
         </Carousel.Item>
       </Carousel>
-      <CategoryPage NoHeader={true} />
+      <CategoryPage />
       {/* Last Ürünler */}
       {/* <div className="featured-products-container container mt-4">
         <h3 className="text-center fw-bold mb-4">Latest Ürünler</h3>

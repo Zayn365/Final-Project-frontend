@@ -73,7 +73,10 @@ function ProductPage() {
             let finalPrice = Number(product.price) || 0;
             let campaignAmount;
             const campaign = campaigns.find(
-              (c) => product.category && c.products?.includes(product.category)
+              (c) =>
+                Array.isArray(c.products) &&
+                c.products.includes(product.category) &&
+                c.selectedUser === user?.tc_id
             );
 
             if (
@@ -112,7 +115,7 @@ function ProductPage() {
           })()}
 
           <p className="py-3" style={{ textAlign: "justify" }}>
-            <strong>Açıklama:</strong> {product.description}
+            <strong>Ürün Adı:</strong> {product.description}
           </p>
 
           {user && !user.isAdmin && (

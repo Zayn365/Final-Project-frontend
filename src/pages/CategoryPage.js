@@ -8,11 +8,11 @@ import { useSelector } from "react-redux";
 import ToastMessage from "../components/ToastMessage";
 import { formatWithCommas, unformatNumber } from "../hooks/formatFuctions";
 
-function CategoryPage({ NoHeader }) {
+function CategoryPage() {
   const { category = "all" } = useParams();
   const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [perPage, setPerPage] = useState(48);
+  const [perPage, setPerPage] = useState(12);
   const [sortBy, setSortBy] = useState("featured");
   const [pageIdx, setPageIdx] = useState(0);
   const [showLoginToast, setShowLoginToast] = useState(false);
@@ -70,11 +70,48 @@ function CategoryPage({ NoHeader }) {
         return filtered;
     }
   }, [filtered, sortBy]);
+  const k12Filtered = useMemo(() => {
+    if (!user?.k12?.students?.length) return allProducts;
 
-  const pageCount = Math.ceil(sorted.length / perPage);
+    const studentGrades = user.k12.students.map((s) => `${s.gradeLevel}`);
+    return sorted.filter((product) => {
+      if (!product.class || !Array.isArray(product.class)) return false;
+      return product.class.some((cls) => {
+        const match = cls.match(/\d+/);
+        return match && studentGrades.includes(match[0]);
+      });
+    });
+  }, [sorted, user]);
+
+  const nonClassBased = useMemo(() => {
+    return sorted.filter(
+      (product) => !product.class?.length && !product.hasClass
+    );
+  }, [sorted]);
+
+  const finalProducts = useMemo(() => {
+    // ✅ No user logged in: show everything in the category
+    if (!user || !user.k12?.students?.length) return sorted;
+
+    if (category.toLowerCase() === "all") {
+      return [...k12Filtered, ...nonClassBased];
+    }
+
+    const categoryFiltered = sorted.filter((product) => {
+      if (!product.class?.length && !product.hasClass) return true; // show non-class items
+
+      // Only allow classed products matching user grades
+      return product.class?.some((cls) =>
+        user.k12.students.some((s) => cls.includes(`${s.gradeLevel}`))
+      );
+    });
+
+    return categoryFiltered;
+  }, [category, sorted, user]);
+  const pageCount = Math.ceil(finalProducts.length / perPage);
   const pageStart = pageIdx * perPage;
-  const pageEnd = Math.min(pageStart + perPage, sorted.length);
-  const paged = sorted.slice(pageStart, pageEnd);
+  const pageEnd = Math.min(pageStart + perPage, finalProducts.length);
+  const paged = finalProducts.slice(pageStart, pageEnd);
 
   const sizeOptions = [
     "5-6",
@@ -109,7 +146,7 @@ function CategoryPage({ NoHeader }) {
           body="Login to add items to your cart"
         />
       )}
-      {!NoHeader && (
+      {/* {!NoHeader && (
         <div className="mb-5">
           <img
             src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
@@ -117,7 +154,7 @@ function CategoryPage({ NoHeader }) {
             alt="Banner"
           />
         </div>
-      )}
+      )} */}
 
       <Container fluid className="py-4">
         <Row>
@@ -127,6 +164,7 @@ function CategoryPage({ NoHeader }) {
                 <Link
                   to={`/category/${cat.toLowerCase()}`}
                   key={cat}
+                  onClick={() => setPageIdx(0)}
                   className={`list-group-item ${
                     cat.toLowerCase() === category.toLowerCase()
                       ? "activate"
@@ -146,8 +184,8 @@ function CategoryPage({ NoHeader }) {
               </h4>
               <div className="d-flex align-items-center gap-3 text-muted small">
                 <div>
-                  {sorted.length ? pageStart + 1 : 0} – {pageEnd} arası, toplam{" "}
-                  {sorted.length} ürün gösteriliyor
+                  {finalProducts.length ? pageStart + 1 : 0} – {pageEnd} arası,
+                  toplam {finalProducts.length} ürün gösteriliyor
                 </div>
                 <div>
                   Göster:{" "}
@@ -191,8 +229,10 @@ function CategoryPage({ NoHeader }) {
               )}
               {paged.map((prod) => {
                 let campaignAmount;
-                const campaign = campaigns.find((c) =>
-                  c.products?.includes(prod.category)
+                const campaign = campaigns.find(
+                  (c) =>
+                    c.products?.includes(prod.category) &&
+                    c.selectedUser === user?.tc_id
                 );
                 let finalPrice = Number(prod.price) || 0;
 
@@ -202,7 +242,6 @@ function CategoryPage({ NoHeader }) {
                   !isNaN(campaign.amount)
                 ) {
                   if (campaign.type === "percentage") {
-                    console.log("TCL ~ {paged.map ~ finalPrice:", finalPrice);
                     campaignAmount = campaign.amount;
                     finalPrice -= (finalPrice * campaign.amount) / 100;
                   } else if (campaign.type === "fixed") {
@@ -221,6 +260,16 @@ function CategoryPage({ NoHeader }) {
                         className="img-fluid mb-3"
                       />
                       <div className="product-info text-start flex-grow-1">
+                        <div className="mb-2">
+                          <div className="d-flex">
+                            <span
+                              className="text-dark text-center text-wrap"
+                              style={{ lineHeight: "1.3em", fontSize: "16px" }}
+                            >
+                              {prod.name}
+                            </span>
+                          </div>
+                        </div>
                         <div className="top-info">
                           <div className="info-row info-top">
                             {prod.class.length > 0 || prod.hasClass === true ? (

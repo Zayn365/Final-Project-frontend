@@ -23,6 +23,13 @@ export const appApi = createApi({
         body: user,
       }),
     }),
+    loginWithK12: builder.mutation({
+      query: (user) => ({
+        url: "/users/k12Login",
+        method: "POST",
+        body: user,
+      }),
+    }),
     // creating product
     createProduct: builder.mutation({
       query: (product) => ({
@@ -131,6 +138,7 @@ export const appApi = createApi({
 export const {
   useSignupMutation,
   useLoginMutation,
+  useLoginWithK12Mutation,
   useCreateProductMutation,
   useAddToCartMutation,
   useRemoveFromCartMutation,

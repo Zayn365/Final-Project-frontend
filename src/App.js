@@ -18,7 +18,7 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { addNotification } from "./features/userSlice";
 import Footer from "./components/Footer";
-import AdminLogin from "./pages/AdminLogin";
+import UserLogin from "./pages/UserLogin";
 import Shirts from "./pages/Shirts";
 function App() {
   const user = useSelector((state) => state.user);
@@ -48,7 +48,7 @@ function App() {
           <Route index element={<Home />} />
           {!user && (
             <>
-              <Route path="/login" element={<Login />} />
+              <Route path="/login" element={<UserLogin />} />
               <Route path="/signup" element={<Signup />} />
             </>
           )}
@@ -68,7 +68,7 @@ function App() {
           <Route path="/product/:id" element={<ProductPage />} />
 
           <Route path="/category/:category" element={<CategoryPage />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin-login" element={<Login />} />
           {/* <Route path="/new-product" element={<NewProduct />} /> */}
           {/* <Route path="/shirts" element={<Shirts />} /> */}
 

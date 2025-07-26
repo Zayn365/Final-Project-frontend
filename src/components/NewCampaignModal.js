@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { useCreateCampaignMutation } from "../services/appApi";
 import { useSelector } from "react-redux";
+import Select from "react-select";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -12,12 +13,23 @@ function NewCampaignModal({ show, handleClose }) {
     amount: "",
     start_Date: today,
     end_date: today,
+    selectedUser: "",
   });
 
+  const [students, setStudents] = useState([]);
   const [createCampaign, { isLoading, isSuccess, isError, error }] =
     useCreateCampaignMutation();
-
   const products = useSelector((state) => state.products || []);
+
+  useEffect(() => {
+    fetch("/students_parents.json")
+      .then((res) => res.json())
+      .then(setStudents)
+      .catch((err) => {
+        console.error("Failed to load students JSON:", err);
+        setStudents([]);
+      });
+  }, []);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -42,7 +54,6 @@ function NewCampaignModal({ show, handleClose }) {
     const { data } = await createCampaign(payload);
     if (data) {
       handleClose();
-      window.location.reload();
     }
   };
 
@@ -103,7 +114,6 @@ function NewCampaignModal({ show, handleClose }) {
 
           <Form.Group className="mb-3">
             <Form.Label>Kategoriler</Form.Label>
-
             <div className="d-flex flex-wrap gap-2 mb-2">
               {form.products[0] && (
                 <div className="d-flex align-items-center border rounded p-1 pe-2">
@@ -121,14 +131,13 @@ function NewCampaignModal({ show, handleClose }) {
                 </div>
               )}
             </div>
-
             <Form.Select
               onChange={(e) => {
                 const selectedCategory = e.target.value;
                 if (selectedCategory) {
                   setForm((prev) => ({
                     ...prev,
-                    products: [selectedCategory], // only one selected
+                    products: [selectedCategory],
                   }));
                 }
               }}
@@ -140,6 +149,37 @@ function NewCampaignModal({ show, handleClose }) {
                 </option>
               ))}
             </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Kullanıcı Seç</Form.Label>
+            <Select
+              className="basic-single"
+              classNamePrefix="select"
+              isSearchable
+              options={students.map((s) => ({
+                label: `${s.Ogrenci_Adı} (${s.Veli_Adı || "Veli Bilinmiyor"})`,
+                value: s.Ogrenci_TC,
+              }))}
+              value={
+                students.find((s) => s.Ogrenci_TC === form.selectedUser)
+                  ? {
+                      label: students.find(
+                        (s) => s.Ogrenci_TC === form.selectedUser
+                      )?.Ogrenci_Adı,
+                      value: form.selectedUser,
+                    }
+                  : null
+              }
+              onChange={(selectedOption) =>
+                setForm((prev) => ({
+                  ...prev,
+                  selectedUser: selectedOption?.value || "",
+                }))
+              }
+              placeholder="Kullanıcı ara ve seç"
+              noOptionsMessage={() => "Sonuç bulunamadı"}
+            />
           </Form.Group>
 
           <Button type="submit" disabled={isLoading}>
