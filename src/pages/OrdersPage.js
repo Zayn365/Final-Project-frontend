@@ -14,19 +14,21 @@ function OrdersPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!user?._id) return;
+
     setLoading(true);
     axios
       .get(`/users/${user._id}/orders`)
       .then(({ data }) => {
-        console.log("TCL ~ OrdersPage ~ data:", data);
         setOrders(data);
         setLoading(false);
       })
       .catch((e) => {
         console.error("Failed to fetch orders:", e);
+        setOrders([]); // Ensure state updates
         setLoading(false);
       });
-  }, []);
+  }, [user]);
 
   if (loading) return <Loading />;
 

@@ -374,12 +374,11 @@ function CategoryPage() {
                               setToastError(true);
                               return;
                             }
-
+                            console.log(prod._id);
                             addToCart({
                               userId: user._id,
                               productId: prod._id,
                               price: finalPrice,
-                              image: prod.pictures?.[0]?.url,
                             });
                           }}
                         >

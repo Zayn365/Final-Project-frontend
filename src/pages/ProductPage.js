@@ -73,7 +73,6 @@ function ProductPage() {
             let finalPrice = Number(product.price) || 0;
             let campaignAmount;
             const campaign = campaigns.find((c) => {
-              console.log("TCL ~ c:", c);
               return (
                 Array.isArray(c.products) &&
                 c.products.includes(product.category) &&
@@ -202,8 +201,6 @@ function ProductPage() {
                         userId: user._id,
                         productId: id,
                         price: product.price,
-                        image: product.pictures[0].url,
-                        quantity,
                       })
                     }
                   >

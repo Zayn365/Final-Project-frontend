@@ -22,7 +22,9 @@ function CartPage() {
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
 
   const userCart = user.cart;
+  console.log("TCL ~ CartPage ~ userCart:", userCart);
   const cartItems = products.filter((product) => userCart[product._id]);
+  console.log("TCL ~ CartPage ~ cartItems:", cartItems);
 
   // Utility: Get discounted price if campaign exists
   const getDiscountedPrice = (product) => {
@@ -30,12 +32,15 @@ function CartPage() {
       return parseFloat(product.price);
     }
 
-    const campaign = campaigns.find(
-      (c) =>
+    const campaign = campaigns.find((c) => {
+      return (
         Array.isArray(c.products) &&
         c.products.includes(product.category) &&
-        c.selectedUser === user?.tc_id
-    );
+        (Array.isArray(c.selectedUsers)
+          ? c.selectedUsers.includes(user?.tc_id)
+          : c.selectedUser === user?.tc_id)
+      );
+    });
 
     if (!campaign) return parseFloat(product.price);
 
