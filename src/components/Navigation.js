@@ -77,6 +77,11 @@ function Navigation() {
         <div className="ms-3 d-flex align-items-center">
           {!user && (
             <>
+              {/* <LinkContainer style={{ marginRight: "12px" }} to="/admin-login">
+                <Nav.Link className="position-relative p-0 text-white">
+                  Admin
+                </Nav.Link>
+              </LinkContainer> */}
               <Nav.Link className="p-0" onClick={handleToggleNotifications}>
                 <i
                   className="far fa-bell nav-icon"
