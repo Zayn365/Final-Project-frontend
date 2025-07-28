@@ -73,6 +73,37 @@ function EditProductModal({ show, handleClose, productId }) {
       })
       .catch(console.error);
   }, [productId]);
+  useEffect(() => {
+    const mapSınıfToCategory = (cls) => {
+      const match = cls.match(/\d+/);
+      if (!match) return null;
+
+      const num = parseInt(match[0]);
+      if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
+      if ([5, 6, 7, 8].includes(num)) return "Ortaokul Kıyafet";
+      if ([9, 10, 11, 12].includes(num)) return "Lise Kıyafet";
+      return null;
+    };
+
+    if (classNo.length > 0) {
+      const inferred = classNo.map(mapSınıfToCategory).filter(Boolean);
+      if (inferred.length > 0) {
+        const selectedCategory = inferred[0]; // use first match
+        setCategory((prev) => {
+          // Only overwrite if category was one of the inferred types or empty
+          const kıyafetler = [
+            "İlkokul Kıyafet",
+            "Ortaokul Kıyafet",
+            "Lise Kıyafet",
+          ];
+          if (!prev || kıyafetler.includes(prev)) {
+            return selectedCategory;
+          }
+          return prev;
+        });
+      }
+    }
+  }, [classNo]);
 
   function handleRemoveImg(imgObj) {
     setImgToRemove(imgObj.public_id);

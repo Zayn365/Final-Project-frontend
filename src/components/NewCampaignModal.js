@@ -19,6 +19,7 @@ function NewCampaignModal({ show, handleClose }) {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCampus, setSelectedCampus] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
 
   const [createCampaign, { isLoading, isSuccess, isError, error }] =
     useCreateCampaignMutation();
@@ -57,6 +58,19 @@ function NewCampaignModal({ show, handleClose }) {
       return matchesSearch && matchesCampus;
     });
   }, [uniqueStudents, searchTerm, selectedCampus]);
+
+  useEffect(() => {
+    if (selectAll) {
+      const allTCs = filteredStudents.map((s) => s.Ogrenci_TC);
+      setSelectedUsers((prev) => Array.from(new Set([...prev, ...allTCs])));
+    } else {
+      const remaining = selectedUsers.filter(
+        (tc) => !filteredStudents.some((s) => s.Ogrenci_TC === tc)
+      );
+      setSelectedUsers(remaining);
+    }
+  }, [selectAll, filteredStudents]);
+
   const resetForm = () => {
     setForm({
       products: [],
@@ -68,6 +82,7 @@ function NewCampaignModal({ show, handleClose }) {
     setSelectedUsers([]);
     setSearchTerm("");
     setSelectedCampus("");
+    setSelectAll(false);
   };
 
   const toggleUser = (tc) => {
@@ -97,10 +112,12 @@ function NewCampaignModal({ show, handleClose }) {
 
     reader.readAsBinaryString(file);
   };
+
   const onClose = () => {
     resetForm();
     handleClose();
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -264,7 +281,18 @@ function NewCampaignModal({ show, handleClose }) {
             <table className="table table-bordered table-sm">
               <thead>
                 <tr>
-                  <th>Seç</th>
+                  <th>
+                    <Form.Check
+                      type="checkbox"
+                      label="Hepsini Seç"
+                      checked={
+                        filteredStudents.every((s) =>
+                          selectedUsers.includes(s.Ogrenci_TC)
+                        ) && filteredStudents.length > 0
+                      }
+                      onChange={(e) => setSelectAll(e.target.checked)}
+                    />
+                  </th>
                   <th>Ad</th>
                   <th>TC</th>
                   <th>Kampüs</th>

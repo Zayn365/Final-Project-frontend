@@ -197,6 +197,32 @@ function AddProductModal({ show, handleClose }) {
       }
     }
   }, [form.category, customCategory, useCustomCategory, products]);
+  useEffect(() => {
+    const classToCategoryMap = (cls) => {
+      const sınıfNumMatch = cls.match(/\d+/);
+      if (!sınıfNumMatch) return null;
+
+      const num = parseInt(sınıfNumMatch[0]);
+      if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
+      if ([5, 6, 7, 8].includes(num)) return "Ortaokul Kıyafet";
+      if ([9, 10, 11, 12].includes(num)) return "Lise Kıyafet";
+      return null;
+    };
+
+    if (form.class.length > 0 && !useCustomCategory) {
+      const detectedCategories = form.class
+        .map(classToCategoryMap)
+        .filter(Boolean);
+
+      if (detectedCategories.length > 0) {
+        const mostRelevant = detectedCategories[0]; // use first match
+        setForm((prev) => ({
+          ...prev,
+          category: mostRelevant,
+        }));
+      }
+    }
+  }, [form.class, useCustomCategory]);
 
   return (
     <Modal show={show} onHide={handleClosing} size="lg" centered>

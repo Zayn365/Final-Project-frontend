@@ -6,7 +6,7 @@ import "./Shirts.css";
 import { useAddToCartMutation } from "../services/appApi";
 import { useSelector } from "react-redux";
 import ToastMessage from "../components/ToastMessage";
-import { formatWithCommas, unformatNumber } from "../hooks/formatFuctions";
+import { formatWithCommas } from "../hooks/formatFuctions";
 
 function CategoryPage() {
   const { category = "all" } = useParams();
@@ -20,13 +20,16 @@ function CategoryPage() {
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const user = useSelector((state) => state.user);
   const campaigns = useSelector((state) => state.campaigns || []);
-
+  const [orders, setOrders] = useState([]);
+  const [toastError, setToastError] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data } = await axios.get("/products");
         const list = data || [];
-
+        axios.get("/orders").then(({ data }) => {
+          setOrders(data);
+        });
         setAllProducts(list);
 
         const uniqueCategories = [
@@ -70,6 +73,7 @@ function CategoryPage() {
         return filtered;
     }
   }, [filtered, sortBy]);
+
   const k12Filtered = useMemo(() => {
     if (!user?.k12?.students?.length) return allProducts;
 
@@ -90,7 +94,6 @@ function CategoryPage() {
   }, [sorted]);
 
   const finalProducts = useMemo(() => {
-    // ✅ No user logged in: show everything in the category
     if (!user || !user.k12?.students?.length) return sorted;
 
     if (category.toLowerCase() === "all") {
@@ -98,9 +101,7 @@ function CategoryPage() {
     }
 
     const categoryFiltered = sorted.filter((product) => {
-      if (!product.class?.length && !product.hasClass) return true; // show non-class items
-
-      // Only allow classed products matching user grades
+      if (!product.class?.length && !product.hasClass) return true;
       return product.class?.some((cls) =>
         user.k12.students.some((s) => cls.includes(`${s.gradeLevel}`))
       );
@@ -108,6 +109,7 @@ function CategoryPage() {
 
     return categoryFiltered;
   }, [category, sorted, user]);
+
   const pageCount = Math.ceil(finalProducts.length / perPage);
   const pageStart = pageIdx * perPage;
   const pageEnd = Math.min(pageStart + perPage, finalProducts.length);
@@ -128,8 +130,20 @@ function CategoryPage() {
     "3XL",
     "4XL",
   ];
-  const classOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+  useEffect(() => {
+    if (showLoginToast) {
+      const timer = setTimeout(() => setShowLoginToast(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginToast]);
+
+  useEffect(() => {
+    if (toastError) {
+      const timer = setTimeout(() => setToastError(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastError]);
   return (
     <div className="category-page-container">
       {isSuccess && (
@@ -139,23 +153,22 @@ function CategoryPage() {
           body={`sepetinize eklendi`}
         />
       )}
-
       {showLoginToast && (
         <ToastMessage
           bg="danger"
           title="Giriş Gerekli"
           body="Ürün eklemek için giriş yapmalısınız"
+          onClose={() => setShowLoginToast(false)}
         />
       )}
-      {/* {!NoHeader && (
-        <div className="mb-5">
-          <img
-            src="https://stationers.pk/cdn/shop/files/IMG-20250228-WA0009.jpg?v=1741775104&width=2400"
-            className="d-block w-100"
-            alt="Banner"
-          />
-        </div>
-      )} */}
+      {toastError && (
+        <ToastMessage
+          bg="danger"
+          title="Zaten Alındı"
+          body="Bu ürünü daha önce almışsınız."
+          onClose={() => setToastError(false)}
+        />
+      )}
 
       <Container fluid className="py-4">
         <Row>
@@ -284,7 +297,6 @@ function CategoryPage() {
                                   </span>
                                 </div>
                               )}
-
                             {prod.hasSize && (
                               <div className="d-flex align-items-center">
                                 <span className="label">Beden:</span>
@@ -307,10 +319,7 @@ function CategoryPage() {
                           {campaignAmount && (
                             <Col
                               sm={12}
-                              style={{
-                                display: "flex",
-                                justifyContent: "center",
-                              }}
+                              className="d-flex justify-content-center"
                             >
                               <Badge bg="success">
                                 ₺{campaignAmount} İNDİRİM
@@ -330,20 +339,36 @@ function CategoryPage() {
                         className="choose-btn mt-3 w-100"
                         variant="danger"
                         onClick={() => {
-                          if (!user) {
-                            setShowLoginToast(true);
-                            setTimeout(() => setShowLoginToast(false), 3000);
+                          const currentYear = new Date().getFullYear();
+
+                          const alreadyOrdered = orders.some((order) => {
+                            console.log("TCL ~ order:", order);
+                            const year = new Date(
+                              order.date || order.createdAt
+                            ).getFullYear();
+                            const productIds = Object.keys(
+                              order.products || {}
+                            );
+                            if (year !== currentYear) return false;
+
+                            return productIds.includes(prod._id);
+                          });
+                          console.log("TCL ~ alreadyOrdered:", alreadyOrdered);
+
+                          if (alreadyOrdered) {
+                            setToastError(true);
                             return;
                           }
-                          addToCart({
-                            userId: user._id,
-                            productId: prod._id,
-                            price: finalPrice,
-                            image: prod.pictures?.[0]?.url,
-                          });
+
+                          // addToCart({
+                          //   userId: user._id,
+                          //   productId: prod._id,
+                          //   price: finalPrice,
+                          //   image: prod.pictures?.[0]?.url,
+                          // });
                         }}
                       >
-                        Sepete Ekle{" "}
+                        Sepete Ekle
                       </Button>
 
                       <Button
@@ -351,7 +376,7 @@ function CategoryPage() {
                         variant="light"
                         onClick={() => navigate(`/product/${prod._id}`)}
                       >
-                        Detaylar{" "}
+                        Detaylar
                       </Button>
                     </div>
                   </Col>
