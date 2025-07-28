@@ -210,7 +210,7 @@ function OrdersAdminPage() {
                 <strong>Durum:</strong> {orderToShow.status}
               </p>
               <p>
-                <strong>Tutar:</strong> ${orderToShow.total}
+                <strong>Tutar:</strong> ₺{orderToShow.total}
               </p>
               <p>
                 <strong>Tarih:</strong> {orderToShow.date?.slice(0, 10)}

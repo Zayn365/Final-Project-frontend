@@ -18,6 +18,7 @@ function OrdersPage() {
     axios
       .get(`/users/${user._id}/orders`)
       .then(({ data }) => {
+        console.log("TCL ~ OrdersPage ~ data:", data);
         setOrders(data);
         setLoading(false);
       })

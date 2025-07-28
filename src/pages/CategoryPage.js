@@ -347,14 +347,21 @@ function CategoryPage() {
                             const currentYear = new Date().getFullYear();
 
                             const alreadyOrdered = orders.some((order) => {
-                              console.log("TCL ~ order:", order);
                               const year = new Date(
                                 order.date || order.createdAt
                               ).getFullYear();
                               const productIds = Object.keys(
                                 order.products || {}
                               );
-                              if (year !== currentYear) return false;
+                              console.log(
+                                "TCL ~ year !== currentYear:",
+                                year,
+                                currentYear
+                              );
+                              if (year !== currentYear) {
+                                console.log("nigger works");
+                                return false;
+                              }
 
                               return productIds.includes(prod._id);
                             });
@@ -368,12 +375,12 @@ function CategoryPage() {
                               return;
                             }
 
-                            // addToCart({
-                            //   userId: user._id,
-                            //   productId: prod._id,
-                            //   price: finalPrice,
-                            //   image: prod.pictures?.[0]?.url,
-                            // });
+                            addToCart({
+                              userId: user._id,
+                              productId: prod._id,
+                              price: finalPrice,
+                              image: prod.pictures?.[0]?.url,
+                            });
                           }}
                         >
                           Sepete Ekle

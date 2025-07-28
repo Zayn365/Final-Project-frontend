@@ -19,10 +19,8 @@ function CheckoutForm() {
   const [firstName, setFirstName] = useState(user.name?.split(" ")[0] || "");
   const [lastName, setLastName] = useState(user.name?.split(" ")[1] || "");
   const [street, setStreet] = useState("");
-  const [area, setArea] = useState("");
+  const [area, setArea] = useState(""); // İlçe
   const [city, setCity] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [country, setCountry] = useState("");
   const [paying, setPaying] = useState(false);
 
   async function handlePay(e) {
@@ -35,12 +33,12 @@ function CheckoutForm() {
 
     setPaying(false);
     if (paymentIntent) {
-      const fullAddress = `${street}, ${area}, ${city} ${zipCode}, ${country}`;
+      const fullAddress = `${street}, ${area}, ${city}`;
       createOrder({
         userId: user._id,
         cart: user.cart,
         address: fullAddress,
-        country,
+        country: "Türkiye", // optional, can be removed if your backend allows
         username: user.name,
         schoolName: user.k12?.schoolName || "",
       }).then((res) => {
@@ -104,10 +102,10 @@ function CheckoutForm() {
           </Form.Group>
 
           <Form.Group controlId="street" className="mb-3">
-            <Form.Label>Sokak Adresi</Form.Label>
+            <Form.Label>Adres</Form.Label>
             <Form.Control
               type="text"
-              placeholder="Sokak adresinizi girin"
+              placeholder="Adresinizi girin"
               value={street}
               onChange={(e) => setStreet(e.target.value)}
               required
@@ -117,10 +115,10 @@ function CheckoutForm() {
           <Row className="mb-3">
             <Col md={6}>
               <Form.Group controlId="area">
-                <Form.Label>Bölge</Form.Label>
+                <Form.Label>İlçe</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Bölgenizi girin"
+                  placeholder="İlçenizi girin"
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
                   required
@@ -135,33 +133,6 @@ function CheckoutForm() {
                   placeholder="Şehrinizi girin"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Row className="mb-3">
-            <Col md={6}>
-              <Form.Group controlId="zipCode">
-                <Form.Label>Posta Kodu</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Posta kodunuzu girin"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  required
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group controlId="country">
-                <Form.Label>Ülke</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Ülkenizi girin"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
                   required
                 />
               </Form.Group>

@@ -72,13 +72,16 @@ function ProductPage() {
           {(() => {
             let finalPrice = Number(product.price) || 0;
             let campaignAmount;
-            const campaign = campaigns.find(
-              (c) =>
+            const campaign = campaigns.find((c) => {
+              console.log("TCL ~ c:", c);
+              return (
                 Array.isArray(c.products) &&
                 c.products.includes(product.category) &&
-                c.selectedUser === user?.tc_id
-            );
-
+                (Array.isArray(c.selectedUsers)
+                  ? c.selectedUsers.includes(user?.tc_id)
+                  : c.selectedUser === user?.tc_id)
+              );
+            });
             if (
               campaign &&
               typeof campaign.amount === "number" &&

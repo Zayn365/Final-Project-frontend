@@ -69,6 +69,7 @@ function App() {
 
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/admin-login" element={<Login />} />
+          <Route path="/adminLogin" element={<Login />} />
           {/* <Route path="/new-product" element={<NewProduct />} /> */}
           {/* <Route path="/shirts" element={<Shirts />} /> */}
 
