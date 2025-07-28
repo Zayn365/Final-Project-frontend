@@ -235,156 +235,164 @@ function CategoryPage() {
             </div>
 
             <Row>
-              {paged.length === 0 && (
-                <div className="text-center text-muted py-5">
-                  <h5>Ürün bulunamadı</h5>
-                  <p>Aramanızla eşleşen ürün bulunamadı.</p>
-                </div>
-              )}
-              {paged.map((prod) => {
-                let campaignAmount;
-                const campaign = campaigns.find(
-                  (c) =>
-                    c.products?.includes(prod.category) &&
-                    Array.isArray(c.selectedUsers) &&
-                    c.selectedUsers.includes(user?.tc_id)
-                );
-                let finalPrice = Number(prod.price) || 0;
+              {paged.length === 0 ||
+                (!user && (
+                  <div className="text-center text-muted py-5">
+                    <h5>Ürün bulunamadı</h5>
+                    <p>Aramanızla eşleşen ürün bulunamadı.</p>
+                  </div>
+                ))}
+              {user &&
+                paged.map((prod) => {
+                  let campaignAmount;
+                  const campaign = campaigns.find(
+                    (c) =>
+                      c.products?.includes(prod.category) &&
+                      Array.isArray(c.selectedUsers) &&
+                      c.selectedUsers.includes(user?.tc_id)
+                  );
+                  let finalPrice = Number(prod.price) || 0;
 
-                if (
-                  campaign &&
-                  typeof campaign.amount === "number" &&
-                  !isNaN(campaign.amount)
-                ) {
-                  if (campaign.type === "percentage") {
-                    campaignAmount = campaign.amount;
-                    finalPrice -= (finalPrice * campaign.amount) / 100;
-                  } else if (campaign.type === "fixed") {
-                    campaignAmount = campaign.amount;
-                    finalPrice -= campaign.amount;
+                  if (
+                    campaign &&
+                    typeof campaign.amount === "number" &&
+                    !isNaN(campaign.amount)
+                  ) {
+                    if (campaign.type === "percentage") {
+                      campaignAmount = campaign.amount;
+                      finalPrice -= (finalPrice * campaign.amount) / 100;
+                    } else if (campaign.type === "fixed") {
+                      campaignAmount = campaign.amount;
+                      finalPrice -= campaign.amount;
+                    }
+                    finalPrice = Math.max(finalPrice, 0);
                   }
-                  finalPrice = Math.max(finalPrice, 0);
-                }
 
-                return (
-                  <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
-                    <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
-                      <img
-                        src={prod.pictures?.[0]?.url}
-                        alt={prod.name}
-                        className="img-fluid mb-3"
-                      />
-                      <div className="product-info text-start flex-grow-1">
-                        <div className="mb-2">
-                          <div className="d-flex">
-                            <span
-                              className="text-dark text-center text-wrap"
-                              style={{ lineHeight: "1.3em", fontSize: "16px" }}
-                            >
-                              {prod.name}
-                            </span>
+                  return (
+                    <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
+                      <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
+                        <img
+                          src={prod.pictures?.[0]?.url}
+                          alt={prod.name}
+                          className="img-fluid mb-3"
+                        />
+                        <div className="product-info text-start flex-grow-1">
+                          <div className="mb-2">
+                            <div className="d-flex">
+                              <span
+                                className="text-dark text-center text-wrap"
+                                style={{
+                                  lineHeight: "1.3em",
+                                  fontSize: "16px",
+                                }}
+                              >
+                                {prod.name}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="top-info">
-                          <div className="info-row info-top flex-column">
-                            {prod.hasClass &&
-                              Array.isArray(prod.class) &&
-                              prod.class.length > 0 && (
-                                <div className="d-flex align-items-center mb-1">
-                                  <span className="label">Sınıf:</span>
-                                  <span className="ms-1">
-                                    {prod.class[0] || "Mevcut değil"}
-                                  </span>
+                          <div className="top-info">
+                            <div className="info-row info-top flex-column">
+                              {prod.hasClass &&
+                                Array.isArray(prod.class) &&
+                                prod.class.length > 0 && (
+                                  <div className="d-flex align-items-center mb-1">
+                                    <span className="label">Sınıf:</span>
+                                    <span className="ms-1">
+                                      {prod.class[0] || "Mevcut değil"}
+                                    </span>
+                                  </div>
+                                )}
+                              {prod.hasSize && (
+                                <div className="d-flex align-items-center">
+                                  <span className="label">Beden:</span>
+                                  <Form.Select
+                                    size="sm"
+                                    className="value-dropdown text-danger ms-2"
+                                    style={{ width: "auto" }}
+                                  >
+                                    {(Array.isArray(prod?.sizes)
+                                      ? prod.sizes
+                                      : sizeOptions
+                                    ).map((s) => (
+                                      <option key={s}>{s}</option>
+                                    ))}
+                                  </Form.Select>
                                 </div>
                               )}
-                            {prod.hasSize && (
-                              <div className="d-flex align-items-center">
-                                <span className="label">Beden:</span>
-                                <Form.Select
-                                  size="sm"
-                                  className="value-dropdown text-danger ms-2"
-                                  style={{ width: "auto" }}
-                                >
-                                  {(Array.isArray(prod?.sizes)
-                                    ? prod.sizes
-                                    : sizeOptions
-                                  ).map((s) => (
-                                    <option key={s}>{s}</option>
-                                  ))}
-                                </Form.Select>
-                              </div>
-                            )}
-                          </div>
+                            </div>
 
-                          {campaignAmount && (
-                            <Col
-                              sm={12}
-                              className="d-flex justify-content-center"
-                            >
-                              <Badge bg="success">
-                                ₺{campaignAmount} İNDİRİM
-                              </Badge>
-                            </Col>
-                          )}
-                          <div className="info-row">
-                            <span className="label">Fiyat:</span>
-                            <span className="value">
-                              {formatWithCommas(finalPrice.toFixed(0))} TL
-                            </span>
+                            {campaignAmount && (
+                              <Col
+                                sm={12}
+                                className="d-flex justify-content-center"
+                              >
+                                <Badge bg="success">
+                                  ₺{campaignAmount} İNDİRİM
+                                </Badge>
+                              </Col>
+                            )}
+                            <div className="info-row">
+                              <span className="label">Fiyat:</span>
+                              <span className="value">
+                                {formatWithCommas(finalPrice.toFixed(0))} TL
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <Button
-                        className="choose-btn mt-3 w-100"
-                        variant="danger"
-                        onClick={() => {
-                          const currentYear = new Date().getFullYear();
+                        <Button
+                          className="choose-btn mt-3 w-100"
+                          variant="danger"
+                          onClick={() => {
+                            const currentYear = new Date().getFullYear();
 
-                          const alreadyOrdered = orders.some((order) => {
-                            console.log("TCL ~ order:", order);
-                            const year = new Date(
-                              order.date || order.createdAt
-                            ).getFullYear();
-                            const productIds = Object.keys(
-                              order.products || {}
+                            const alreadyOrdered = orders.some((order) => {
+                              console.log("TCL ~ order:", order);
+                              const year = new Date(
+                                order.date || order.createdAt
+                              ).getFullYear();
+                              const productIds = Object.keys(
+                                order.products || {}
+                              );
+                              if (year !== currentYear) return false;
+
+                              return productIds.includes(prod._id);
+                            });
+                            console.log(
+                              "TCL ~ alreadyOrdered:",
+                              alreadyOrdered
                             );
-                            if (year !== currentYear) return false;
 
-                            return productIds.includes(prod._id);
-                          });
-                          console.log("TCL ~ alreadyOrdered:", alreadyOrdered);
+                            if (alreadyOrdered) {
+                              setToastError(true);
+                              return;
+                            }
 
-                          if (alreadyOrdered) {
-                            setToastError(true);
-                            return;
-                          }
+                            // addToCart({
+                            //   userId: user._id,
+                            //   productId: prod._id,
+                            //   price: finalPrice,
+                            //   image: prod.pictures?.[0]?.url,
+                            // });
+                          }}
+                        >
+                          Sepete Ekle
+                        </Button>
 
-                          // addToCart({
-                          //   userId: user._id,
-                          //   productId: prod._id,
-                          //   price: finalPrice,
-                          //   image: prod.pictures?.[0]?.url,
-                          // });
-                        }}
-                      >
-                        Sepete Ekle
-                      </Button>
-
-                      <Button
-                        className="quick-view-btn mt-2 w-100"
-                        variant="light"
-                        onClick={() => navigate(`/product/${prod._id}`)}
-                      >
-                        Detaylar
-                      </Button>
-                    </div>
-                  </Col>
-                );
-              })}
+                        <Button
+                          className="quick-view-btn mt-2 w-100"
+                          variant="light"
+                          onClick={() => navigate(`/product/${prod._id}`)}
+                        >
+                          Detaylar
+                        </Button>
+                      </div>
+                    </Col>
+                  );
+                })}
             </Row>
 
-            {pageCount > 1 && (
+            {user && pageCount > 1 && (
               <div className="d-flex justify-content-center gap-3 mt-4">
                 <Button
                   size="sm"
