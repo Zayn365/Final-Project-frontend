@@ -103,7 +103,13 @@ const Footer = () => {
 
       {/* Sağ alt sabit admin giriş butonu */}
       <div
-        onClick={() => navigate("/adminLogin")}
+        onClick={() => {
+          if (user && user.isAdmin) {
+            navigate("/admin");
+          } else {
+            navigate("/adminLogin");
+          }
+        }}
         style={{
           position: "absolute",
           bottom: "16px",
