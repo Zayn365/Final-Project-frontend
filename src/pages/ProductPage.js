@@ -18,10 +18,19 @@ function ProductPage() {
   const user = useSelector((state) => state.user);
   const [product, setProduct] = useState(null);
   const [similar, setSimilar] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [toastError, setToastError] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const handleDragStart = (e) => e.preventDefault();
   const campaigns = useSelector((state) => state.campaigns || []);
+  useEffect(() => {
+    if (user) {
+      axios.get("/orders").then(({ data }) => {
+        setOrders(data || []);
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     axios.get(`/products/${id}`).then(({ data }) => {
@@ -29,7 +38,12 @@ function ProductPage() {
       setSimilar(data.similar);
     });
   }, [id]);
-
+  useEffect(() => {
+    if (toastError) {
+      const timer = setTimeout(() => setToastError(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastError]);
   if (!product) return <Loading />;
 
   const responsive = {
@@ -55,6 +69,15 @@ function ProductPage() {
   console.log(product);
   return (
     <Container className="pt-4" style={{ position: "relative" }}>
+      {toastError && (
+        <ToastMessage
+          bg="danger"
+          title="Zaten Alındı"
+          body="Bu ürünü daha önce almışsınız."
+          onClose={() => setToastError(false)}
+        />
+      )}
+
       <Row>
         <Col lg={6}>
           <AliceCarousel
@@ -196,13 +219,29 @@ function ProductPage() {
                     variant="danger"
                     size="lg"
                     className="w-100"
-                    onClick={() =>
+                    onClick={() => {
+                      const currentYear = new Date().getFullYear();
+
+                      const alreadyOrdered = orders.some((order) => {
+                        const year = new Date(
+                          order.date || order.createdAt
+                        ).getFullYear();
+                        const productIds = Object.keys(order.products || {});
+                        if (year !== currentYear) return false;
+                        return productIds.includes(product._id);
+                      });
+
+                      if (alreadyOrdered) {
+                        setToastError(true);
+                        return;
+                      }
+
                       addToCart({
                         userId: user._id,
-                        productId: id,
+                        productId: product._id,
                         price: product.price,
-                      })
-                    }
+                      });
+                    }}
                   >
                     Sepete Ekle
                   </Button>

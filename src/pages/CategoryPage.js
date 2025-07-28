@@ -75,16 +75,131 @@ function CategoryPage() {
   }, [filtered, sortBy]);
 
   const k12Filtered = useMemo(() => {
-    if (!user?.k12?.students?.length) return allProducts;
+    if (!user?.k12?.students?.length) return sorted;
 
-    const studentGrades = user.k12.students.map((s) => `${s.gradeLevel}`);
-    return sorted.filter((product) => {
-      if (!product.class || !Array.isArray(product.class)) return false;
-      return product.class.some((cls) => {
-        const match = cls.match(/\d+/);
-        return match && studentGrades.includes(match[0]);
+    const studentGrades = user.k12.students.map((s) =>
+      typeof s.gradeLevel === "string" ? s.gradeLevel.trim() : `${s.gradeLevel}`
+    );
+    console.log("🧠 Student Grades (normalized):", studentGrades);
+
+    const preschoolLabels = [
+      "hazırlık (48-60 ay)",
+      "hazırlık (60-66 ay)",
+      "hazırlık (66-72 ay)",
+      "ana",
+    ];
+
+    const isPreschoolStudent = (grade) => {
+      const normalized = grade?.toString().toLowerCase().trim();
+      return preschoolLabels.includes(normalized);
+    };
+
+    const isBookCategory = (cat) => {
+      const c = (cat || "").toLowerCase();
+      return (
+        c.includes("eğitim") ||
+        c.includes("set") ||
+        c.includes("kitap") ||
+        c.includes("book")
+      );
+    };
+
+    const preschoolBookClasses = ["3 yaş", "4 yaş", "5 yaş"];
+    const isStudentPreschool = studentGrades.some(isPreschoolStudent);
+
+    const filtered = sorted.filter((product) => {
+      const productCategory = (product.category || "").toLowerCase();
+      const classes = product.class || [];
+
+      // ✅ Allow no-class Anaokulu Kıyafet
+      if (
+        productCategory === "anaokulu kıyafet" &&
+        isStudentPreschool &&
+        (!product.class || product.class.length === 0)
+      ) {
+        console.log("✅ Allowing no-class Anaokulu Kıyafet:", product.name);
+        return true;
+      }
+
+      if (!Array.isArray(classes)) {
+        console.log("⛔ Invalid class for product:", product.name);
+        return false;
+      }
+
+      return classes.some((cls) => {
+        const normalizedClass = cls
+          .toString()
+          .toLowerCase()
+          .trim()
+          .replace(/\./g, "")
+          .replace(/\s+/g, " ");
+
+        // 👶 Preschool Books
+        if (isBookCategory(productCategory)) {
+          if (isStudentPreschool) {
+            const match = preschoolBookClasses.includes(normalizedClass);
+            console.log(
+              `📘 Book "${product.name}" | normalized class: "${normalizedClass}" | match:`,
+              match
+            );
+            return match;
+          } else {
+            const match = studentGrades.some((grade) =>
+              normalizedClass.includes(grade.toLowerCase())
+            );
+            return match;
+          }
+        }
+
+        // 👕 Clothing logic (including special case)
+        const studentClassNums = studentGrades
+          .map((g) => parseInt(g))
+          .filter((n) => !isNaN(n));
+
+        // ✅ Class-specific category enforcement
+        if (
+          studentClassNums.includes(6) &&
+          productCategory !== "ortaokul kıyafet"
+        ) {
+          return false;
+        }
+
+        if (
+          studentClassNums.includes(11) &&
+          productCategory !== "lise kıyafet"
+        ) {
+          return false;
+        }
+
+        // Normal numeric class matching
+        const classNumMatch = normalizedClass.match(/^\d+$/);
+        if (classNumMatch) {
+          const classNum = parseInt(classNumMatch[0]);
+          return studentClassNums.some((g) => {
+            if (classNum >= 1 && classNum <= 4 && g >= 1 && g <= 4)
+              return productCategory === "ilkokul kıyafet";
+            if (classNum >= 5 && classNum <= 8 && g >= 5 && g <= 8)
+              return productCategory === "ortaokul kıyafet";
+            if (classNum >= 9 && classNum <= 12 && g >= 9 && g <= 12)
+              return productCategory === "lise kıyafet";
+            return false;
+          });
+        }
+
+        // 👕 Preschool clothing
+        if (preschoolLabels.includes(normalizedClass)) {
+          return isStudentPreschool && productCategory === "anaokulu kıyafet";
+        }
+
+        return false;
       });
     });
+
+    console.log(
+      "✅ Final k12Filtered products:",
+      filtered.map((p) => p.name)
+    );
+    return filtered;
   }, [sorted, user]);
 
   const nonClassBased = useMemo(() => {
@@ -96,19 +211,16 @@ function CategoryPage() {
   const finalProducts = useMemo(() => {
     if (!user || !user.k12?.students?.length) return sorted;
 
-    if (category.toLowerCase() === "all") {
-      return [...k12Filtered, ...nonClassBased];
-    }
+    // ✅ Always prefer k12Filtered (already filtered by student + product logic)
+    const results = k12Filtered.length > 0 ? k12Filtered : nonClassBased;
 
-    const categoryFiltered = sorted.filter((product) => {
-      if (!product.class?.length && !product.hasClass) return true;
-      return product.class?.some((cls) =>
-        user.k12.students.some((s) => cls.includes(`${s.gradeLevel}`))
-      );
-    });
+    console.log(
+      "🧾 Final Rendered Products:",
+      results.map((p) => p.name)
+    );
 
-    return categoryFiltered;
-  }, [category, sorted, user]);
+    return results;
+  }, [k12Filtered, nonClassBased, sorted, user]);
 
   const pageCount = Math.ceil(finalProducts.length / perPage);
   const pageStart = pageIdx * perPage;
