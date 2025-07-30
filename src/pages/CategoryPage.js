@@ -22,14 +22,13 @@ function CategoryPage() {
   const campaigns = useSelector((state) => state.campaigns || []);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data } = await axios.get("/products");
         const list = data || [];
-        axios.get("/orders").then(({ data }) => {
-          setOrders(data);
-        });
+        axios.get("/orders").then(({ data }) => setOrders(data));
         setAllProducts(list);
 
         const uniqueCategories = [
@@ -53,10 +52,9 @@ function CategoryPage() {
     );
     if (exactMatch.length > 0) return exactMatch;
 
-    const partialMatch = allProducts.filter((p) =>
+    return allProducts.filter((p) =>
       p.category?.toLowerCase().includes(category.toLowerCase())
     );
-    return partialMatch;
   }, [allProducts, category]);
 
   const sorted = useMemo(() => {
@@ -73,159 +71,59 @@ function CategoryPage() {
         return filtered;
     }
   }, [filtered, sortBy]);
+  const filterK12 = useMemo(() => {
+    if (!user?.k12?.students?.length) return [];
 
-  const k12Filtered = useMemo(() => {
-    if (!user?.k12?.students?.length) return sorted;
-
-    const studentGrades = user.k12.students.map((s) =>
-      typeof s.gradeLevel === "string" ? s.gradeLevel.trim() : `${s.gradeLevel}`
-    );
-    console.log("🧠 Student Grades (normalized):", studentGrades);
+    const normalize = (val) =>
+      String(val)
+        .toLowerCase()
+        .replace(/\./g, "")
+        .replace(/sınıf/g, "")
+        .replace(/\s+/g, "")
+        .trim();
 
     const preschoolLabels = [
-      "hazırlık (48-60 ay)",
-      "hazırlık (60-66 ay)",
-      "hazırlık (66-72 ay)",
+      "hazırlık(48-60ay)",
+      "hazırlık(60-66ay)",
+      "hazırlık(66-72ay)",
       "ana",
+      "3yaş",
+      "4yaş",
+      "5yaş",
     ];
 
-    const isPreschoolStudent = (grade) => {
-      const normalized = grade?.toString().toLowerCase().trim();
-      return preschoolLabels.includes(normalized);
-    };
+    const studentGrades = user.k12.students.map((s) => normalize(s.gradeLevel));
+    const studentClassNums = user.k12.students
+      .map((s) => parseInt(s.gradeLevel))
+      .filter((n) => !isNaN(n));
 
-    const isBookCategory = (cat) => {
-      const c = (cat || "").toLowerCase();
-      return (
-        c.includes("eğitim") ||
-        c.includes("set") ||
-        c.includes("kitap") ||
-        c.includes("book")
-      );
-    };
+    const isPreschooler = studentGrades.some((g) =>
+      preschoolLabels.includes(g)
+    );
 
-    const preschoolBookClasses = ["3 yaş", "4 yaş", "5 yaş"];
-    const isStudentPreschool = studentGrades.some(isPreschoolStudent);
+    return sorted.filter((product) => {
+      const classes = Array.isArray(product.class) ? product.class : [];
 
-    const filtered = sorted.filter((product) => {
-      const productCategory = (product.category || "").toLowerCase();
-      const classes = product.class || [];
+      if (isPreschooler) {
+        return classes.some((cls) => preschoolLabels.includes(normalize(cls)));
+      } else {
+        return classes.some((cls) => {
+          const norm = normalize(cls);
+          const clsNum = parseInt(norm);
 
-      // ✅ Allow no-class Anaokulu Kıyafet
-      if (
-        productCategory === "anaokulu kıyafet" &&
-        isStudentPreschool &&
-        (!product.class || product.class.length === 0)
-      ) {
-        console.log("✅ Allowing no-class Anaokulu Kıyafet:", product.name);
-        return true;
-      }
+          if (studentGrades.includes(norm)) return true;
+          if (!isNaN(clsNum) && studentClassNums.includes(clsNum)) return true;
 
-      if (!Array.isArray(classes)) {
-        console.log("⛔ Invalid class for product:", product.name);
-        return false;
-      }
-
-      return classes.some((cls) => {
-        const normalizedClass = cls
-          .toString()
-          .toLowerCase()
-          .trim()
-          .replace(/\./g, "")
-          .replace(/\s+/g, " ");
-
-        // 👶 Preschool Books
-        if (isBookCategory(productCategory)) {
-          if (isStudentPreschool) {
-            const match = preschoolBookClasses.includes(normalizedClass);
-            console.log(
-              `📘 Book "${product.name}" | normalized class: "${normalizedClass}" | match:`,
-              match
-            );
-            return match;
-          } else {
-            const match = studentGrades.some((grade) =>
-              normalizedClass.includes(grade.toLowerCase())
-            );
-            return match;
-          }
-        }
-
-        // 👕 Clothing logic (including special case)
-        const studentClassNums = studentGrades
-          .map((g) => parseInt(g))
-          .filter((n) => !isNaN(n));
-
-        // ✅ Class-specific category enforcement
-        if (
-          studentClassNums.includes(6) &&
-          productCategory !== "ortaokul kıyafet"
-        ) {
           return false;
-        }
-
-        if (
-          studentClassNums.includes(11) &&
-          productCategory !== "lise kıyafet"
-        ) {
-          return false;
-        }
-
-        // Normal numeric class matching
-        const classNumMatch = normalizedClass.match(/^\d+$/);
-        if (classNumMatch) {
-          const classNum = parseInt(classNumMatch[0]);
-          return studentClassNums.some((g) => {
-            if (classNum >= 1 && classNum <= 4 && g >= 1 && g <= 4)
-              return productCategory === "ilkokul kıyafet";
-            if (classNum >= 5 && classNum <= 8 && g >= 5 && g <= 8)
-              return productCategory === "ortaokul kıyafet";
-            if (classNum >= 9 && classNum <= 12 && g >= 9 && g <= 12)
-              return productCategory === "lise kıyafet";
-            return false;
-          });
-        }
-
-        // 👕 Preschool clothing
-        if (preschoolLabels.includes(normalizedClass)) {
-          return isStudentPreschool && productCategory === "anaokulu kıyafet";
-        }
-
-        return false;
-      });
+        });
+      }
     });
+  }, [user, sorted]);
 
-    console.log(
-      "✅ Final k12Filtered products:",
-      filtered.map((p) => p.name)
-    );
-    return filtered;
-  }, [sorted, user]);
-
-  const nonClassBased = useMemo(() => {
-    return sorted.filter(
-      (product) => !product.class?.length && !product.hasClass
-    );
-  }, [sorted]);
-
-  const finalProducts = useMemo(() => {
-    if (!user || !user.k12?.students?.length) return sorted;
-
-    // ✅ Always prefer k12Filtered (already filtered by student + product logic)
-    const results = k12Filtered.length > 0 ? k12Filtered : nonClassBased;
-
-    console.log(
-      "🧾 Final Rendered Products:",
-      results.map((p) => p.name)
-    );
-
-    return results;
-  }, [k12Filtered, nonClassBased, sorted, user]);
-
-  const pageCount = Math.ceil(finalProducts.length / perPage);
+  const pageCount = Math.ceil(filterK12.length / perPage);
   const pageStart = pageIdx * perPage;
-  const pageEnd = Math.min(pageStart + perPage, finalProducts.length);
-  const paged = finalProducts.slice(pageStart, pageEnd);
+  const pageEnd = Math.min(pageStart + perPage, filterK12.length);
+  const paged = filterK12.slice(pageStart, pageEnd);
 
   const sizeOptions = [
     "5-6",
@@ -256,6 +154,7 @@ function CategoryPage() {
       return () => clearTimeout(timer);
     }
   }, [toastError]);
+
   return (
     <div className="category-page-container">
       {isSuccess && (
@@ -310,8 +209,8 @@ function CategoryPage() {
               </h4>
               <div className="d-flex align-items-center gap-3 text-muted small">
                 <div>
-                  {finalProducts.length ? pageStart + 1 : 0} – {pageEnd} arası,
-                  toplam {finalProducts.length} ürün gösteriliyor
+                  {sorted.length ? pageStart + 1 : 0} – {pageEnd} arası, toplam{" "}
+                  {sorted.length} ürün gösteriliyor
                 </div>
                 <div>
                   Göster:{" "}
@@ -347,170 +246,179 @@ function CategoryPage() {
             </div>
 
             <Row>
-              {paged.length === 0 ||
-                (!user && (
-                  <div className="text-center text-muted py-5">
-                    <h5>Ürün bulunamadı</h5>
-                    <p>Aramanızla eşleşen ürün bulunamadı.</p>
-                  </div>
-                ))}
-              {user &&
-                paged.map((prod) => {
-                  let campaignAmount;
-                  const campaign = campaigns.find(
-                    (c) =>
-                      c.products?.includes(prod.category) &&
-                      Array.isArray(c.selectedUsers) &&
-                      c.selectedUsers.includes(user?.tc_id)
-                  );
-                  let finalPrice = Number(prod.price) || 0;
+              {paged.length === 0 && (
+                <div className="text-center text-muted py-5">
+                  <h5>Ürün bulunamadı</h5>
+                  <p>Aramanızla eşleşen ürün bulunamadı.</p>
+                </div>
+              )}
 
-                  if (
-                    campaign &&
-                    typeof campaign.amount === "number" &&
-                    !isNaN(campaign.amount)
-                  ) {
-                    if (campaign.type === "percentage") {
-                      campaignAmount = campaign.amount;
-                      finalPrice -= (finalPrice * campaign.amount) / 100;
-                    } else if (campaign.type === "fixed") {
-                      campaignAmount = campaign.amount;
-                      finalPrice -= campaign.amount;
-                    }
-                    finalPrice = Math.max(finalPrice, 0);
+              {paged.map((prod) => {
+                let campaignAmount;
+                const campaign = campaigns.find(
+                  (c) =>
+                    c.products?.includes(prod.category) &&
+                    Array.isArray(c.selectedUsers) &&
+                    c.selectedUsers.includes(user?.tc_id)
+                );
+                let finalPrice = Number(prod.price) || 0;
+
+                if (
+                  campaign &&
+                  typeof campaign.amount === "number" &&
+                  !isNaN(campaign.amount)
+                ) {
+                  if (campaign.type === "percentage") {
+                    campaignAmount = campaign.amount;
+                    finalPrice -= (finalPrice * campaign.amount) / 100;
+                  } else if (campaign.type === "fixed") {
+                    campaignAmount = campaign.amount;
+                    finalPrice -= campaign.amount;
                   }
+                  finalPrice = Math.max(finalPrice, 0);
+                }
 
-                  return (
-                    <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
-                      <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
-                        <img
-                          src={prod.pictures?.[0]?.url}
-                          alt={prod.name}
-                          className="img-fluid mb-3"
-                        />
-                        <div className="product-info text-start flex-grow-1">
-                          <div className="mb-2">
-                            <div className="d-flex">
-                              <span
-                                className="text-dark text-center text-wrap"
-                                style={{
-                                  lineHeight: "1.3em",
-                                  fontSize: "16px",
-                                }}
-                              >
-                                {prod.name}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="top-info">
-                            <div className="info-row info-top flex-column">
-                              {prod.hasClass &&
-                                Array.isArray(prod.class) &&
-                                prod.class.length > 0 && (
-                                  <div className="d-flex align-items-center mb-1">
-                                    <span className="label">Sınıf:</span>
-                                    <span className="ms-1">
-                                      {prod.class[0] || "Mevcut değil"}
-                                    </span>
-                                  </div>
-                                )}
-                              {prod.hasSize && (
-                                <div className="d-flex align-items-center">
-                                  <span className="label">Beden:</span>
-                                  <Form.Select
-                                    size="sm"
-                                    className="value-dropdown text-danger ms-2"
-                                    style={{ width: "auto" }}
-                                  >
-                                    {(Array.isArray(prod?.sizes)
-                                      ? prod.sizes
-                                      : sizeOptions
-                                    ).map((s) => (
-                                      <option key={s}>{s}</option>
-                                    ))}
-                                  </Form.Select>
-                                </div>
-                              )}
-                            </div>
-
-                            {campaignAmount && (
-                              <Col
-                                sm={12}
-                                className="d-flex justify-content-center"
-                              >
-                                <Badge bg="success">
-                                  ₺{campaignAmount} İNDİRİM
-                                </Badge>
-                              </Col>
-                            )}
-                            <div className="info-row">
-                              <span className="label">Fiyat:</span>
-                              <span className="value">
-                                {formatWithCommas(finalPrice.toFixed(0))} TL
-                              </span>
-                            </div>
+                return (
+                  <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
+                    <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
+                      <img
+                        src={prod.pictures?.[0]?.url}
+                        alt={prod.name}
+                        className="img-fluid mb-3"
+                      />
+                      <div className="product-info text-start flex-grow-1">
+                        <div className="mb-2">
+                          <div className="d-flex">
+                            <span
+                              className="text-dark text-center text-wrap"
+                              style={{
+                                lineHeight: "1.3em",
+                                fontSize: "16px",
+                              }}
+                            >
+                              {prod.name}
+                            </span>
                           </div>
                         </div>
+                        <div className="top-info">
+                          <div className="info-row info-top flex-column">
+                            {prod.hasClass &&
+                              Array.isArray(prod.class) &&
+                              prod.class.length > 0 &&
+                              user?.k12?.students?.length > 0 && (
+                                <div className="d-flex align-items-center mb-1">
+                                  <span className="label">Sınıf:</span>
+                                  <span className="ms-1">
+                                    {(() => {
+                                      const normalize = (val) =>
+                                        String(val)
+                                          .toLowerCase()
+                                          .replace(/\./g, "")
+                                          .replace(/sınıf/g, "")
+                                          .replace(/\s+/g, "")
+                                          .trim();
 
-                        <Button
-                          className="choose-btn mt-3 w-100"
-                          variant="danger"
-                          onClick={() => {
-                            const currentYear = new Date().getFullYear();
+                                      const studentGrades =
+                                        user.k12.students.map((s) =>
+                                          normalize(s.gradeLevel)
+                                        );
 
-                            const alreadyOrdered = orders.some((order) => {
-                              const year = new Date(
-                                order.date || order.createdAt
-                              ).getFullYear();
-                              const productIds = Object.keys(
-                                order.products || {}
-                              );
-                              console.log(
-                                "TCL ~ year !== currentYear:",
-                                year,
-                                currentYear
-                              );
-                              if (year !== currentYear) {
-                                console.log("nigger works");
-                                return false;
-                              }
+                                      const match = prod.class.find((cls) =>
+                                        studentGrades.includes(normalize(cls))
+                                      );
 
-                              return productIds.includes(prod._id);
-                            });
-                            console.log(
-                              "TCL ~ alreadyOrdered:",
-                              alreadyOrdered
-                            );
+                                      return match || "Mevcut değil";
+                                    })()}
+                                  </span>
+                                </div>
+                              )}
 
-                            if (alreadyOrdered) {
-                              setToastError(true);
-                              return;
-                            }
-                            console.log(prod._id);
-                            addToCart({
-                              userId: user._id,
-                              productId: prod._id,
-                              price: finalPrice,
-                            });
-                          }}
-                        >
-                          Sepete Ekle
-                        </Button>
+                            {prod.hasSize && (
+                              <div className="d-flex align-items-center">
+                                <span className="label">Beden:</span>
+                                <Form.Select
+                                  size="sm"
+                                  className="value-dropdown text-danger ms-2"
+                                  style={{ width: "auto" }}
+                                >
+                                  {(Array.isArray(prod?.sizes)
+                                    ? prod.sizes
+                                    : sizeOptions
+                                  ).map((s) => (
+                                    <option key={s}>{s}</option>
+                                  ))}
+                                </Form.Select>
+                              </div>
+                            )}
+                          </div>
 
-                        <Button
-                          className="quick-view-btn mt-2 w-100"
-                          variant="light"
-                          onClick={() => navigate(`/product/${prod._id}`)}
-                        >
-                          Detaylar
-                        </Button>
+                          {campaignAmount && (
+                            <Col
+                              sm={12}
+                              className="d-flex justify-content-center"
+                            >
+                              <Badge bg="success">
+                                ₺{campaignAmount} İNDİRİM
+                              </Badge>
+                            </Col>
+                          )}
+                          <div className="info-row">
+                            <span className="label">Fiyat:</span>
+                            <span className="value">
+                              {formatWithCommas(finalPrice.toFixed(0))} TL
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </Col>
-                  );
-                })}
+
+                      <Button
+                        className="choose-btn mt-3 w-100"
+                        variant="danger"
+                        onClick={() => {
+                          const currentYear = new Date().getFullYear();
+
+                          const alreadyOrdered = orders.some((order) => {
+                            const year = new Date(
+                              order.date || order.createdAt
+                            ).getFullYear();
+                            const productIds = Object.keys(
+                              order.products || {}
+                            );
+                            return (
+                              year === currentYear &&
+                              productIds.includes(prod._id)
+                            );
+                          });
+
+                          if (alreadyOrdered) {
+                            setToastError(true);
+                            return;
+                          }
+
+                          addToCart({
+                            userId: user._id,
+                            productId: prod._id,
+                            price: finalPrice,
+                          });
+                        }}
+                      >
+                        Sepete Ekle
+                      </Button>
+
+                      <Button
+                        className="quick-view-btn mt-2 w-100"
+                        variant="light"
+                        onClick={() => navigate(`/product/${prod._id}`)}
+                      >
+                        Detaylar
+                      </Button>
+                    </div>
+                  </Col>
+                );
+              })}
             </Row>
 
-            {user && pageCount > 1 && (
+            {pageCount > 1 && (
               <div className="d-flex justify-content-center gap-3 mt-4">
                 <Button
                   size="sm"

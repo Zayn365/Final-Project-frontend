@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { useUpdateProductMutation } from "../services/appApi";
 import axios from "../axios";
+import { useNavigate } from "react-router-dom";
 
 const sizeOptions = [
   "5-6",
@@ -55,7 +56,7 @@ function EditProductModal({ show, handleClose, productId }) {
   const [images, setImages] = useState([]);
   const [imgToRemove, setImgToRemove] = useState(null);
   const [hasSize, setHasSize] = useState(false);
-
+  const navigation = useNavigate();
   useEffect(() => {
     if (!productId) return;
     axios
@@ -174,7 +175,7 @@ function EditProductModal({ show, handleClose, productId }) {
     updateProduct(payload).then(({ data }) => {
       if (data) {
         resetAndClose();
-        window.location.reload();
+        navigation("/admin");
       }
     });
   }

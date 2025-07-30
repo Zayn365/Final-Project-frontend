@@ -6,18 +6,18 @@ import { Container, Row, Col, Badge, Button, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Loading from "../components/Loading";
-import SimilarProduct from "../components/SimilarProduct";
+// import SimilarProduct from "../components/SimilarProduct";
 import "./ProductPage.css";
 import { LinkContainer } from "react-router-bootstrap";
 import { useAddToCartMutation } from "../services/appApi";
 import ToastMessage from "../components/ToastMessage";
-import { formatWithCommas, unformatNumber } from "../hooks/formatFuctions";
+import { formatWithCommas } from "../hooks/formatFuctions";
 
 function ProductPage() {
   const { id } = useParams();
   const user = useSelector((state) => state.user);
   const [product, setProduct] = useState(null);
-  const [similar, setSimilar] = useState(null);
+  // const [similar, setSimilar] = useState(null);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -35,7 +35,7 @@ function ProductPage() {
   useEffect(() => {
     axios.get(`/products/${id}`).then(({ data }) => {
       setProduct(data.product);
-      setSimilar(data.similar);
+      // setSimilar(data.similar);
     });
   }, [id]);
   useEffect(() => {
@@ -46,11 +46,11 @@ function ProductPage() {
   }, [toastError]);
   if (!product) return <Loading />;
 
-  const responsive = {
-    0: { items: 1 },
-    568: { items: 2 },
-    1024: { items: 3 },
-  };
+  // const responsive = {
+  //   0: { items: 1 },
+  //   568: { items: 2 },
+  //   1024: { items: 3 },
+  // };
 
   const images = product.pictures.map((picture) => (
     <img
@@ -61,11 +61,11 @@ function ProductPage() {
     />
   ));
 
-  const similarProducts = (similar || []).map((product, idx) => (
-    <div className="item" data-value={idx} key={product._id}>
-      <SimilarProduct {...product} />
-    </div>
-  ));
+  // const similarProducts = (similar || []).map((product, idx) => (
+  //   <div className="item" data-value={idx} key={product._id}>
+  //     <SimilarProduct {...product} />
+  //   </div>
+  // ));
   console.log(product);
   return (
     <Container className="pt-4" style={{ position: "relative" }}>
@@ -149,12 +149,31 @@ function ProductPage() {
                 {/* Sınıf */}
                 {product.hasClass &&
                   Array.isArray(product.class) &&
-                  product.class.length > 0 && (
+                  product.class.length > 0 &&
+                  user?.k12?.students?.length > 0 && (
                     <Col xs={12} md={4}>
                       <Form.Label>Sınıf:</Form.Label>
                       <Form.Control
                         type="text"
-                        value={product.class[0] || "Mevcut değil"}
+                        value={(() => {
+                          const normalize = (val) =>
+                            String(val)
+                              .toLowerCase()
+                              .replace(/\./g, "")
+                              .replace(/sınıf/g, "")
+                              .replace(/\s+/g, "")
+                              .trim();
+
+                          const studentGrades = user.k12.students.map((s) =>
+                            normalize(s.gradeLevel)
+                          );
+
+                          const matchedClass = product.class.find((cls) =>
+                            studentGrades.includes(normalize(cls))
+                          );
+
+                          return matchedClass || "Mevcut değil";
+                        })()}
                         readOnly
                         className="w-100 text-center"
                       />
@@ -266,7 +285,7 @@ function ProductPage() {
         </Col>
       </Row>
 
-      <div className="my-4">
+      {/* <div className="my-4">
         <h2>Benzer Ürünler</h2>
         <div className="d-flex justify-content-center align-items-center flex-wrap">
           <AliceCarousel
@@ -276,7 +295,7 @@ function ProductPage() {
             controlsStrategy="alternate"
           />
         </div>
-      </div>
+      </div> */}
     </Container>
   );
 }
