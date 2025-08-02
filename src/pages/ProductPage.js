@@ -66,7 +66,6 @@ function ProductPage() {
   //     <SimilarProduct {...product} />
   //   </div>
   // ));
-  console.log(product);
   return (
     <Container className="pt-4" style={{ position: "relative" }}>
       {toastError && (

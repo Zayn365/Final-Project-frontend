@@ -9,6 +9,7 @@ import {
   useRemoveFromCartMutation,
 } from "../services/appApi";
 import "./CartPage.css";
+import { useState } from "react";
 
 const stripePromise = loadStripe("pk_test_..."); // shortened for clarity
 
@@ -16,15 +17,12 @@ function CartPage() {
   const user = useSelector((state) => state.user);
   const products = useSelector((state) => state.products);
   const campaigns = useSelector((state) => state.campaigns); // 👈 get campaign state
-
   const [increaseCart] = useIncreaseCartProductMutation();
   const [decreaseCart] = useDecreaseCartProductMutation();
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
 
   const userCart = user.cart;
-  console.log("TCL ~ CartPage ~ userCart:", userCart);
   const cartItems = products.filter((product) => userCart[product._id]);
-  console.log("TCL ~ CartPage ~ cartItems:", cartItems);
 
   // Utility: Get discounted price if campaign exists
   const getDiscountedPrice = (product) => {
@@ -44,19 +42,17 @@ function CartPage() {
 
     if (!campaign) return parseFloat(product.price);
 
-    console.log(
-      "Applying campaign for category:",
-      product.category,
-      "→",
-      campaign.amount
-    );
-
     if (campaign.type === "percentage") {
-      return parseFloat(product.price) * (1 - campaign.amount / 100);
+      const actualAmount =
+        parseFloat(product.price) * (1 - campaign.amount / 100);
+      return actualAmount;
     } else if (campaign.type === "fixed") {
-      return Math.max(parseFloat(product.price) - campaign.amount, 0);
+      const actualAmountFixed = Math.max(
+        parseFloat(product.price) - campaign.amount,
+        0
+      );
+      return actualAmountFixed;
     }
-
     return parseFloat(product.price);
   };
   // Total price with campaign discounts
@@ -82,7 +78,15 @@ function CartPage() {
             </Alert>
           ) : (
             <Elements stripe={stripePromise}>
-              <CheckoutForm />
+              <CheckoutForm
+                products={cartItems.map((item) => {
+                  const discountedPrice = getDiscountedPrice(item);
+                  return {
+                    ...item,
+                    price: discountedPrice,
+                  };
+                })}
+              />
             </Elements>
           )}
         </Col>
@@ -105,7 +109,6 @@ function CartPage() {
                   const originalPrice = parseFloat(item.price);
                   const discountedPrice = getDiscountedPrice(item);
                   const hasDiscount = discountedPrice < originalPrice;
-
                   return (
                     <tr key={item._id}>
                       <td>

@@ -36,15 +36,18 @@ function DashboardProducts() {
   }
 
   const filteredProducts = useMemo(() => {
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (filteredCategory &&
-          product.category
-            .toLowerCase()
-            .includes(filteredCategory.toLowerCase()))
-    );
-  }, [products, searchTerm]);
+    return products.filter((product) => {
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      const matchesCategory = filteredCategory
+        ? product.category?.toLowerCase() === filteredCategory.toLowerCase()
+        : true;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, filteredCategory]);
 
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   const currentProducts = filteredProducts.slice(

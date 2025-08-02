@@ -109,6 +109,9 @@ function CategoryPage() {
       } else {
         return classes.some((cls) => {
           const norm = normalize(cls);
+
+          if (["3yaş", "4yaş", "5yaş"].includes(norm)) return false;
+
           const clsNum = parseInt(norm);
 
           if (studentGrades.includes(norm)) return true;

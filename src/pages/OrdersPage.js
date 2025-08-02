@@ -58,7 +58,6 @@ function OrdersPage() {
       </Container>
     );
   }
-  console.log(orders);
   return (
     <Container className="py-4">
       <h2 className="text-center mb-4">Siparişlerim</h2>
