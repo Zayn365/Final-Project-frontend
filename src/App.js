@@ -20,6 +20,7 @@ import { addNotification } from "./features/userSlice";
 import Footer from "./components/Footer";
 import UserLogin from "./pages/UserLogin";
 import Shirts from "./pages/Shirts";
+import Ziraat3DSecureResult from "./pages/PaymentResult";
 function App() {
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -65,6 +66,7 @@ function App() {
             </>
           )}
           <Route path="/product/:id" element={<ProductPage />} />
+          <Route path="/payment/result" element={<Ziraat3DSecureResult />} />
 
           <Route path="/category/:category" element={<CategoryPage />} />
           <Route path="/admin-login" element={<Login />} />

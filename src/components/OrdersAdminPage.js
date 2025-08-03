@@ -6,6 +6,7 @@ import Loading from "./Loading";
 
 function OrdersAdminPage() {
   const [orders, setOrders] = useState([]);
+  console.log("TCL ~ OrdersAdminPage ~ orders:", orders);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,8 +130,10 @@ function OrdersAdminPage() {
             <th>Müşteri Adı</th>
             <th>Ürünler</th>
             <th>Sipariş Tutarı</th>
+
             <th>Adres</th>
             <th>Okul</th>
+            {/* <th>School Name</th> */}
             <th>Durum</th>
             <th>Detaylar</th>
           </tr>
@@ -143,7 +146,8 @@ function OrdersAdminPage() {
               <td>{order.count}</td>
               <td>{order.total}</td>
               <td>{order.address}</td>
-              <td>{studentSchoolMap[order.username] || "Bilinmiyor"}</td>
+              {/* <td>{studentSchoolMap[order.username] || "Bilinmiyor"}</td> */}
+              <td>{order.schoolName}</td>
               <td>
                 {order.status === "processing" ? (
                   <Button
@@ -202,9 +206,12 @@ function OrdersAdminPage() {
               <p>
                 <strong>Ülke:</strong> {orderToShow.country || "N/A"}
               </p>
-              <p>
+              {/* <p>
                 <strong>Okul:</strong>{" "}
                 {studentSchoolMap[orderToShow.username] || "Bilinmiyor"}
+              </p> */}
+              <p>
+                <strong>Okul:</strong> {orderToShow.schoolName}
               </p>
               <p>
                 <strong>Durum:</strong> {orderToShow.status}
