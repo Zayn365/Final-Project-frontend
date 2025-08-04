@@ -248,11 +248,13 @@ function CheckoutForm({ products, total }) {
     const isOtherCard = !binExists;
     try {
       const body = {
-        amount: total || user.cart.total,
+        amount: 1,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone: user.phone || "5380000000",
-        returnUrl: "https://store.bikev.k12.tr/payment/result",
+        // returnUrl: "https://store.bikev.k12.tr/payment/result",
+        returnUrl:
+          "https://final-project-backend-m9nb.onrender.com/payment/result",
         isOtherCard: isOtherCard,
         orderItems: products
           ? products.map((product) => ({
@@ -260,7 +262,7 @@ function CheckoutForm({ products, total }) {
               name: product.name,
               description: product.description,
               quantity: user.cart[product._id],
-              amount: product.price,
+              amount: 1,
             }))
           : [
               {
