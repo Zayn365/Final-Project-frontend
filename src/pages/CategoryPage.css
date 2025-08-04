@@ -10,6 +10,15 @@
   align-items: center;
   color: white;
 }
+.gift-section {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.gift-section.show {
+  max-height: 500px; /* Adjust based on expected content height */
+}
 
 .all-banner-container {
   background-image: url("../../public/product.jpg");

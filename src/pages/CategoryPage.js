@@ -22,6 +22,7 @@ function CategoryPage() {
   const campaigns = useSelector((state) => state.campaigns || []);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
+  const [openGifts, setOpenGifts] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -264,8 +265,10 @@ function CategoryPage() {
                     Array.isArray(c.selectedUsers) &&
                     c.selectedUsers.includes(user?.tc_id)
                 );
+                console.log("TCL ~ campaign:", campaign);
                 let finalPrice = Number(prod.price) || 0;
-
+                const subItems = campaign?.subItems?.items || [];
+                const isGiftVisible = openGifts[prod._id];
                 if (
                   campaign &&
                   typeof campaign.amount === "number" &&
@@ -354,7 +357,23 @@ function CategoryPage() {
                               </div>
                             )}
                           </div>
-
+                          {subItems.length > 0 && (
+                            <Button
+                              variant="outline-secondary"
+                              size="sm"
+                              className="w-100 mb-2"
+                              onClick={() =>
+                                setOpenGifts((prev) => ({
+                                  ...prev,
+                                  [prod._id]: !prev[prod._id],
+                                }))
+                              }
+                            >
+                              {isGiftVisible
+                                ? "Hediye Ürünlerini Gizle"
+                                : "Hediye Ürünlerini Gör"}
+                            </Button>
+                          )}
                           {campaignAmount && (
                             <Col
                               sm={12}
@@ -373,6 +392,29 @@ function CategoryPage() {
                           </div>
                         </div>
                       </div>
+                      {isGiftVisible && (
+                        <div className="gift-section border p-2 rounded mb-2 bg-light">
+                          {subItems.map((gift, idx) => (
+                            <div
+                              key={gift._id || idx}
+                              className="d-flex align-items-center gap-2 mb-1"
+                            >
+                              <img
+                                src={
+                                  gift.pictures?.[0]?.url || "/placeholder.jpg"
+                                }
+                                alt={gift.name}
+                                style={{
+                                  width: 40,
+                                  height: 40,
+                                  objectFit: "contain",
+                                }}
+                              />
+                              <span className="small">{gift.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       <Button
                         className="choose-btn mt-3 w-100"

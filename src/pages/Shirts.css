@@ -5,7 +5,15 @@
 .category-page-container {
   min-height: 100vh;
 }
+.gift-section-wrapper {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  max-height: 0;
+}
 
+.gift-section-wrapper.open {
+  max-height: 500px; /* adjust based on your content */
+}
 .side-menu {
   padding-left: 0;
   border-right: 1px solid #ddd;

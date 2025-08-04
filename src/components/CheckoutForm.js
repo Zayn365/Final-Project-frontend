@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Button, Col, Form, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,7 @@ import { useCreateOrderMutation } from "../services/appApi";
 import ToastMessage from "../components/ToastMessage";
 import axios from "axios";
 import { bankBins } from "../utils/bankBins";
-function CheckoutForm({ products }) {
+function CheckoutForm({ products, total }) {
   const stripe = true;
   const elements = true;
   const user = useSelector((state) => state.user);
@@ -27,7 +27,40 @@ function CheckoutForm({ products }) {
   const [cardNumber, setCardNumber] = useState("");
   const [cvv, setCvv] = useState("");
   const [expDate, setExpDate] = useState("");
-  const [is3DSecure, setIs3DSecure] = useState(false); // Toggle for 3D Secure
+  const [is3DSecure, setIs3DSecure] = useState(true); // Toggle for 3D Secure
+  useEffect(() => {
+    const listener = async (event) => {
+      if (event.data?.type === "3DS_DONE" && event.data.success) {
+        // Now we know payment succeeded — create the order
+        const fullAddress = `${street}, ${area}, ${city}`;
+        try {
+          const res = await createOrder({
+            userId: user._id,
+            cart: user.cart,
+            address: fullAddress,
+            country: "Türkiye",
+            username: user.name,
+            schoolName: user.k12?.schoolName || "",
+          });
+
+          if (res?.data) {
+            setAlertVariant("success");
+            setAlertMessage("3D Secure ödeme başarılı. Sipariş oluşturuldu.");
+            setShowToast(true);
+            setTimeout(() => navigate("/orders"), 1000);
+          }
+        } catch (err) {
+          setAlertVariant("danger");
+          setAlertMessage("Sipariş oluşturulurken bir hata oluştu.");
+        } finally {
+          setPaying(false);
+        }
+      }
+    };
+
+    window.addEventListener("message", listener);
+    return () => window.removeEventListener("message", listener);
+  }, [user, street, area, city]);
 
   async function postToZiraat3DSecure(sessionToken, data) {
     const popup = window.open("", "_blank", "width=600,height=800");
@@ -36,6 +69,14 @@ function CheckoutForm({ products }) {
       alert("Popup blocked! Please allow popups for this website.");
       return;
     }
+
+    // ✅ Start monitoring if popup is closed
+    const popupInterval = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(popupInterval);
+        setPaying(false); // reset paying flag
+      }
+    }, 500);
 
     const formAction = `https://vpos.ziraatpay.com.tr/ziraatpay/api/v2/post/sale3d/${sessionToken}`;
     const formInputs = Object.entries(data)
@@ -46,163 +87,150 @@ function CheckoutForm({ products }) {
       .join("");
 
     const formHtml = `
-      
-
-<!DOCTYPE html>
-<html>
-   <head>
-      <title>Sample POST Form</title>
-      <meta charset="utf-8">
-      <script>
-							function hideCardPANData() {
-								if (document
-										.getElementById('isPayWithCardToken').checked) {
-									document.getElementById('cardPANData').style.display = 'none';
-									document
-											.getElementById('cardTokenContainer').style.display = 'block';
-								} else {
-									document
-											.getElementById('cardTokenContainer').style.display = 'none';
-									document.getElementById('cardPANData').style.display = 'block';
-								}
-							}
-						</script>
-      <style type="text/css">
-form {
-	display: table;
-}
-
-p {
-	display: table-row;
-}
-
-label {
-	display: table-cell;
-}
-
-input {
-	display: table-cell;
-}
-</style>
-   </head>
-   <body onload="hideCardPANData();">
-      <form
-		action="${formAction}"
-		method="post">
-         <div>
-            <label for="isPayWithCardToken">Pay with Card Token</label>
-            <input type="checkbox" onclick="hideCardPANData();"
-				name="isPayWithCardToken" id="isPayWithCardToken" autocomplete="off"
-				maxlength="32" />
-         </div>
-         <div class="container">
-            <div id="cardPANData">
-               <p>
-                  <label for="cardOwner">Card Owner Name</label>
-                  <input type="text"  name="cardOwner" id="cardOwner"
-						autocomplete="off" maxlength="32" />
-               </p>
-               <p>
-                  <label for="pan">Card Number (PAN)</label>
-                  <input type="text" id="pan" name="pan"
-						autocomplete="off" maxlength="19" />
-               </p>
-               <p>
-                  <label for="expiryMonth">Expiration Date</label>
-                  <select name="expiryMonth" id="expiryMonth">
-                     <option value="01">January</option>
-                     <option value="02">February</option>
-                     <option value="03">March</option>
-                     <option value="04">April</option>
-                     <option value="05">May</option>
-                     <option value="06">June</option>
-                     <option value="07">July</option>
-                     <option value="08">August</option>
-                     <option value="09">September</option>
-                     <option value="10">October</option>
-                     <option value="11">November</option>
-                     <option value="12">December</option>
-                  </select>
-                  <select name="expiryYear" id="expiryYear">
-                     <option value="2016">2016</option>
-                     <option value="2017">2017</option>
-                     <option value="2018">2018</option>
-                     <option value="2019">2019</option>
-                     <option value="2020">2020</option>
-                     <option value="2021">2021</option>
-                     <option value="2022">2022</option>
-                     <option value="2023">2023</option>
-                     <option value="2024">2024</option>
-                     <option value="2025">2025</option>
-                     <option value="2026">2026</option>
-                     <option value="2027">2027</option>
-                     <option value="2028">2028</option>
-                     <option value="2029">2029</option>
-                     <option value="2030">2030</option>
-                     <option value="2031">2031</option>
-                     <option value="2032">2032</option>
-                     <option value="2033">2033</option>
-                     <option value="2034">2034</option>
-                  </select>
-               </p>
-               <p>
-                  <label for="cvv">Security Code (CVV)</label>
-                  <input type="input" name="cvv" id="cvv"
-						autocomplete="off" maxlength="4" />
-               </p>
-               <p>
-                  <label for="saveCard">Save Card</label>
-                  <input type="checkbox" name="saveCard" id="saveCard"
-						value="YES" />
-               </p>
-               <p>
-                  <label for="cardName">Card Name</label>
-                  <input type="text" name="cardName" id="cardName" />
-               </p>
-               <p>
-                  <label for="installmentCount">Installment Count</label>
-                  <input type="text" name="installmentCount"
-						id="installmentCount" />
-               </p>
-               <input type="hidden" value="" name="points" id="points" />
-			   <input type="hidden" value="" name="paymentSystem"
-					id="paymentSystem" />
-            </div>
-         </div>
-         <div id="cardTokenContainer">
-            <p>
-               <label for="cardToken">Card Token</label>
-               <input type="text" name="cardToken" id="cardToken"
-					autocomplete="off" maxlength="64" />
-            </p>
-            <p>
-               <label for="installmentCount">Installment Count</label>
-               <input type="text" name="installmentCount"
-					id="installmentCount" />
-            </p>
-         </div>
-         <input type="submit" value="Submit" />
-        </form>
-     	
-     	<script type="text/javascript" src="https://ZIRAATPAY_HOST/ziraatpay/static/external/whitewolf-v3.js"></script>
-		<script type="text/javascript">
-			whitewolf.run(h.online-metrix.net, ORG_ID, SESSIONTOKEN);
-		</script>
-		<noscript>
-		    <iframe
-		        style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;"
-		        src="https://h.online-metrix.net/tags?org_id=ORG_ID&session_id=UNIQUE_SESSION_ID&pageid=PAGEID">
-		    </iframe>
-		</noscript>
- 	 </body>
-</html>
-					
-    `;
+  <!DOCTYPE html>
+  <html>
+     <head>
+        <title>Sample POST Form</title>
+        <meta charset="utf-8">
+        <script>
+                function hideCardPANData() {
+                  if (document
+                      .getElementById('isPayWithCardToken').checked) {
+                    document.getElementById('cardPANData').style.display = 'none';
+                    document
+                        .getElementById('cardTokenContainer').style.display = 'block';
+                  } else {
+                    document
+                        .getElementById('cardTokenContainer').style.display = 'none';
+                    document.getElementById('cardPANData').style.display = 'block';
+                  }
+                }
+              </script>
+        <style type="text/css">
+  form {
+    display: table;
+  }
+  p {
+    display: table-row;
+  }
+  label {
+    display: table-cell;
+  }
+  input {
+    display: table-cell;
+  }
+  </style>
+     </head>
+     <body onload="hideCardPANData();">
+        <form
+      action="${formAction}"
+      method="post">
+           <div>
+              <label for="isPayWithCardToken">Pay with Card Token</label>
+              <input type="checkbox" onclick="hideCardPANData();"
+          name="isPayWithCardToken" id="isPayWithCardToken" autocomplete="off"
+          maxlength="32" />
+           </div>
+           <div class="container">
+              <div id="cardPANData">
+                 <p>
+                    <label for="cardOwner">Card Owner Name</label>
+                    <input type="text"  name="cardOwner" id="cardOwner"
+              autocomplete="off" maxlength="32" />
+                 </p>
+                 <p>
+                    <label for="pan">Card Number (PAN)</label>
+                    <input type="text" id="pan" name="pan"
+              autocomplete="off" maxlength="19" />
+                 </p>
+                 <p>
+                    <label for="expiryMonth">Expiration Date</label>
+                    <select name="expiryMonth" id="expiryMonth">
+                       <option value="01">January</option>
+                       <option value="02">February</option>
+                       <option value="03">March</option>
+                       <option value="04">April</option>
+                       <option value="05">May</option>
+                       <option value="06">June</option>
+                       <option value="07">July</option>
+                       <option value="08">August</option>
+                       <option value="09">September</option>
+                       <option value="10">October</option>
+                       <option value="11">November</option>
+                       <option value="12">December</option>
+                    </select>
+                    <select name="expiryYear" id="expiryYear">
+                       <option value="2024">2024</option>
+                       <option value="2025">2025</option>
+                       <option value="2026">2026</option>
+                       <option value="2027">2027</option>
+                       <option value="2028">2028</option>
+                       <option value="2029">2029</option>
+                       <option value="2030">2030</option>
+                       <option value="2031">2031</option>
+                       <option value="2032">2032</option>
+                       <option value="2033">2033</option>
+                       <option value="2034">2034</option>
+                    </select>
+                 </p>
+                 <p>
+                    <label for="cvv">Security Code (CVV)</label>
+                    <input type="input" name="cvv" id="cvv"
+              autocomplete="off" maxlength="4" />
+                 </p>
+                 <p>
+                    <label for="saveCard">Save Card</label>
+                    <input type="checkbox" name="saveCard" id="saveCard"
+              value="YES" />
+                 </p>
+                 <p>
+                    <label for="cardName">Card Name</label>
+                    <input type="text" name="cardName" id="cardName" />
+                 </p>
+                 <p>
+                    <label for="installmentCount">Installment Count</label>
+                    <input disabled type="text" name="installmentCount"
+              id="installmentCount" />
+                 </p>
+                 <input type="hidden" value="" name="points" id="points" />
+           <input type="hidden" value="" name="paymentSystem"
+            id="paymentSystem" />
+              </div>
+           </div>
+           <div id="cardTokenContainer">
+              <p>
+                 <label for="cardToken">Card Token</label>
+                 <input type="text" name="cardToken" id="cardToken"
+            autocomplete="off" maxlength="64" />
+              </p>
+              <p>
+                 <label for="installmentCount">Installment Count</label>
+                 <input type="text" disabled name="installmentCount"
+            id="installmentCount" />
+              </p>
+           </div>
+           <input type="submit" value="Submit" />
+          </form>
+         
+         <script type="text/javascript" src="https://ZIRAATPAY_HOST/ziraatpay/static/external/whitewolf-v3.js"></script>
+      <script type="text/javascript">
+        whitewolf.run(h.online-metrix.net, ORG_ID, SESSIONTOKEN);
+      </script>
+      <noscript>
+          <iframe
+              style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;"
+              src="https://h.online-metrix.net/tags?org_id=ORG_ID&session_id=UNIQUE_SESSION_ID&pageid=PAGEID">
+          </iframe>
+      </noscript>
+      </body>
+  </html>
+  `;
 
     popup.document.open();
     popup.document.write(formHtml);
     popup.document.close();
   }
+
   function waitForPopupCompletion() {
     return new Promise((resolve) => {
       const handler = (event) => {
@@ -220,11 +248,11 @@ input {
     const isOtherCard = !binExists;
     try {
       const body = {
-        amount: user.cart.total,
+        amount: total || user.cart.total,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone: user.phone || "5380000000",
-        returnUrl: "http://localhost:3000/payment/result",
+        returnUrl: "https://store.bikev.k12.tr/payment/result",
         isOtherCard: isOtherCard,
         orderItems: products
           ? products.map((product) => ({
@@ -246,7 +274,7 @@ input {
       };
       const response = await axios.post(
         `https://final-project-backend-m9nb.onrender.com/${
-          is3DSecure ? "payment/3d-session" : "payment"
+          is3DSecure ? "payment" : "payment"
         }`,
         body
       );
@@ -258,14 +286,14 @@ input {
           CARDPAN: `${cardNumber}`,
           CARDEXPIRY: `${expDate}`,
           CARDCVV: `${cvv}`,
-          INSTALLMENTS: "1",
+          INSTALLMENTS: "",
           NAMEONCARD: `${nameOnCard}`,
           CARDOWNER: `${nameOnCard}`,
         });
         await waitForPopupCompletion(); // ✅ fix
         return response.data.sessionToken;
       } else {
-        return response.data.sessionToken;
+        // return response.data.sessionToken;
       }
     } catch (error) {
       console.error("Error creating payment session", error);
@@ -323,6 +351,7 @@ input {
         cardCvv: cvv,
         nameOnCard,
       });
+
       if (!chargeResult || chargeResult.responseMsg !== "Approved") {
         setAlertVariant("danger");
         setAlertMessage(
@@ -332,30 +361,34 @@ input {
         setPaying(false);
         return;
       }
-    }
-    const fullAddress = `${street}, ${area}, ${city}`;
-    try {
-      const res = await createOrder({
-        userId: user._id,
-        cart: user.cart,
-        address: fullAddress,
-        country: "Türkiye",
-        username: user.name,
-        schoolName: user.k12?.schoolName || "",
-      });
 
-      if (res?.data) {
-        setAlertVariant("success");
-        setAlertMessage("Ödeme durumu: Başarılı");
-        setShowToast(true);
-        setTimeout(() => navigate("/orders"), 1000);
+      // Only non-3D payment creates the order here
+      const fullAddress = `${street}, ${area}, ${city}`;
+      try {
+        const res = await createOrder({
+          userId: user._id,
+          cart: user.cart,
+          address: fullAddress,
+          country: "Türkiye",
+          username: user.name,
+          schoolName: user.k12?.schoolName || "",
+        });
+
+        if (res?.data) {
+          setAlertVariant("success");
+          setAlertMessage("Ödeme durumu: Başarılı");
+          setShowToast(true);
+          setTimeout(() => navigate("/orders"), 1000);
+        }
+      } catch (err) {
+        setAlertVariant("danger");
+        setAlertMessage("Sipariş oluşturulurken bir hata oluştu.");
+      } finally {
+        setPaying(false);
       }
-    } catch (err) {
-      setAlertVariant("danger");
-      setAlertMessage("Sipariş oluşturulurken bir hata oluştu.");
-    } finally {
-      setPaying(false);
     }
+
+    // If 3D Secure, wait for the postMessage in useEffect
   };
 
   return (
@@ -443,39 +476,39 @@ input {
               </Form.Group>
             </Col>
           </Row>
-          {/* <Form.Group controlId="is3DSecure" className="mb-3">
+          <Form.Group controlId="is3DSecure" className="mb-3">
             <Form.Check
               type="checkbox"
               label="3D Secure Kart ile ödeme yap"
               checked={is3DSecure}
+              disabled={is3DSecure}
+              required
               onChange={(e) => setIs3DSecure(e.target.checked)}
             />
-          </Form.Group> */}
+          </Form.Group>
+          <Form.Group controlId="nameOnCard" className="mb-3">
+            <Form.Label>Kart Üzerindeki İsim</Form.Label>
+            <Form.Control
+              type="text"
+              value={nameOnCard}
+              placeholder="Kart Üzerindeki İsim"
+              onChange={(e) => setNameOnCard(e.target.value)}
+              required
+            />
+          </Form.Group>
 
-          {!is3DSecure && (
+          <Form.Group controlId="cardNumber" className="mb-3">
+            <Form.Label>Kart Numarası</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Kart Numarası"
+              value={cardNumber}
+              onChange={(e) => setCardNumber(e.target.value)}
+              required
+            />
+          </Form.Group>
+          {/* {!is3DSecure && (
             <>
-              <Form.Group controlId="nameOnCard" className="mb-3">
-                <Form.Label>Kart Üzerindeki İsim</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={nameOnCard}
-                  placeholder="Kart Üzerindeki İsim"
-                  onChange={(e) => setNameOnCard(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group controlId="cardNumber" className="mb-3">
-                <Form.Label>Kart Numarası</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Kart Numarası"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  required
-                />
-              </Form.Group>
-
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group controlId="cvv">
@@ -519,7 +552,7 @@ input {
                 </Col>
               </Row>
             </>
-          )}
+          )} */}
           <div className="d-grid">
             <Button
               type="submit"

@@ -45,6 +45,7 @@ function DashboardCampaigns() {
     (currentPage - 1) * campaignsPerPage,
     currentPage * campaignsPerPage
   );
+  console.log("TCL ~ DashboardCampaigns ~ currentCampaigns:", currentCampaigns);
 
   const uniqueCategories = useMemo(() => {
     return Array.from(
@@ -149,6 +150,7 @@ function DashboardCampaigns() {
             <th>Başlangıç</th>
             <th>Bitiş</th>
             <th>Kategori</th>
+            <th>Gift Items</th>
             <th>Kullanıcılar</th>
             <th>İşlemler</th>
           </tr>
@@ -173,6 +175,17 @@ function DashboardCampaigns() {
                       </span>
                     ))}
                   </div>
+                </td>
+                <td>
+                  {c?.subItems?.items
+                    ? c?.subItems?.items?.map((val) => {
+                        return (
+                          <span className="badge bg-secondary text-light p-1 px-2">
+                            {val.name}
+                          </span>
+                        );
+                      })
+                    : "Na"}
                 </td>
                 <td>
                   <div className="d-flex flex-wrap gap-1">

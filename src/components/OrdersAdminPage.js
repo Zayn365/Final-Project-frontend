@@ -6,7 +6,6 @@ import Loading from "./Loading";
 
 function OrdersAdminPage() {
   const [orders, setOrders] = useState([]);
-  console.log("TCL ~ OrdersAdminPage ~ orders:", orders);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,18 +74,21 @@ function OrdersAdminPage() {
   }, [students]);
 
   const schoolOptions = useMemo(() => {
-    return Array.from(new Set(students.map((s) => s.Okul))).filter(Boolean);
+    return Array.from(
+      new Set(students.map((s) => s.Okul?.trim()).filter(Boolean))
+    );
   }, [students]);
-
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const name = order.owner?.name || "";
       const addr = order.address || "";
-      const school = studentSchoolMap[order.username] || "";
+      const school = order.schoolName || "";
       const matchesSearch =
         name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         addr.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSchool = selectedSchool ? school === selectedSchool : true;
+      const matchesSchool = selectedSchool
+        ? school?.toLowerCase().trim() === selectedSchool.toLowerCase().trim()
+        : true;
       return matchesSearch && matchesSchool;
     });
   }, [orders, searchTerm, selectedSchool, studentSchoolMap]);

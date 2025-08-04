@@ -13,6 +13,8 @@ function NewCampaignModal({ show, handleClose }) {
     amount: "",
     start_Date: today,
     end_date: today,
+    subItemsPrice: "",
+    subItemsItems: [], // Full product objects
   });
 
   const [students, setStudents] = useState([]);
@@ -78,6 +80,8 @@ function NewCampaignModal({ show, handleClose }) {
       amount: "",
       start_Date: today,
       end_date: today,
+      subItemsPrice: "",
+      subItemsItems: [],
     });
     setSelectedUsers([]);
     setSearchTerm("");
@@ -125,6 +129,10 @@ function NewCampaignModal({ show, handleClose }) {
       ...form,
       amount: Number(form.amount),
       selectedUsers,
+      subItems: {
+        price: Number(form.subItemsPrice),
+        items: form.subItemsItems,
+      },
     };
 
     if (
@@ -236,6 +244,65 @@ function NewCampaignModal({ show, handleClose }) {
               {[...new Set(products.map((p) => p.category))].map((category) => (
                 <option key={category} value={category}>
                   {category}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Hediye Ürün Fiyatı</Form.Label>
+            <Form.Control
+              type="number"
+              value={form.subItemsPrice}
+              onChange={handleChange("subItemsPrice")}
+              placeholder="Hediye ürün fiyatı giriniz"
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Hediye Ürünler</Form.Label>
+            <div className="d-flex flex-wrap gap-2 mb-2">
+              {form.subItemsItems.map((prod) => (
+                <div
+                  key={prod._id}
+                  className="d-flex align-items-center border rounded p-1 pe-2"
+                >
+                  <span className="me-2">{prod.name}</span>
+                  <i
+                    className="fa fa-times text-danger"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        subItemsItems: prev.subItemsItems.filter(
+                          (p) => p._id !== prod._id
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+
+            <Form.Select
+              onChange={(e) => {
+                const selected = e.target.value;
+                const product = products.find((p) => p._id === selected);
+                if (
+                  product &&
+                  !form.subItemsItems.some((item) => item._id === product._id)
+                ) {
+                  setForm((prev) => ({
+                    ...prev,
+                    subItemsItems: [...prev.subItemsItems, product],
+                  }));
+                }
+              }}
+            >
+              <option value="">Hediye ürün seçiniz</option>
+              {products.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name}
                 </option>
               ))}
             </Form.Select>

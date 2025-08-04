@@ -9,14 +9,13 @@ import {
   useRemoveFromCartMutation,
 } from "../services/appApi";
 import "./CartPage.css";
-import { useState } from "react";
 
-const stripePromise = loadStripe("pk_test_..."); // shortened for clarity
+const stripePromise = loadStripe("pk_test_...");
 
 function CartPage() {
   const user = useSelector((state) => state.user);
   const products = useSelector((state) => state.products);
-  const campaigns = useSelector((state) => state.campaigns); // 👈 get campaign state
+  const campaigns = useSelector((state) => state.campaigns);
   const [increaseCart] = useIncreaseCartProductMutation();
   const [decreaseCart] = useDecreaseCartProductMutation();
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
@@ -24,42 +23,33 @@ function CartPage() {
   const userCart = user.cart;
   const cartItems = products.filter((product) => userCart[product._id]);
 
-  // Utility: Get discounted price if campaign exists
-  const getDiscountedPrice = (product) => {
-    if (campaigns.length <= 0 || !product.category) {
-      return parseFloat(product.price);
-    }
-
-    const campaign = campaigns.find((c) => {
-      return (
+  const getCampaignForProduct = (product) =>
+    campaigns.find(
+      (c) =>
         Array.isArray(c.products) &&
         c.products.includes(product.category) &&
         (Array.isArray(c.selectedUsers)
           ? c.selectedUsers.includes(user?.tc_id)
           : c.selectedUser === user?.tc_id)
-      );
-    });
+    );
 
+  const getDiscountedPrice = (product) => {
+    const campaign = getCampaignForProduct(product);
     if (!campaign) return parseFloat(product.price);
-
     if (campaign.type === "percentage") {
-      const actualAmount =
-        parseFloat(product.price) * (1 - campaign.amount / 100);
-      return actualAmount;
+      return parseFloat(product.price) * (1 - campaign.amount / 100);
     } else if (campaign.type === "fixed") {
-      const actualAmountFixed = Math.max(
-        parseFloat(product.price) - campaign.amount,
-        0
-      );
-      return actualAmountFixed;
+      return Math.max(parseFloat(product.price) - campaign.amount, 0);
     }
     return parseFloat(product.price);
   };
-  // Total price with campaign discounts
+
   const total = cartItems.reduce((acc, item) => {
     const quantity = userCart[item._id];
     const discountedPrice = getDiscountedPrice(item);
-    return acc + discountedPrice * quantity;
+    const campaign = getCampaignForProduct(item);
+    const subItemsTotal = campaign?.subItems?.price || 0;
+    return acc + discountedPrice * quantity + subItemsTotal;
   }, 0);
 
   const handleDecrease = (product) => {
@@ -81,11 +71,14 @@ function CartPage() {
               <CheckoutForm
                 products={cartItems.map((item) => {
                   const discountedPrice = getDiscountedPrice(item);
+                  const campaign = getCampaignForProduct(item);
+                  const subItems = campaign?.subItems?.price || 0;
                   return {
                     ...item,
-                    price: discountedPrice,
+                    price: discountedPrice + subItems,
                   };
                 })}
+                total={total}
               />
             </Elements>
           )}
@@ -109,76 +102,106 @@ function CartPage() {
                   const originalPrice = parseFloat(item.price);
                   const discountedPrice = getDiscountedPrice(item);
                   const hasDiscount = discountedPrice < originalPrice;
+                  const campaign = getCampaignForProduct(item);
+                  const subItems = campaign?.subItems?.items || [];
+
                   return (
-                    <tr key={item._id}>
-                      <td>
-                        {!isLoading && (
-                          <i
-                            className="fa fa-times text-danger"
-                            style={{ cursor: "pointer" }}
-                            onClick={() =>
-                              removeFromCart({
-                                productId: item._id,
-                                price: item.price,
-                                userId: user._id,
-                              })
-                            }
-                          ></i>
-                        )}
-                      </td>
-                      <td>
-                        <img
-                          src={item.pictures[0]?.url}
-                          alt={item.name}
-                          style={{
-                            width: 80,
-                            height: 80,
-                            objectFit: "cover",
-                          }}
-                        />
-                      </td>
-                      <td>
-                        ₺
-                        {hasDiscount ? (
-                          <>
-                            <span className="text-muted text-decoration-line-through">
-                              {originalPrice.toFixed(2)}
-                            </span>{" "}
-                            <span className="text-success fw-bold">
-                              {discountedPrice.toFixed(2)}
-                            </span>
-                          </>
-                        ) : (
-                          originalPrice.toFixed(2)
-                        )}
-                      </td>
-                      <td>
-                        <div className="quantity-indicator">
-                          <i
-                            className="fa fa-minus-circle"
-                            onClick={() =>
-                              handleDecrease({
-                                productId: item._id,
-                                price: item.price,
-                                userId: user._id,
-                              })
-                            }
-                          ></i>
-                          <span>{quantity}</span>
-                          <i
-                            className="fa fa-plus-circle"
-                            onClick={() =>
-                              increaseCart({
-                                productId: item._id,
-                                price: item.price,
-                                userId: user._id,
-                              })
-                            }
-                          ></i>
-                        </div>
-                      </td>
-                      <td>₺{(discountedPrice * quantity).toFixed(2)}</td>
-                    </tr>
+                    <>
+                      <tr key={item._id}>
+                        <td>
+                          {!isLoading && (
+                            <i
+                              className="fa fa-times text-danger"
+                              style={{ cursor: "pointer" }}
+                              onClick={() =>
+                                removeFromCart({
+                                  productId: item._id,
+                                  price: item.price,
+                                  userId: user._id,
+                                })
+                              }
+                            ></i>
+                          )}
+                        </td>
+                        <td>
+                          <img
+                            src={item.pictures[0]?.url}
+                            alt={item.name}
+                            style={{
+                              width: 80,
+                              height: 80,
+                              objectFit: "cover",
+                            }}
+                          />
+                        </td>
+                        <td>
+                          ₺
+                          {hasDiscount ? (
+                            <>
+                              <span className="text-muted text-decoration-line-through">
+                                {originalPrice.toFixed(2)}
+                              </span>{" "}
+                              <span className="text-success fw-bold">
+                                {discountedPrice.toFixed(2)}
+                              </span>
+                            </>
+                          ) : (
+                            originalPrice.toFixed(2)
+                          )}
+                        </td>
+                        <td>
+                          <div className="quantity-indicator">
+                            <i
+                              className="fa fa-minus-circle"
+                              onClick={() =>
+                                handleDecrease({
+                                  productId: item._id,
+                                  price: item.price,
+                                  userId: user._id,
+                                })
+                              }
+                            ></i>
+                            <span>{quantity}</span>
+                            <i
+                              className="fa fa-plus-circle"
+                              onClick={() =>
+                                increaseCart({
+                                  productId: item._id,
+                                  price: item.price,
+                                  userId: user._id,
+                                })
+                              }
+                            ></i>
+                          </div>
+                        </td>
+                        <td>₺{(discountedPrice * quantity).toFixed(2)}</td>
+                      </tr>
+
+                      {subItems.map((sub, index) => (
+                        <tr
+                          key={`${item._id}-sub-${index}`}
+                          className="bg-light"
+                        >
+                          <td>
+                            <img
+                              src={sub.pictures[0]?.url}
+                              alt={sub.name}
+                              style={{
+                                width: 40,
+                                height: 40,
+                                objectFit: "cover",
+                              }}
+                            />
+                          </td>
+                          <td colSpan={2}>
+                            <span className="fw-bold">{sub.name}</span>
+                          </td>
+                          <td colSpan={2} className="text-end text-muted">
+                            +₺{campaign?.subItems.price.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </>
                   );
                 })}
               </tbody>

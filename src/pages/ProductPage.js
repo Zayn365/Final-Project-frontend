@@ -20,6 +20,8 @@ function ProductPage() {
   // const [similar, setSimilar] = useState(null);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
+  const [showGifts, setShowGifts] = useState(false);
+
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const handleDragStart = (e) => e.preventDefault();
@@ -118,23 +120,65 @@ function ProductPage() {
               finalPrice = Math.max(finalPrice, 0);
             }
 
-            return (
-              <div className="d-flex flex-column align-items-center text-center mb-3">
-                {campaignAmount && (
-                  <Badge bg="success" className="mb-2">
-                    {campaignAmount} İNDİRİM
-                  </Badge>
-                )}
+            const subItems = campaign?.subItems?.items || [];
 
-                <p className="product__price mb-0">
-                  ₺ {formatWithCommas(finalPrice.toFixed(0))}{" "}
+            return (
+              <>
+                <div className="d-flex flex-column align-items-center text-center mb-3">
                   {campaignAmount && (
-                    <span className="text-muted text-decoration-line-through ms-2 small">
-                      ₺ {formatWithCommas(Number(product.price).toFixed(0))}
-                    </span>
+                    <Badge bg="success" className="mb-2">
+                      {campaignAmount} İNDİRİM
+                    </Badge>
                   )}
-                </p>
-              </div>
+
+                  <p className="product__price mb-0">
+                    ₺ {formatWithCommas(finalPrice.toFixed(0))}{" "}
+                    {campaignAmount && (
+                      <span className="text-muted text-decoration-line-through ms-2 small">
+                        ₺ {formatWithCommas(Number(product.price).toFixed(0))}
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {subItems.length > 0 && (
+                  <div className="text-center mb-3">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => setShowGifts((prev) => !prev)}
+                    >
+                      {showGifts ? "Hediyeleri Gizle" : "Hediyeleri Gör"}
+                    </Button>
+
+                    {showGifts && (
+                      <div className="border mt-3 p-2 rounded bg-light text-start">
+                        <h6 className="mb-2">Hediye Ürünler:</h6>
+                        <p className="text-success">
+                          Fiyat: ₺{campaign?.subItems?.price}
+                        </p>
+                        {subItems.map((item) => (
+                          <div
+                            key={item._id}
+                            className="d-flex align-items-center gap-2 mb-2"
+                          >
+                            <img
+                              src={item.pictures?.[0]?.url}
+                              alt={item.name}
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                objectFit: "cover",
+                              }}
+                            />
+                            <span className="small">{item.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             );
           })()}
 
