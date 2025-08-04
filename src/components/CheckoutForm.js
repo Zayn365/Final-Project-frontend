@@ -248,7 +248,7 @@ function CheckoutForm({ products, total }) {
     const isOtherCard = !binExists;
     try {
       const body = {
-        amount: 1,
+        amount: total || user.cart.total,
         customerName: user.name,
         customerEmail: user.email,
         customerPhone: user.phone || "5380000000",
@@ -262,7 +262,7 @@ function CheckoutForm({ products, total }) {
               name: product.name,
               description: product.description,
               quantity: user.cart[product._id],
-              amount: 1,
+              amount: product.price,
             }))
           : [
               {
