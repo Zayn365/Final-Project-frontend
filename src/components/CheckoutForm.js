@@ -6,6 +6,7 @@ import { useCreateOrderMutation } from "../services/appApi";
 import ToastMessage from "../components/ToastMessage";
 import axios from "axios";
 import { bankBins } from "../utils/bankBins";
+import logo from "../assets/images/logo.png";
 function CheckoutForm({ products, total }) {
   const stripe = true;
   const elements = true;
@@ -87,144 +88,130 @@ function CheckoutForm({ products, total }) {
       .join("");
 
     const formHtml = `
-  <!DOCTYPE html>
-  <html>
-     <head>
-        <title>Sample POST Form</title>
-        <meta charset="utf-8">
-        <script>
-                function hideCardPANData() {
-                  if (document
-                      .getElementById('isPayWithCardToken').checked) {
-                    document.getElementById('cardPANData').style.display = 'none';
-                    document
-                        .getElementById('cardTokenContainer').style.display = 'block';
-                  } else {
-                    document
-                        .getElementById('cardTokenContainer').style.display = 'none';
-                    document.getElementById('cardPANData').style.display = 'block';
-                  }
-                }
-              </script>
-        <style type="text/css">
-  form {
-    display: table;
-  }
-  p {
-    display: table-row;
-  }
-  label {
-    display: table-cell;
-  }
-  input {
-    display: table-cell;
-  }
-  </style>
-     </head>
-     <body onload="hideCardPANData();">
-        <form
-      action="${formAction}"
-      method="post">
-           <div>
-              <label for="isPayWithCardToken">Pay with Card Token</label>
-              <input type="checkbox" onclick="hideCardPANData();"
-          name="isPayWithCardToken" id="isPayWithCardToken" autocomplete="off"
-          maxlength="32" />
-           </div>
-           <div class="container">
-              <div id="cardPANData">
-                 <p>
-                    <label for="cardOwner">Card Owner Name</label>
-                    <input type="text"  name="cardOwner" id="cardOwner"
-              autocomplete="off" maxlength="32" />
-                 </p>
-                 <p>
-                    <label for="pan">Card Number (PAN)</label>
-                    <input type="text" id="pan" name="pan"
-              autocomplete="off" maxlength="19" />
-                 </p>
-                 <p>
-                    <label for="expiryMonth">Expiration Date</label>
-                    <select name="expiryMonth" id="expiryMonth">
-                       <option value="01">January</option>
-                       <option value="02">February</option>
-                       <option value="03">March</option>
-                       <option value="04">April</option>
-                       <option value="05">May</option>
-                       <option value="06">June</option>
-                       <option value="07">July</option>
-                       <option value="08">August</option>
-                       <option value="09">September</option>
-                       <option value="10">October</option>
-                       <option value="11">November</option>
-                       <option value="12">December</option>
-                    </select>
-                    <select name="expiryYear" id="expiryYear">
-                       <option value="2024">2024</option>
-                       <option value="2025">2025</option>
-                       <option value="2026">2026</option>
-                       <option value="2027">2027</option>
-                       <option value="2028">2028</option>
-                       <option value="2029">2029</option>
-                       <option value="2030">2030</option>
-                       <option value="2031">2031</option>
-                       <option value="2032">2032</option>
-                       <option value="2033">2033</option>
-                       <option value="2034">2034</option>
-                    </select>
-                 </p>
-                 <p>
-                    <label for="cvv">Security Code (CVV)</label>
-                    <input type="input" name="cvv" id="cvv"
-              autocomplete="off" maxlength="4" />
-                 </p>
-                 <p>
-                    <label for="saveCard">Save Card</label>
-                    <input type="checkbox" name="saveCard" id="saveCard"
-              value="YES" />
-                 </p>
-                 <p>
-                    <label for="cardName">Card Name</label>
-                    <input type="text" name="cardName" id="cardName" />
-                 </p>
-                 <p>
-                    <label for="installmentCount">Installment Count</label>
-                    <input disabled type="text" name="installmentCount"
-              id="installmentCount" />
-                 </p>
-                 <input type="hidden" value="" name="points" id="points" />
-           <input type="hidden" value="" name="paymentSystem"
-            id="paymentSystem" />
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Form</title>
+              <link rel="icon" href="${logo}" />
+          <meta charset="utf-8" />
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+          <script>
+            function hideCardPANData() {
+              if (document.getElementById('isPayWithCardToken').checked) {
+                document.getElementById('cardPANData').style.display = 'none';
+                document.getElementById('cardTokenContainer').style.display = 'block';
+              } else {
+                document.getElementById('cardTokenContainer').style.display = 'none';
+                document.getElementById('cardPANData').style.display = 'block';
+              }
+            }
+          </script>
+        </head>
+        <body onload="hideCardPANData();">
+        <div style="display: flex; justify-content: center; background-color: #00214d; padding-top: 10px; ">
+         <img src="${logo}" alt="logo" height="100" />
+        </div>
+          <div class="container py-5">
+            <h3 class="mb-4">Card Payment Form</h3>
+            <form action="${formAction}" method="post" class="row g-3">
+              <div class="col-12 form-check mb-3">
+                <input type="checkbox" class="form-check-input" id="isPayWithCardToken" name="isPayWithCardToken" onclick="hideCardPANData();" />
+                <label class="form-check-label" for="isPayWithCardToken">Pay with Card Token</label>
               </div>
-           </div>
-           <div id="cardTokenContainer">
-              <p>
-                 <label for="cardToken">Card Token</label>
-                 <input type="text" name="cardToken" id="cardToken"
-            autocomplete="off" maxlength="64" />
-              </p>
-              <p>
-                 <label for="installmentCount">Installment Count</label>
-                 <input type="text" disabled name="installmentCount"
-            id="installmentCount" />
-              </p>
-           </div>
-           <input type="submit" value="Submit" />
-          </form>
-         
-         <script type="text/javascript" src="https://ZIRAATPAY_HOST/ziraatpay/static/external/whitewolf-v3.js"></script>
-      <script type="text/javascript">
-        whitewolf.run(h.online-metrix.net, ORG_ID, SESSIONTOKEN);
-      </script>
-      <noscript>
-          <iframe
+      
+              <div id="cardPANData" class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="cardOwner">Card Owner Name</label>
+                  <input type="text" class="form-control" name="cardOwner" id="cardOwner" maxlength="32" autocomplete="off" />
+                </div>
+      
+                <div class="col-md-6">
+                  <label class="form-label" for="pan">Card Number (PAN)</label>
+                  <input type="text" class="form-control" name="pan" id="pan" maxlength="19" autocomplete="off" />
+                </div>
+      
+                <div class="col-md-6">
+                  <label class="form-label" for="expiryMonth">Expiration Date</label>
+                  <div class="d-flex gap-2">
+                    <select class="form-select" name="expiryMonth" id="expiryMonth">
+                      ${[..."01,02,03,04,05,06,07,08,09,10,11,12".split(",")]
+                        .map(
+                          (m, i) =>
+                            `<option value="${m}">${new Date(
+                              0,
+                              i
+                            ).toLocaleString("default", {
+                              month: "long",
+                            })}</option>`
+                        )
+                        .join("")}
+                    </select>
+                    <select class="form-select" name="expiryYear" id="expiryYear">
+                      ${Array.from(
+                        { length: 11 },
+                        (_, i) =>
+                          `<option value="${2024 + i}">${2024 + i}</option>`
+                      ).join("")}
+                    </select>
+                  </div>
+                </div>
+      
+                <div class="col-md-6">
+                  <label class="form-label" for="cvv">Security Code (CVV)</label>
+                  <input type="text" class="form-control" name="cvv" id="cvv" maxlength="4" autocomplete="off" />
+                </div>
+      
+                <div class="col-md-6">
+                  <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" name="saveCard" id="saveCard" value="YES" />
+                    <label class="form-check-label" for="saveCard">Save Card</label>
+                  </div>
+                </div>
+      
+                <div class="col-md-6">
+                  <label class="form-label" for="cardName">Card Name</label>
+                  <input type="text" class="form-control" name="cardName" id="cardName" />
+                </div>
+      
+                <div class="col-md-6">
+                  <label class="form-label" for="installmentCount">Installment Count</label>
+                  <input type="text" class="form-control" name="installmentCount" id="installmentCount" disabled />
+                </div>
+      
+                <input type="hidden" value="" name="points" id="points" />
+                <input type="hidden" value="" name="paymentSystem" id="paymentSystem" />
+              </div>
+      
+              <div id="cardTokenContainer" style="display: none;" class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="cardToken">Card Token</label>
+                  <input type="text" class="form-control" name="cardToken" id="cardToken" maxlength="64" autocomplete="off" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="installmentCount">Installment Count</label>
+                  <input type="text" class="form-control" name="installmentCount" id="installmentCount" disabled />
+                </div>
+              </div>
+      
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+              </div>
+            </form>
+          </div>
+      
+          <script type="text/javascript" src="https://ZIRAATPAY_HOST/ziraatpay/static/external/whitewolf-v3.js"></script>
+          <script>
+            whitewolf.run(h.online-metrix.net, ORG_ID, SESSIONTOKEN);
+          </script>
+          <noscript>
+            <iframe
               style="width: 100px; height: 100px; border: 0; position: absolute; top: -5000px;"
               src="https://h.online-metrix.net/tags?org_id=ORG_ID&session_id=UNIQUE_SESSION_ID&pageid=PAGEID">
-          </iframe>
-      </noscript>
-      </body>
-  </html>
-  `;
+            </iframe>
+          </noscript>
+        </body>
+      </html>
+      `;
 
     popup.document.open();
     popup.document.write(formHtml);
