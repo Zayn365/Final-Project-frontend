@@ -57,7 +57,7 @@ function CheckoutForm({ products, total }) {
             await Promise.all(
               user.k12.students.map((student) =>
                 axios.post(
-                  "https://final-project-backend-m9nb.onrender.com/user/k12/sale",
+                  "https://final-project-backend-m9nb.onrender.com/users/k12/sale",
                   {
                     userId: user._id,
                     data: {
