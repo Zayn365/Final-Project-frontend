@@ -8,6 +8,36 @@ import {
 import AddCampaignModal from "./NewCampaignModal";
 import EditCampaignModal from "./EditCampaignModal";
 
+const UserBadgeList = ({ tcs = [], students = [] }) => {
+  const [expanded, setExpanded] = useState(false);
+  const maxVisible = 3;
+
+  const visible = expanded ? tcs : tcs.slice(0, maxVisible);
+
+  return (
+    <div className="d-flex flex-wrap gap-1">
+      {visible.map((tc) => {
+        const student = students.find((s) => s.Ogrenci_TC === tc);
+        return (
+          <span key={tc} className="badge bg-secondary text-light p-1 px-2">
+            {student ? `${student.Ad} (${tc})` : tc}
+          </span>
+        );
+      })}
+      {tcs.length > maxVisible && (
+        <span
+          className="badge bg-info text-dark p-1 px-2"
+          role="button"
+          style={{ cursor: "pointer" }}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "Daha Az" : "Daha Fazla"}
+        </span>
+      )}
+    </div>
+  );
+};
+
 function DashboardCampaigns() {
   const dispatch = useDispatch();
   const campaigns = useSelector((state) => state.campaigns || []);
@@ -188,21 +218,10 @@ function DashboardCampaigns() {
                     : "Na"}
                 </td>
                 <td>
-                  <div className="d-flex flex-wrap gap-1">
-                    {(c.selectedUsers || []).map((tc) => {
-                      const student = studentsData.find(
-                        (s) => s.Ogrenci_TC === tc
-                      );
-                      return (
-                        <span
-                          key={tc}
-                          className="badge bg-secondary text-light p-1 px-2"
-                        >
-                          {student ? `${student.Ad} (${tc})` : tc}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  <UserBadgeList
+                    tcs={c.selectedUsers}
+                    students={studentsData}
+                  />
                 </td>
                 <td className="d-flex gap-2">
                   <Button
