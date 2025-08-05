@@ -36,7 +36,7 @@ function AdminReportPage() {
     }
   };
 
-  // Filtering logic
+  // Filtering
   useEffect(() => {
     let filtered = [...reportData];
 

@@ -106,6 +106,7 @@ function CategoryPage() {
       hazırlık6066ay: "5yaş", // ✅ ADD THIS
       hazırlık6672ay: "5yaş",
       önhazırlık3648ay: "3yaş",
+      hazırlık3648: "3yaş",
     };
 
     // Handle preschool filtering
