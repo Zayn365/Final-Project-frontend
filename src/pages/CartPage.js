@@ -138,7 +138,7 @@ function CartPage() {
                           ₺
                           {hasDiscount ? (
                             <>
-                              <span className="text-muted text-decoration-line-through">
+                              <span className=" text-danger text-decoration-line-through">
                                 {originalPrice.toFixed(2)}
                               </span>{" "}
                               <span className="text-success fw-bold">

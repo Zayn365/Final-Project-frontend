@@ -120,8 +120,8 @@ function CheckoutForm({ products, total }) {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Payment Form</title>
-              <link rel="icon" href="${logo}" />
+          <title>Ödeme Formu</title>
+          <link rel="icon" href="${logo}" />
           <meta charset="utf-8" />
           <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
           <script>
@@ -137,30 +137,30 @@ function CheckoutForm({ products, total }) {
           </script>
         </head>
         <body onload="hideCardPANData();">
-        <div style="display: flex; justify-content: center; background-color: #00214d; padding-top: 10px; ">
-         <img src="${logo}" alt="logo" height="100" />
-        </div>
+          <div style="display: flex; justify-content: center; background-color: #00214d; padding-top: 10px;">
+            <img src="${logo}" alt="logo" height="100" />
+          </div>
           <div class="container py-5">
-            <h3 class="mb-4">Card Payment Form</h3>
+            <h3 class="mb-4">Kart ile Ödeme Formu</h3>
             <form action="${formAction}" method="post" class="row g-3">
               <div class="col-12 form-check mb-3">
                 <input type="checkbox" class="form-check-input" id="isPayWithCardToken" name="isPayWithCardToken" onclick="hideCardPANData();" />
-                <label class="form-check-label" for="isPayWithCardToken">Pay with Card Token</label>
+                <label class="form-check-label" for="isPayWithCardToken">Kart Token ile Öde</label>
               </div>
-      
+    
               <div id="cardPANData" class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label" for="cardOwner">Card Owner Name</label>
+                  <label class="form-label" for="cardOwner">Kart Sahibinin Adı</label>
                   <input type="text" class="form-control" name="cardOwner" id="cardOwner" maxlength="32" autocomplete="off" />
                 </div>
-      
+    
                 <div class="col-md-6">
-                  <label class="form-label" for="pan">Card Number (PAN)</label>
+                  <label class="form-label" for="pan">Kart Numarası (PAN)</label>
                   <input type="text" class="form-control" name="pan" id="pan" maxlength="19" autocomplete="off" />
                 </div>
-      
+    
                 <div class="col-md-6">
-                  <label class="form-label" for="expiryMonth">Expiration Date</label>
+                  <label class="form-label" for="expiryMonth">Son Kullanma Tarihi</label>
                   <div class="d-flex gap-2">
                     <select class="form-select" name="expiryMonth" id="expiryMonth">
                       ${[..."01,02,03,04,05,06,07,08,09,10,11,12".split(",")]
@@ -169,7 +169,7 @@ function CheckoutForm({ products, total }) {
                             `<option value="${m}">${new Date(
                               0,
                               i
-                            ).toLocaleString("default", {
+                            ).toLocaleString("tr-TR", {
                               month: "long",
                             })}</option>`
                         )
@@ -184,50 +184,50 @@ function CheckoutForm({ products, total }) {
                     </select>
                   </div>
                 </div>
-      
+    
                 <div class="col-md-6">
-                  <label class="form-label" for="cvv">Security Code (CVV)</label>
+                  <label class="form-label" for="cvv">Güvenlik Kodu (CVV)</label>
                   <input type="text" class="form-control" name="cvv" id="cvv" maxlength="4" autocomplete="off" />
                 </div>
-      
+    
                 <div class="col-md-6">
                   <div class="form-check mt-4">
                     <input class="form-check-input" type="checkbox" name="saveCard" id="saveCard" value="YES" />
-                    <label class="form-check-label" for="saveCard">Save Card</label>
+                    <label class="form-check-label" for="saveCard">Kartı Kaydet</label>
                   </div>
                 </div>
-      
+    
                 <div class="col-md-6">
-                  <label class="form-label" for="cardName">Card Name</label>
+                  <label class="form-label" for="cardName">Kart Adı</label>
                   <input type="text" class="form-control" name="cardName" id="cardName" />
                 </div>
-      
+    
                 <div class="col-md-6">
-                  <label class="form-label" for="installmentCount">Installment Count</label>
+                  <label class="form-label" for="installmentCount">Taksit Sayısı</label>
                   <input type="text" class="form-control" name="installmentCount" id="installmentCount" disabled />
                 </div>
-      
+    
                 <input type="hidden" value="" name="points" id="points" />
                 <input type="hidden" value="" name="paymentSystem" id="paymentSystem" />
               </div>
-      
+    
               <div id="cardTokenContainer" style="display: none;" class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label" for="cardToken">Card Token</label>
+                  <label class="form-label" for="cardToken">Kart Token</label>
                   <input type="text" class="form-control" name="cardToken" id="cardToken" maxlength="64" autocomplete="off" />
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label" for="installmentCount">Installment Count</label>
+                  <label class="form-label" for="installmentCount">Taksit Sayısı</label>
                   <input type="text" class="form-control" name="installmentCount" id="installmentCount" disabled />
                 </div>
               </div>
-      
+    
               <div class="col-12">
-                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                <button type="submit" class="btn btn-primary mt-3">Gönder</button>
               </div>
             </form>
           </div>
-      
+    
           <script type="text/javascript" src="https://ZIRAATPAY_HOST/ziraatpay/static/external/whitewolf-v3.js"></script>
           <script>
             whitewolf.run(h.online-metrix.net, ORG_ID, SESSIONTOKEN);
@@ -240,7 +240,7 @@ function CheckoutForm({ products, total }) {
           </noscript>
         </body>
       </html>
-      `;
+    `;
 
     popup.document.open();
     popup.document.write(formHtml);

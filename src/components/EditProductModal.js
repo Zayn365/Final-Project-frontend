@@ -179,6 +179,7 @@ function EditProductModal({ show, handleClose, productId }) {
       if (data) {
         resetAndClose();
         navigation("/admin");
+        window.location.reload();
       }
     });
   }
