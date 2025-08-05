@@ -23,6 +23,7 @@ function CategoryPage() {
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
   const [openGifts, setOpenGifts] = useState({});
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,6 +45,16 @@ function CategoryPage() {
 
     fetchData();
   }, []);
+  useEffect(() => {
+    if (isSuccess) {
+      setShowSuccessToast(true);
+      const timer = setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess]);
 
   const filtered = useMemo(() => {
     if (category.toLowerCase() === "all") return allProducts;
@@ -168,11 +179,12 @@ function CategoryPage() {
 
   return (
     <div className="category-page-container">
-      {isSuccess && (
+      {showSuccessToast && (
         <ToastMessage
           bg="success"
           title="Sepete Eklendi"
-          body={`sepetinize eklendi`}
+          body="Ürün sepetinize eklendi"
+          onClose={() => setShowSuccessToast(false)}
         />
       )}
       {showLoginToast && (

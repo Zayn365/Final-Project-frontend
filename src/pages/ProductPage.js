@@ -21,7 +21,7 @@ function ProductPage() {
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
   const [showGifts, setShowGifts] = useState(false);
-
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
   const handleDragStart = (e) => e.preventDefault();
@@ -46,6 +46,17 @@ function ProductPage() {
       return () => clearTimeout(timer);
     }
   }, [toastError]);
+  useEffect(() => {
+    if (isSuccess) {
+      setShowSuccessToast(true);
+      const timer = setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess]);
+
   if (!product) return <Loading />;
 
   // const responsive = {
@@ -328,6 +339,14 @@ function ProductPage() {
               bg="success"
               title="Sepete Eklendi"
               body={`${product.name} sepetinize eklendi`}
+            />
+          )}
+          {showSuccessToast && (
+            <ToastMessage
+              bg="success"
+              title="Sepete Eklendi"
+              body="Ürün sepetinize eklendi"
+              onClose={() => setShowSuccessToast(false)}
             />
           )}
         </Col>
