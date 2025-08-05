@@ -9,6 +9,7 @@ import {
   useRemoveFromCartMutation,
 } from "../services/appApi";
 import "./CartPage.css";
+import { formatWithCommas } from "../hooks/formatFuctions";
 
 const stripePromise = loadStripe("pk_test_...");
 
@@ -139,14 +140,14 @@ function CartPage() {
                           {hasDiscount ? (
                             <>
                               <span className=" text-danger text-decoration-line-through">
-                                {originalPrice.toFixed(2)}
+                                {formatWithCommas(originalPrice)}
                               </span>{" "}
                               <span className="text-success fw-bold">
-                                {discountedPrice.toFixed(2)}
+                                {formatWithCommas(discountedPrice)}
                               </span>
                             </>
                           ) : (
-                            originalPrice.toFixed(2)
+                            formatWithCommas(originalPrice)
                           )}
                         </td>
                         <td>
