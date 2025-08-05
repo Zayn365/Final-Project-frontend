@@ -80,6 +80,7 @@ function AddProductModal({ show, handleClose }) {
       sizes: [],
       class: [],
       images: [],
+      stock: "", // new
     });
     setCustomCategory("");
     setUseCustomCategory(false);
@@ -156,6 +157,7 @@ function AddProductModal({ show, handleClose }) {
       images,
       hasClass: true,
       hasSize,
+      stock: Number(form.stock), // add this
     };
 
     createProduct(payload).then(({ data }) => {
@@ -263,7 +265,15 @@ function AddProductModal({ show, handleClose }) {
               required
             />
           </Form.Group>
-
+          <Form.Group className="mb-3">
+            <Form.Label>Stok Adedi</Form.Label>
+            <Form.Control
+              type="number"
+              value={form.stock}
+              onChange={handleInput("stock")}
+              required
+            />
+          </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Kategori</Form.Label>
             <Form.Select

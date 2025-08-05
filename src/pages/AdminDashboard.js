@@ -4,6 +4,7 @@ import ClientsAdminPage from "../components/ClientsAdminPage";
 import DashboardProducts from "../components/DashboardProducts";
 import OrdersAdminPage from "../components/OrdersAdminPage";
 import DashboardCampaign from "../components/DashboardCampaign";
+import AdminReportPage from "../components/DashboardReports";
 function AdminDashboard() {
   return (
     <Container fluid className="py-4 px-5 bg-light min-vh-100">
@@ -24,6 +25,9 @@ function AdminDashboard() {
               <Nav.Item>
                 <Nav.Link eventKey="campaign">Kampanya</Nav.Link>
               </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="report">Raporlar</Nav.Link>
+              </Nav.Item>
             </Nav>
           </Col>
           <Col sm={9}>
@@ -39,6 +43,9 @@ function AdminDashboard() {
               </Tab.Pane>
               <Tab.Pane eventKey="campaign">
                 <DashboardCampaign />
+              </Tab.Pane>
+              <Tab.Pane eventKey="report">
+                <AdminReportPage />
               </Tab.Pane>
             </Tab.Content>
           </Col>

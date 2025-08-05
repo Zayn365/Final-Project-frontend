@@ -56,6 +56,7 @@ function EditProductModal({ show, handleClose, productId }) {
   const [images, setImages] = useState([]);
   const [imgToRemove, setImgToRemove] = useState(null);
   const [hasSize, setHasSize] = useState(false);
+  const [stock, setStock] = useState("");
   const navigation = useNavigate();
   useEffect(() => {
     if (!productId) return;
@@ -71,6 +72,7 @@ function EditProductModal({ show, handleClose, productId }) {
         setClassNo(p.class || p.classNo || []);
         setImages(p.pictures || []);
         setHasSize((p.sizes || []).length > 0);
+        setStock(p.stock || 0);
       })
       .catch(console.error);
   }, [productId]);
@@ -170,6 +172,7 @@ function EditProductModal({ show, handleClose, productId }) {
       pictures: images,
       hasClass: true,
       hasSize,
+      stock: Number(stock), // add this
     };
 
     updateProduct(payload).then(({ data }) => {
@@ -220,7 +223,15 @@ function EditProductModal({ show, handleClose, productId }) {
               onChange={(e) => setPrice(e.target.value)}
             />
           </Form.Group>
-
+          <Form.Group className="mb-3">
+            <Form.Label>Stok Adedi</Form.Label>
+            <Form.Control
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              required
+            />
+          </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Kategori</Form.Label>
             <Form.Control

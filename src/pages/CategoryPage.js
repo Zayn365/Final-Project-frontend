@@ -81,46 +81,53 @@ function CategoryPage() {
         .replace(/\./g, "")
         .replace(/sınıf/g, "")
         .replace(/\s+/g, "")
+        .replace(/[\(\)\-]/g, "") // remove brackets and dashes
         .trim();
-
-    const preschoolLabels = [
-      "hazırlık(48-60ay)",
-      "hazırlık(60-66ay)",
-      "hazırlık(66-72ay)",
-      "ana",
-      "3yaş",
-      "4yaş",
-      "5yaş",
-    ];
 
     const studentGrades = user.k12.students.map((s) => normalize(s.gradeLevel));
     const studentClassNums = user.k12.students
       .map((s) => parseInt(s.gradeLevel))
       .filter((n) => !isNaN(n));
 
-    const isPreschooler = studentGrades.some((g) =>
-      preschoolLabels.includes(g)
-    );
+    // Map for preschool logic
+    const preschoolMap = {
+      hazırlık4860ay: "4yaş",
+      hazırlık6672ay: "5yaş",
+      önhazırlık3648ay: "3yaş",
+    };
 
+    // Handle preschool filtering
+    const matchedPreschoolAges = studentGrades
+      .filter((grade) => grade in preschoolMap)
+      .map((grade) => preschoolMap[grade]);
+
+    const isAna = studentGrades.includes("ana");
+
+    if (matchedPreschoolAges.length || isAna) {
+      if (isAna) return []; // Ana shows no books
+
+      const allowed = new Set(matchedPreschoolAges.map(normalize));
+
+      return sorted.filter((product) => {
+        const classes = Array.isArray(product.class) ? product.class : [];
+        return classes.some((cls) => allowed.has(normalize(cls)));
+      });
+    }
+
+    // Normal logic for primary + others
     return sorted.filter((product) => {
       const classes = Array.isArray(product.class) ? product.class : [];
 
-      if (isPreschooler) {
-        return classes.some((cls) => preschoolLabels.includes(normalize(cls)));
-      } else {
-        return classes.some((cls) => {
-          const norm = normalize(cls);
+      return classes.some((cls) => {
+        const norm = normalize(cls);
+        if (["3yaş", "4yaş", "5yaş"].includes(norm)) return false;
 
-          if (["3yaş", "4yaş", "5yaş"].includes(norm)) return false;
+        const clsNum = parseInt(norm);
+        if (studentGrades.includes(norm)) return true;
+        if (!isNaN(clsNum) && studentClassNums.includes(clsNum)) return true;
 
-          const clsNum = parseInt(norm);
-
-          if (studentGrades.includes(norm)) return true;
-          if (!isNaN(clsNum) && studentClassNums.includes(clsNum)) return true;
-
-          return false;
-        });
-      }
+        return false;
+      });
     });
   }, [user, sorted]);
 
@@ -265,7 +272,6 @@ function CategoryPage() {
                     Array.isArray(c.selectedUsers) &&
                     c.selectedUsers.includes(user?.tc_id)
                 );
-                console.log("TCL ~ campaign:", campaign);
                 let finalPrice = Number(prod.price) || 0;
                 const subItems = campaign?.subItems?.items || [];
                 const isGiftVisible = openGifts[prod._id];
@@ -356,7 +362,12 @@ function CategoryPage() {
                                 </Form.Select>
                               </div>
                             )}
+                            <div className="d-flex align-items-center mb-1">
+                              <span className="label">Stok:</span>
+                              <span className="ms-1">{prod.stock ?? 0}</span>
+                            </div>
                           </div>
+
                           {subItems.length > 0 && (
                             <Button
                               variant="outline-secondary"
@@ -419,6 +430,7 @@ function CategoryPage() {
                       <Button
                         className="choose-btn mt-3 w-100"
                         variant="danger"
+                        disabled={prod.stock <= 0}
                         onClick={() => {
                           const currentYear = new Date().getFullYear();
 
@@ -447,7 +459,7 @@ function CategoryPage() {
                           });
                         }}
                       >
-                        Sepete Ekle
+                        {prod.stock <= 0 ? "Stokta Yok" : "Sepete Ekle"}
                       </Button>
 
                       <Button

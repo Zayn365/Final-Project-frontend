@@ -32,9 +32,9 @@ function CheckoutForm({ products, total }) {
   useEffect(() => {
     const listener = async (event) => {
       if (event.data?.type === "3DS_DONE" && event.data.success) {
-        // Now we know payment succeeded — create the order
         const fullAddress = `${street}, ${area}, ${city}`;
         try {
+          // Step 1: Create order
           const res = await createOrder({
             userId: user._id,
             cart: user.cart,
@@ -44,13 +44,42 @@ function CheckoutForm({ products, total }) {
             schoolName: user.k12?.schoolName || "",
           });
 
-          if (res?.data) {
-            setAlertVariant("success");
-            setAlertMessage("3D Secure ödeme başarılı. Sipariş oluşturuldu.");
-            setShowToast(true);
-            setTimeout(() => navigate("/orders"), 1000);
+          // Step 2: Create K12 Sales Contracts
+          if (res?.data && Array.isArray(user.k12?.students)) {
+            const contractDate = new Date().toISOString();
+
+            const salesItemInfos = [
+              { Name: "Kitap", Amount: 500 },
+              { Name: "Kırtasiye", Amount: 350 },
+              { Name: "Forma", Amount: 1500 },
+            ];
+
+            await Promise.all(
+              user.k12.students.map((student) =>
+                axios.post(
+                  "https://final-project-backend-m9nb.onrender.com/user/k12/sale",
+                  {
+                    userId: user._id,
+                    data: {
+                      SSN: student.studentTc,
+                      StudentPersonalID: student.studentId,
+                      SchoolInfoID: student.schoolInfoId,
+                      ContractDate: contractDate,
+                      Description: "Satış",
+                      SalesItemInfos: salesItemInfos,
+                    },
+                  }
+                )
+              )
+            );
           }
+
+          setAlertVariant("success");
+          setAlertMessage("3D Secure ödeme başarılı. Sipariş oluşturuldu.");
+          setShowToast(true);
+          setTimeout(() => navigate("/orders"), 1000);
         } catch (err) {
+          console.error("Sipariş veya satış sözleşmesi hatası:", err);
           setAlertVariant("danger");
           setAlertMessage("Sipariş oluşturulurken bir hata oluştu.");
         } finally {

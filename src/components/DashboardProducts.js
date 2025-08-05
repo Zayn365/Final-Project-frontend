@@ -137,6 +137,7 @@ function DashboardProducts() {
             <th>Görsel</th>
             <th>Ürün No</th>
             <th>İsim</th>
+            <th>Stok</th>
             <th>Kategori</th>
             <th>Fiyat</th>
             <th>Bedenler</th>
@@ -161,6 +162,7 @@ function DashboardProducts() {
               </td>
               <td>{data._id}</td>
               <td>{data.name}</td>
+              <td>{data.stock ?? "0"}</td>
               <td>{data.category}</td>
               <td>{formatWithCommas(unformatNumber(String(data.price)))}</td>
               <td>{(data.sizes || ["N/A"]).join(", ")}</td>

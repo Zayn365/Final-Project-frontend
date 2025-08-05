@@ -93,6 +93,9 @@ function ProductPage() {
           <p>
             <Badge bg="danger">{product.category}</Badge>
           </p>
+          <p>
+            <Badge bg="info">{product.stock ?? 0} Stokta Var</Badge>
+          </p>
           {(() => {
             let finalPrice = Number(product.price) || 0;
             let campaignAmount;
@@ -281,6 +284,7 @@ function ProductPage() {
                     variant="danger"
                     size="lg"
                     className="w-100"
+                    disabled={product.stock <= 0}
                     onClick={() => {
                       const currentYear = new Date().getFullYear();
 
@@ -302,10 +306,11 @@ function ProductPage() {
                         userId: user._id,
                         productId: product._id,
                         price: product.price,
+                        count: quantity,
                       });
                     }}
                   >
-                    Sepete Ekle
+                    {product.stock <= 0 ? "Stokta Yok" : "Sepete Ekle"}
                   </Button>
                 </Col>
               </Row>
