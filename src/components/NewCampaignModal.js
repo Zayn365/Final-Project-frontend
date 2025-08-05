@@ -110,7 +110,20 @@ function NewCampaignModal({ show, handleClose }) {
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-      const tcList = jsonData.map((row) => row["Ogrenci_TC"]).filter(Boolean);
+      const newStudents = jsonData.filter((row) => row["Ogrenci_TC"]);
+      const tcList = newStudents.map((s) => s["Ogrenci_TC"]);
+
+      // ✅ Merge new students into existing student list
+      setStudents((prev) => {
+        const existingTCs = new Set(prev.map((s) => s.Ogrenci_TC));
+        const merged = [...prev];
+        newStudents.forEach((s) => {
+          if (!existingTCs.has(s.Ogrenci_TC)) merged.push(s);
+        });
+        return merged;
+      });
+
+      // ✅ Merge selected TCs
       setSelectedUsers((prev) => Array.from(new Set([...prev, ...tcList])));
     };
 

@@ -29,6 +29,20 @@ function CheckoutForm({ products, total }) {
   const [cvv, setCvv] = useState("");
   const [expDate, setExpDate] = useState("");
   const [is3DSecure, setIs3DSecure] = useState(true); // Toggle for 3D Secure
+  // console.log({
+  //   SSN: user.k12.students[0].studentTc,
+  //   StudentPersonalID: user.k12.students[0].studentId,
+  //   SchoolInfoID: user.k12.students[0].schoolInfoId,
+  //   ContractDate: "2025-20-2",
+  //   Description: "Satış",
+  //   SalesItemInfos: [
+  //     [
+  //       { Name: "Kitap", Amount: 500 },
+  //       { Name: "Kırtasiye", Amount: 350 },
+  //       { Name: "Forma", Amount: 1500 },
+  //     ],
+  //   ],
+  // });
   useEffect(() => {
     const listener = async (event) => {
       if (event.data?.type === "3DS_DONE" && event.data.success) {

@@ -1,41 +1,45 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useUpdateCampaignMutation } from "../services/appApi";
+import * as XLSX from "xlsx";
 import axios from "../axios";
-import debounce from "lodash.debounce";
-import Select from "react-select";
 
 function EditCampaignModal({ show, handleClose, campaignId }) {
   const [form, setForm] = useState({
+    products: [],
     type: "percentage",
     amount: "",
     start_Date: "",
     end_date: "",
-    products: [],
-    selectedUsers: [],
     subItemsPrice: "",
-    subItemsItems: [], // full product objects
+    subItemsItems: [],
   });
 
   const [students, setStudents] = useState([]);
-  const [searchUser, setSearchUser] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCampus, setSelectedCampus] = useState("");
+  const [selectAll, setSelectAll] = useState(false);
 
-  const products = useSelector((state) => state.products || []);
   const [updateCampaign, { isLoading, isSuccess, isError, error }] =
     useUpdateCampaignMutation();
+  const products = useSelector((state) => state.products || []);
 
+  // Load student JSON
   useEffect(() => {
     fetch("/students_parents.json")
       .then((res) => res.json())
       .then(setStudents)
-      .catch((err) => console.error("Failed to load students JSON", err));
+      .catch((err) => {
+        console.error("Failed to load students JSON:", err);
+        setStudents([]);
+      });
   }, []);
 
+  // Load existing campaign data
   useEffect(() => {
     if (!campaignId || !show) return;
-
     axios.get(`/campaigns/single/${campaignId}`).then(({ data }) => {
       setForm({
         type: data.type || "percentage",
@@ -43,73 +47,111 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
         start_Date: data.start_Date,
         end_date: data.end_date,
         products: data.products || [],
-        selectedUsers: data.selectedUsers || [],
         subItemsPrice: data.subItems?.price || "",
         subItemsItems: data.subItems?.items || [],
       });
-      setSearchUser("");
+      setSelectedUsers(data.selectedUsers || []);
     });
   }, [campaignId, show]);
 
+  const uniqueStudents = useMemo(() => {
+    const map = new Map();
+    students.forEach((s) => {
+      if (!map.has(s.Ogrenci_TC)) map.set(s.Ogrenci_TC, s);
+    });
+    return Array.from(map.values());
+  }, [students]);
+
+  const campusOptions = useMemo(() => {
+    return Array.from(new Set(students.map((s) => s.Okul)));
+  }, [students]);
+
+  const filteredStudents = useMemo(() => {
+    return uniqueStudents.filter((s) => {
+      const matchesSearch =
+        s.Ogrenci_Adı?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.Ogrenci_TC?.toString().includes(searchTerm);
+      const matchesCampus = selectedCampus ? s.Okul === selectedCampus : true;
+      return matchesSearch && matchesCampus;
+    });
+  }, [uniqueStudents, searchTerm, selectedCampus]);
+
   useEffect(() => {
-    if (!searchUser) {
-      setFilteredUsers([]);
-      return;
+    if (selectAll) {
+      const allTCs = filteredStudents.map((s) => s.Ogrenci_TC);
+      setSelectedUsers((prev) => Array.from(new Set([...prev, ...allTCs])));
+    } else {
+      const remaining = selectedUsers.filter(
+        (tc) => !filteredStudents.some((s) => s.Ogrenci_TC === tc)
+      );
+      setSelectedUsers(remaining);
     }
+  }, [selectAll, filteredStudents]);
 
-    const filtered = students.filter((student) =>
-      student.Ogrenci_Adı?.toLowerCase().includes(searchUser.toLowerCase())
+  const toggleUser = (tc) => {
+    setSelectedUsers((prev) =>
+      prev.includes(tc) ? prev.filter((id) => id !== tc) : [...prev, tc]
     );
-    setFilteredUsers(filtered.slice(0, 20));
-  }, [searchUser, students]);
-
-  const debouncedSearch = useMemo(
-    () => debounce((value) => setSearchUser(value), 300),
-    []
-  );
+  };
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
+  const handleExcelUpload = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const binaryStr = evt.target.result;
+      const workbook = XLSX.read(binaryStr, { type: "binary" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet);
+      const newStudents = jsonData.filter((row) => row["Ogrenci_TC"]);
+      const tcList = newStudents.map((s) => s["Ogrenci_TC"]);
+
+      setStudents((prev) => {
+        const existingTCs = new Set(prev.map((s) => s.Ogrenci_TC));
+        const merged = [...prev];
+        newStudents.forEach((s) => {
+          if (!existingTCs.has(s.Ogrenci_TC)) merged.push(s);
+        });
+        return merged;
+      });
+
+      setSelectedUsers((prev) => Array.from(new Set([...prev, ...tcList])));
+    };
+    reader.readAsBinaryString(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const payload = {
       id: campaignId,
       ...form,
       amount: Number(form.amount),
+      selectedUsers,
       subItems: {
         price: Number(form.subItemsPrice),
         items: form.subItemsItems,
       },
     };
 
-    const { data } = await updateCampaign(payload);
-    if (data) {
-      handleCloseModal();
+    if (
+      !payload.type ||
+      isNaN(payload.amount) ||
+      payload.products.length === 0 ||
+      selectedUsers.length === 0
+    ) {
+      return alert("Lütfen tüm alanları doldurunuz ve kullanıcı seçiniz.");
     }
-  };
 
-  const resetForm = () =>
-    setForm({
-      type: "percentage",
-      amount: "",
-      start_Date: "",
-      end_date: "",
-      products: [],
-      selectedUsers: [],
-      subItemsPrice: "",
-      subItemsItems: [],
-    });
-
-  const handleCloseModal = () => {
-    resetForm();
-    handleClose();
+    const { data } = await updateCampaign(payload);
+    if (data) handleClose();
   };
 
   return (
-    <Modal show={show} onHide={handleCloseModal} size="md" centered>
+    <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>Kampanya Düzenle</Modal.Title>
       </Modal.Header>
@@ -122,11 +164,7 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
 
           <Form.Group className="mb-3">
             <Form.Label>Tip</Form.Label>
-            <Form.Select
-              value={form.type}
-              onChange={handleChange("type")}
-              required
-            >
+            <Form.Select value={form.type} onChange={handleChange("type")}>
               <option value="percentage">Yüzde</option>
               <option value="fixed">Tutar</option>
             </Form.Select>
@@ -172,30 +210,24 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
                     className="fa fa-times text-danger"
                     style={{ cursor: "pointer" }}
                     onClick={() =>
-                      setForm((prev) => ({
-                        ...prev,
-                        products: [],
-                      }))
+                      setForm((prev) => ({ ...prev, products: [] }))
                     }
                   />
                 </div>
               )}
             </div>
             <Form.Select
-              onChange={(e) => {
-                const selectedCategory = e.target.value;
-                if (selectedCategory) {
-                  setForm((prev) => ({
-                    ...prev,
-                    products: [selectedCategory],
-                  }));
-                }
-              }}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  products: [e.target.value],
+                }))
+              }
             >
               <option value="">Kategori Seçiniz</option>
-              {[...new Set(products.map((p) => p.category))].map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              {[...new Set(products.map((p) => p.category))].map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
                 </option>
               ))}
             </Form.Select>
@@ -207,7 +239,6 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
               type="number"
               value={form.subItemsPrice}
               onChange={handleChange("subItemsPrice")}
-              placeholder="Hediye ürün fiyatı giriniz"
             />
           </Form.Group>
 
@@ -235,7 +266,6 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
                 </div>
               ))}
             </div>
-
             <Form.Select
               onChange={(e) => {
                 const selected = e.target.value;
@@ -260,42 +290,82 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
             </Form.Select>
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Kullanıcı Seç</Form.Label>
-            <Select
-              isMulti
-              isSearchable
-              options={[
-                ...students
-                  .filter(
-                    (v, i, self) =>
-                      self.findIndex((s) => s.Ogrenci_TC === v.Ogrenci_TC) === i
-                  )
-                  .map((s) => ({
-                    label: `${s.Ogrenci_Adı} (${s.Ogrenci_TC})`,
-                    value: s.Ogrenci_TC,
-                  })),
-              ]}
-              value={form.selectedUsers.map((tc) => {
-                const student = students.find((s) => s.Ogrenci_TC === tc);
-                return student
-                  ? {
-                      label: `${student.Ogrenci_Adı} (${student.Ogrenci_TC})`,
-                      value: student.Ogrenci_TC,
-                    }
-                  : { label: tc, value: tc };
-              })}
-              onChange={(selectedOptions) =>
-                setForm((prev) => ({
-                  ...prev,
-                  selectedUsers: selectedOptions.map((opt) => opt.value),
-                }))
-              }
-              placeholder="Kullanıcıları ara ve seç"
-            />
-          </Form.Group>
+          <hr />
+          <h5>
+            Kullanıcı Seç{" "}
+            <label style={{ cursor: "pointer", marginLeft: 10 }}>
+              📥
+              <input
+                type="file"
+                accept=".xlsx, .xls"
+                onChange={handleExcelUpload}
+                hidden
+              />
+            </label>
+          </h5>
 
-          <Button type="submit" disabled={isLoading}>
+          <Form.Control
+            className="mb-2"
+            type="text"
+            placeholder="İsim veya TC numarasıyla ara"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          <Form.Select
+            className="mb-2"
+            value={selectedCampus}
+            onChange={(e) => setSelectedCampus(e.target.value)}
+          >
+            <option value="">Tüm Kampüsler</option>
+            {campusOptions.map((campus) => (
+              <option key={campus} value={campus}>
+                {campus}
+              </option>
+            ))}
+          </Form.Select>
+
+          <div style={{ maxHeight: 250, overflowY: "auto" }}>
+            <table className="table table-bordered table-sm">
+              <thead>
+                <tr>
+                  <th>
+                    <Form.Check
+                      type="checkbox"
+                      label="Hepsini Seç"
+                      checked={
+                        filteredStudents.every((s) =>
+                          selectedUsers.includes(s.Ogrenci_TC)
+                        ) && filteredStudents.length > 0
+                      }
+                      onChange={(e) => setSelectAll(e.target.checked)}
+                    />
+                  </th>
+                  <th>Ad</th>
+                  <th>TC</th>
+                  <th>Kampüs</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((s) => (
+                  <tr key={s.Ogrenci_TC}>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={selectedUsers.includes(s.Ogrenci_TC)}
+                        onChange={() => toggleUser(s.Ogrenci_TC)}
+                      />
+                    </td>
+                    <td>{s.Ogrenci_Adı}</td>
+                    <td>{s.Ogrenci_TC}</td>
+                    <td>{s.Okul}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <Button type="submit" className="mt-3" disabled={isLoading}>
             Güncelle
           </Button>
         </Form>
