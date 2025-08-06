@@ -20,7 +20,7 @@ function ProductPage() {
   // const [similar, setSimilar] = useState(null);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
-  const [showGifts, setShowGifts] = useState(false);
+  const [showGifts, setShowGifts] = useState(true);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [addToCart, { isSuccess }] = useAddToCartMutation();
@@ -157,13 +157,13 @@ function ProductPage() {
 
                 {subItems.length > 0 && (
                   <div className="text-center mb-3">
-                    <Button
+                    {/* <Button
                       variant="outline-primary"
                       size="sm"
                       onClick={() => setShowGifts((prev) => !prev)}
                     >
                       {showGifts ? "Hediyeleri Gizle" : "Hediyeleri Gör"}
-                    </Button>
+                    </Button> */}
 
                     {showGifts && (
                       <div className="border mt-3 p-2 rounded bg-light text-start">

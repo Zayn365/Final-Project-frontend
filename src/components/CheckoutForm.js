@@ -400,9 +400,21 @@ function CheckoutForm({ products, total }) {
       // Only non-3D payment creates the order here
       const fullAddress = `${street}, ${area}, ${city}`;
       try {
+        const enrichedCart = { ...user.cart };
+
+        products.forEach((item) => {
+          if (item.subItem?.length) {
+            item.subItem.forEach((sub) => {
+              if (sub._id) {
+                enrichedCart[sub._id] = 1;
+              }
+            });
+          }
+        });
+
         const res = await createOrder({
           userId: user._id,
-          cart: user.cart,
+          cart: enrichedCart,
           address: fullAddress,
           country: "Türkiye",
           username: user.name,

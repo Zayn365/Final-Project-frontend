@@ -1,6 +1,6 @@
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { Alert, Col, Container, Row, Table } from "react-bootstrap";
+import { Alert, Col, Container, Form, Row, Table } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import CheckoutForm from "../components/CheckoutForm";
 import {
@@ -10,6 +10,7 @@ import {
 } from "../services/appApi";
 import "./CartPage.css";
 import { formatWithCommas } from "../hooks/formatFuctions";
+import { useState } from "react";
 
 const stripePromise = loadStripe("pk_test_...");
 
@@ -20,6 +21,8 @@ function CartPage() {
   const [increaseCart] = useIncreaseCartProductMutation();
   const [decreaseCart] = useDecreaseCartProductMutation();
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
+  const [selectedSize, setSelectedSize] = useState({});
+  const [cartSubItems, setCartSubItems] = useState({});
 
   const userCart = user.cart;
   const cartItems = products.filter((product) => userCart[product._id]);
@@ -57,7 +60,6 @@ function CartPage() {
     if (user.cart[product.productId] <= 1) return;
     decreaseCart(product);
   };
-
   return (
     <Container className="cart-container py-4" style={{ minHeight: "95vh" }}>
       <Row>
@@ -74,9 +76,11 @@ function CartPage() {
                   const discountedPrice = getDiscountedPrice(item);
                   const campaign = getCampaignForProduct(item);
                   const subItems = campaign?.subItems?.price || 0;
+                  const subItem = cartSubItems[item._id] || [];
                   return {
                     ...item,
                     price: discountedPrice + subItems,
+                    subItem, // ← inject selected size
                   };
                 })}
                 total={total}
@@ -196,6 +200,54 @@ function CartPage() {
                           </td>
                           <td colSpan={2}>
                             <span className="fw-bold">{sub.name}</span>
+                          </td>
+                          <td>
+                            {sub.sizes && (
+                              <div className="d-flex justify-items-center align-items-center">
+                                <span className="label small">Beden:</span>
+                                <Form.Select
+                                  size="sm"
+                                  className="value-dropdown text-danger ms-2"
+                                  style={{ width: "auto" }}
+                                  value={
+                                    cartSubItems[item._id]?.find(
+                                      (s) => s._id === sub._id
+                                    )?.size || ""
+                                  }
+                                  e={selectedSize[item._id] || ""}
+                                  onChange={(e) => {
+                                    const size = e.target.value;
+
+                                    setCartSubItems((prev) => {
+                                      const key = item._id;
+                                      const current = prev[key] || [];
+
+                                      // If sub already added before, replace it
+                                      const updated = current.some(
+                                        (s) => s._id === sub._id
+                                      )
+                                        ? current.map((s) =>
+                                            s._id === sub._id
+                                              ? { ...s, size }
+                                              : s
+                                          )
+                                        : [...current, { ...sub, size }];
+
+                                      return {
+                                        ...prev,
+                                        [key]: updated,
+                                      };
+                                    });
+                                  }}
+                                >
+                                  {(Array.isArray(sub?.sizes) && sub.sizes).map(
+                                    (s) => (
+                                      <option key={s}>{s}</option>
+                                    )
+                                  )}
+                                </Form.Select>
+                              </div>
+                            )}
                           </td>
                           <td colSpan={2} className="text-end text-muted">
                             +₺{campaign?.subItems.price.toFixed(2)}

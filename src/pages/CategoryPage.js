@@ -291,7 +291,7 @@ function CategoryPage() {
                 );
                 let finalPrice = Number(prod.price) || 0;
                 const subItems = campaign?.subItems?.items || [];
-                const isGiftVisible = openGifts[prod._id];
+                const isGiftVisible = true;
                 if (
                   campaign &&
                   typeof campaign.amount === "number" &&
@@ -385,7 +385,7 @@ function CategoryPage() {
                             </div>
                           </div>
 
-                          {subItems.length > 0 && (
+                          {/* {subItems.length > 0 && (
                             <Button
                               variant="outline-secondary"
                               size="sm"
@@ -401,7 +401,7 @@ function CategoryPage() {
                                 ? "Hediye Ürünlerini Gizle"
                                 : "Hediye Ürünlerini Gör"}
                             </Button>
-                          )}
+                          )} */}
                           {campaignAmount && (
                             <Col
                               sm={12}
@@ -420,7 +420,7 @@ function CategoryPage() {
                           </div>
                         </div>
                       </div>
-                      {isGiftVisible && (
+                      {isGiftVisible && subItems.length > 0 && (
                         <div className="gift-section border p-2 rounded mb-2 bg-light">
                           {subItems.map((gift, idx) => {
                             return (
