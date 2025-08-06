@@ -22,13 +22,40 @@ function AdminReportPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/report/orders");
-      const data = res.data || [];
 
-      const schools = [...new Set(data.map((r) => r.school))];
+      const [ordersRes, studentsRes] = await Promise.all([
+        axios.get("/report/orders"),
+        fetch("/students_parents.json").then((r) => r.json()),
+      ]);
+
+      const orders = ordersRes.data || [];
+      const students = studentsRes || [];
+
+      const orderMap = {};
+      for (const order of orders) {
+        orderMap[order.tc_id] = order;
+      }
+
+      const mergedData = students.map((student) => {
+        const order = orderMap[student.Ogrenci_TC];
+        return {
+          student: student["Öğrenci_Adı"] || "Bilinmiyor",
+          school: student.Okul || "-",
+          items: order?.items || [],
+          total: order?.total || 0,
+          studentPersonalID: student.Ogrenci_TC,
+        };
+      });
+
+      // 🔽 Show ordered students first
+      mergedData.sort((a, b) => (b.total || 0) - (a.total || 0));
+
+      const schools = [
+        ...new Set(mergedData.map((s) => s.school).filter(Boolean)),
+      ];
       setSchoolOptions(schools);
-      setReportData(data);
-      setFilteredData(data);
+      setReportData(mergedData);
+      setFilteredData(mergedData);
     } catch (err) {
       console.error("Error loading report:", err);
     } finally {
@@ -36,7 +63,6 @@ function AdminReportPage() {
     }
   };
 
-  // Filtering
   useEffect(() => {
     let filtered = [...reportData];
 
@@ -119,12 +145,14 @@ function AdminReportPage() {
                   <td>{row.student || "Bilinmiyor"}</td>
                   <td>
                     {row.items?.length > 0
-                      ? row.items.map(
-                          (item, index) =>
-                            `${item.quantity} x ${item.name}${
-                              index < row.items.length - 1 ? ", " : ""
-                            }`
-                        )
+                      ? row.items
+                          .map(
+                            (item, index) =>
+                              `${item.quantity} x ${item.name}${
+                                index < row.items.length - 1 ? ", " : ""
+                              }`
+                          )
+                          .join("")
                       : "Sipariş Yok"}
                   </td>
                   <td>{(row.total || 0).toLocaleString("tr-TR")} ₺</td>
@@ -137,14 +165,22 @@ function AdminReportPage() {
       )}
 
       {totalPages > 1 && (
-        <div className="d-flex justify-content-center gap-2 mt-3">
+        <div
+          className="d-flex gap-2 mt-3 px-2"
+          style={{
+            overflowX: "auto",
+            whiteSpace: "nowrap",
+            scrollbarWidth: "thin",
+          }}
+        >
           {Array.from({ length: totalPages }, (_, idx) => (
             <button
               key={idx}
-              className={`btn btn-sm ${
+              className={`btn btn-sm me-2 ${
                 currentPage === idx + 1 ? "btn-primary" : "btn-outline-primary"
               }`}
               onClick={() => setCurrentPage(idx + 1)}
+              style={{ minWidth: "40px" }}
             >
               {idx + 1}
             </button>

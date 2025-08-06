@@ -75,7 +75,6 @@ function DashboardCampaigns() {
     (currentPage - 1) * campaignsPerPage,
     currentPage * campaignsPerPage
   );
-  console.log("TCL ~ DashboardCampaigns ~ currentCampaigns:", currentCampaigns);
 
   const uniqueCategories = useMemo(() => {
     return Array.from(

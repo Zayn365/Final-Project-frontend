@@ -99,7 +99,6 @@ function CategoryPage() {
     const studentClassNums = user.k12.students
       .map((s) => parseInt(s.gradeLevel))
       .filter((n) => !isNaN(n));
-    console.log("TCL ~ CategoryPage ~ studentClassNums:", studentClassNums);
 
     // Map for preschool logic
     const preschoolMap = {
@@ -129,7 +128,6 @@ function CategoryPage() {
     }
 
     // Normal logic for primary + others
-    console.log("TCL ~ CategoryPage ~ studentClassNums:", studentClassNums);
     return sorted.filter((product) => {
       const classes = Array.isArray(product.class) ? product.class : [];
 
