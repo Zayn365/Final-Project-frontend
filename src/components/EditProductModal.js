@@ -172,7 +172,7 @@ function EditProductModal({ show, handleClose, productId }) {
       category,
       sizes: hasSize ? sizes : [],
       classNo,
-      pictures: images,
+      images,
       hasClass: true,
       hasSize,
       stock: Number(stock), // add this

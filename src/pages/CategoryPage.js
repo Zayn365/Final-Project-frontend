@@ -453,8 +453,8 @@ function CategoryPage() {
                                       style={{ width: "auto" }}
                                     >
                                       {(Array.isArray(gift?.sizes)
-                                        ? gift.sizes
-                                        : sizeOptions
+                                        ? sizeOptions
+                                        : gift.sizes
                                       ).map((s) => (
                                         <option key={s}>{s}</option>
                                       ))}

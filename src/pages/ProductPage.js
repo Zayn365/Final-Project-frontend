@@ -79,6 +79,21 @@ function ProductPage() {
   //     <SimilarProduct {...product} />
   //   </div>
   // ));
+  const sizeOptions = [
+    "5-6",
+    "7-8",
+    "9-10",
+    "11-12",
+    "13-14",
+    "15-16",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "2XL",
+    "3XL",
+    "4XL",
+  ];
   return (
     <Container className="pt-4" style={{ position: "relative" }}>
       {toastError && (
@@ -197,8 +212,9 @@ function ProductPage() {
                                   className="value-dropdown text-danger ms-2"
                                   style={{ width: "auto" }}
                                 >
-                                  {(
-                                    Array.isArray(item?.sizes) && item.sizes
+                                  {(Array.isArray(item?.sizes)
+                                    ? item.sizes
+                                    : sizeOptions
                                   ).map((s) => (
                                     <option key={s}>{s}</option>
                                   ))}
@@ -264,7 +280,7 @@ function ProductPage() {
                       <option value="">-- Select size --</option>
                       {(Array.isArray(product?.sizes)
                         ? product.sizes
-                        : ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
+                        : sizeOptions
                       ).map((size) => (
                         <option key={size} value={size}>
                           {size}
