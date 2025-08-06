@@ -127,8 +127,8 @@ function EditProductModal({ show, handleClose, productId }) {
   function showWidget() {
     const widget = window.cloudinary.createUploadWidget(
       {
-        cloudName: "your-cloudname",
-        uploadPreset: "your-preset",
+        cloudName: "dqwgndidy",
+        uploadPreset: "ml_default",
       },
       (error, result) => {
         if (!error && result.event === "success") {

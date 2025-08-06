@@ -207,7 +207,7 @@ function AddProductModal({ show, handleClose }) {
 
       const num = parseInt(sınıfNumMatch[0]);
       if (
-        form.category !== "Eğitim Seti" ||
+        form.category !== "Eğitim Seti" &&
         form.category !== "Kırtasiye Seti"
       ) {
         if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
