@@ -82,10 +82,13 @@ function EditProductModal({ show, handleClose, productId }) {
       if (!match) return null;
 
       const num = parseInt(match[0]);
-      if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
-      if ([5, 6, 7, 8].includes(num)) return "Ortaokul Kıyafet";
-      if ([9, 10, 11, 12].includes(num)) return "Lise Kıyafet";
-      return null;
+
+      if (category !== "Eğitim Seti" || category !== "Kırtasiye Seti") {
+        if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
+        if ([5, 6, 7, 8].includes(num)) return "Ortaokul Kıyafet";
+        if ([9, 10, 11, 12].includes(num)) return "Lise Kıyafet";
+        return null;
+      }
     };
 
     if (classNo.length > 0) {
