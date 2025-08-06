@@ -11,6 +11,8 @@ function CheckoutForm({ products, total }) {
   const stripe = true;
   const elements = true;
   const user = useSelector((state) => state.user);
+  const { pass } = useSelector((state) => state.personal);
+
   const navigate = useNavigate();
   const [alertMessage, setAlertMessage] = useState("");
   const [alertVariant, setAlertVariant] = useState("success"); // NEW
@@ -62,11 +64,19 @@ function CheckoutForm({ products, total }) {
           if (res?.data && Array.isArray(user.k12?.students)) {
             const contractDate = new Date().toISOString();
 
-            const salesItemInfos = [
-              { Name: "Kitap", Amount: 500 },
-              { Name: "Kırtasiye", Amount: 350 },
-              { Name: "Forma", Amount: 1500 },
-            ];
+            const salesItemInfos =
+              products.length > 0
+                ? products.map((val) => {
+                    return {
+                      Name: val.name,
+                      Amount: val.price,
+                    };
+                  })
+                : [
+                    { Name: "Kitap", Amount: 500 },
+                    { Name: "Kırtasiye", Amount: 350 },
+                    { Name: "Forma", Amount: 1500 },
+                  ];
 
             await Promise.all(
               user.k12.students.map((student) =>
@@ -74,6 +84,7 @@ function CheckoutForm({ products, total }) {
                   "https://final-project-backend-m9nb.onrender.com/users/k12/sale",
                   {
                     userId: user._id,
+                    password: pass,
                     data: {
                       SSN: student.studentTc,
                       StudentPersonalID: student.studentId,
@@ -178,15 +189,7 @@ function CheckoutForm({ products, total }) {
                   <div class="d-flex gap-2">
                     <select class="form-select" name="expiryMonth" id="expiryMonth">
                       ${[..."01,02,03,04,05,06,07,08,09,10,11,12".split(",")]
-                        .map(
-                          (m, i) =>
-                            `<option value="${m}">${new Date(
-                              0,
-                              i
-                            ).toLocaleString("tr-TR", {
-                              month: "long",
-                            })}</option>`
-                        )
+                        .map((m) => `<option value="${m}">${m}</option>`)
                         .join("")}
                     </select>
                     <select class="form-select" name="expiryYear" id="expiryYear">

@@ -14,6 +14,7 @@ import { logout, resetNotifications } from "../features/userSlice";
 import Logo from "../assets/images/logo.png";
 import "./Navigation.css";
 import { useNavigate } from "react-router-dom";
+import { removePass } from "../features/personalSlice";
 
 function Navigation() {
   const user = useSelector((state) => state.user);
@@ -30,7 +31,10 @@ function Navigation() {
       navigate(`/category/${encodeURIComponent(search.trim().toLowerCase())}`);
     }
   };
-  const handleLogout = () => dispatch(logout());
+  const handleLogout = () => {
+    dispatch(removePass());
+    dispatch(logout());
+  };
 
   const unreadNotifications = user?.notifications?.filter(
     (n) => n.status === "unread"

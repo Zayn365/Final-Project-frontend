@@ -172,21 +172,40 @@ function ProductPage() {
                           Fiyat: ₺{campaign?.subItems?.price}
                         </p>
                         {subItems.map((item) => (
-                          <div
-                            key={item._id}
-                            className="d-flex align-items-center gap-2 mb-2"
-                          >
-                            <img
-                              src={item.pictures?.[0]?.url}
-                              alt={item.name}
-                              style={{
-                                width: "40px",
-                                height: "40px",
-                                objectFit: "cover",
-                              }}
-                            />
-                            <span className="small">{item.name}</span>
-                          </div>
+                          <>
+                            {" "}
+                            <div
+                              key={item._id}
+                              className="d-flex align-items-center gap-2 mb-2"
+                            >
+                              <img
+                                src={item.pictures?.[0]?.url}
+                                alt={item.name}
+                                style={{
+                                  width: "40px",
+                                  height: "40px",
+                                  objectFit: "cover",
+                                }}
+                              />
+                              <span className="small">{item.name}</span>
+                            </div>
+                            {item.sizes && (
+                              <div className="d-flex justify-items-center align-items-center">
+                                <span className="label small">Beden:</span>
+                                <Form.Select
+                                  size="sm"
+                                  className="value-dropdown text-danger ms-2"
+                                  style={{ width: "auto" }}
+                                >
+                                  {(
+                                    Array.isArray(item?.sizes) && item.sizes
+                                  ).map((s) => (
+                                    <option key={s}>{s}</option>
+                                  ))}
+                                </Form.Select>
+                              </div>
+                            )}
+                          </>
                         ))}
                       </div>
                     )}

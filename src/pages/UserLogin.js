@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 import { useLoginWithK12Mutation } from "../services/appApi";
 import { ContextValue } from "../Context";
 import logo from "../assets/images/logo.png"; // Replace with actual path
-
+import { useDispatch } from "react-redux";
+import { addPass } from "../features/personalSlice";
 function K12Login() {
   const x = useContext(ContextValue);
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginWithK12, { isError, isLoading, error }] =
@@ -15,6 +17,7 @@ function K12Login() {
   function handleLogin(e) {
     e.preventDefault();
     loginWithK12({ username, password });
+    dispatch(addPass(password));
   }
 
   return (

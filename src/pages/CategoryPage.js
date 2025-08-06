@@ -99,6 +99,7 @@ function CategoryPage() {
     const studentClassNums = user.k12.students
       .map((s) => parseInt(s.gradeLevel))
       .filter((n) => !isNaN(n));
+    console.log("TCL ~ CategoryPage ~ studentClassNums:", studentClassNums);
 
     // Map for preschool logic
     const preschoolMap = {
@@ -128,16 +129,20 @@ function CategoryPage() {
     }
 
     // Normal logic for primary + others
+    console.log("TCL ~ CategoryPage ~ studentClassNums:", studentClassNums);
     return sorted.filter((product) => {
       const classes = Array.isArray(product.class) ? product.class : [];
 
       return classes.some((cls) => {
-        const norm = normalize(cls);
+        const norm = normalize(cls); // assume this lowercases and trims
         if (["3yaş", "4yaş", "5yaş"].includes(norm)) return false;
 
-        const clsNum = parseInt(norm);
+        // Try to extract a number from the normalized class string
+        const clsNumMatch = norm.match(/\d+/); // match any digit(s)
+        const clsNum = clsNumMatch ? parseInt(clsNumMatch[0]) : null;
+
         if (studentGrades.includes(norm)) return true;
-        if (!isNaN(clsNum) && studentClassNums.includes(clsNum)) return true;
+        if (clsNum && studentClassNums.includes(clsNum)) return true;
 
         return false;
       });
@@ -419,25 +424,48 @@ function CategoryPage() {
                       </div>
                       {isGiftVisible && (
                         <div className="gift-section border p-2 rounded mb-2 bg-light">
-                          {subItems.map((gift, idx) => (
-                            <div
-                              key={gift._id || idx}
-                              className="d-flex align-items-center gap-2 mb-1"
-                            >
-                              <img
-                                src={
-                                  gift.pictures?.[0]?.url || "/placeholder.jpg"
-                                }
-                                alt={gift.name}
-                                style={{
-                                  width: 40,
-                                  height: 40,
-                                  objectFit: "contain",
-                                }}
-                              />
-                              <span className="small">{gift.name}</span>
-                            </div>
-                          ))}
+                          {subItems.map((gift, idx) => {
+                            return (
+                              <>
+                                {" "}
+                                <div
+                                  key={gift._id || idx}
+                                  className="d-flex align-items-center gap-2 mb-1"
+                                >
+                                  <img
+                                    src={
+                                      gift.pictures?.[0]?.url ||
+                                      "/placeholder.jpg"
+                                    }
+                                    alt={gift.name}
+                                    style={{
+                                      width: 40,
+                                      height: 40,
+                                      objectFit: "contain",
+                                    }}
+                                  />
+                                  <span className="small">{gift.name}</span>
+                                </div>
+                                {gift.sizes && (
+                                  <div className="d-flex justify-items-center align-items-center">
+                                    <span className="label small">Beden:</span>
+                                    <Form.Select
+                                      size="sm"
+                                      className="value-dropdown text-danger ms-2"
+                                      style={{ width: "auto" }}
+                                    >
+                                      {(Array.isArray(gift?.sizes)
+                                        ? gift.sizes
+                                        : sizeOptions
+                                      ).map((s) => (
+                                        <option key={s}>{s}</option>
+                                      ))}
+                                    </Form.Select>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })}
                         </div>
                       )}
 

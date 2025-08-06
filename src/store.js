@@ -3,7 +3,7 @@ import productSlice from "./features/productSlice";
 import userSlice from "./features/userSlice";
 import campaignSlice from "./features/campaignSlice";
 import appApi from "./services/appApi";
-
+import personalSlice from "./features/personalSlice";
 //persit our store
 import storage from "redux-persist/lib/storage";
 import { combineReducers } from "redux";
@@ -15,6 +15,7 @@ const reducer = combineReducers({
   user: userSlice,
   products: productSlice,
   campaigns: campaignSlice,
+  personal: personalSlice,
   [appApi.reducerPath]: appApi.reducer,
 });
 
