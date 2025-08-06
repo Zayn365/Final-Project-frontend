@@ -21,6 +21,7 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCampus, setSelectedCampus] = useState("");
   const [selectAll, setSelectAll] = useState(false);
+  const [invalidEntries, setInvalidEntries] = useState([]);
 
   const [updateCampaign, { isLoading, isSuccess, isError, error }] =
     useUpdateCampaignMutation();
@@ -100,6 +101,8 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
 
   const handleExcelUpload = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (evt) => {
       const binaryStr = evt.target.result;
@@ -107,20 +110,41 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
-      const newStudents = jsonData.filter((row) => row["Ogrenci_TC"]);
-      const tcList = newStudents.map((s) => s["Ogrenci_TC"]);
 
+      // Filter out entries with valid Ogrenci_TC
+      const newStudents = jsonData.filter(
+        (row) => row["Öğrenci T.C. Kimlik Numarası"]
+      );
+
+      // Standardize keys to match internal structure
+      const formattedStudents = newStudents.map((row) => ({
+        Ogrenci_TC: row["Öğrenci T.C. Kimlik Numarası"],
+        Ogrenci_Adı: row["Öğrenci Tam Adı"],
+        Okul: row["Öğrenci Okul"],
+        Sinif: row["Öğrenci Sınıf Seviyesi"],
+        Veli_Ad: row["Veli (1) Tam Adı"],
+        Veli_TC: row["Veli (1) T.C. Kimlik Numarası"],
+      }));
+
+      // Merge with existing students (deduplicated by Ogrenci_TC)
       setStudents((prev) => {
         const existingTCs = new Set(prev.map((s) => s.Ogrenci_TC));
         const merged = [...prev];
-        newStudents.forEach((s) => {
+        formattedStudents.forEach((s) => {
           if (!existingTCs.has(s.Ogrenci_TC)) merged.push(s);
         });
         return merged;
       });
 
-      setSelectedUsers((prev) => Array.from(new Set([...prev, ...tcList])));
+      // Add all uploaded students to selection
+      const uploadedTCs = formattedStudents.map((s) =>
+        s.Ogrenci_TC?.toString()
+      );
+      setSelectedUsers((prev) =>
+        Array.from(new Set([...prev, ...uploadedTCs]))
+      );
     };
+
     reader.readAsBinaryString(file);
   };
 
@@ -369,6 +393,18 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
             Güncelle
           </Button>
         </Form>
+        {invalidEntries.length > 0 && (
+          <Alert variant="danger">
+            <strong>{invalidEntries.length} geçersiz öğrenci bulundu:</strong>
+            <ul className="mb-0 mt-2">
+              {invalidEntries.map((s, idx) => (
+                <li key={idx}>
+                  ❌ {s.tc} - {s.okul}
+                </li>
+              ))}
+            </ul>
+          </Alert>
+        )}
       </Modal.Body>
     </Modal>
   );

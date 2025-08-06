@@ -22,6 +22,7 @@ function NewCampaignModal({ show, handleClose }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCampus, setSelectedCampus] = useState("");
   const [selectAll, setSelectAll] = useState(false);
+  const [excelUploadMessage, setExcelUploadMessage] = useState("");
 
   const [createCampaign, { isLoading, isSuccess, isError, error }] =
     useCreateCampaignMutation();
@@ -110,21 +111,36 @@ function NewCampaignModal({ show, handleClose }) {
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-      const newStudents = jsonData.filter((row) => row["Ogrenci_TC"]);
+      const newStudents = jsonData
+        .map((row) => ({
+          Ogrenci_TC: row["Öğrenci T.C. Kimlik Numarası"],
+          Ogrenci_Adı: row["Öğrenci Tam Adı"],
+          Okul: row["Öğrenci Okul"],
+        }))
+        .filter((s) => s.Ogrenci_TC);
+      if (newStudents.length === 0) {
+        alert("Excel dosyasında geçerli öğrenci verisi bulunamadı.");
+        return;
+      }
+
       const tcList = newStudents.map((s) => s["Ogrenci_TC"]);
 
-      // ✅ Merge new students into existing student list
+      // Replace existing students with the same TC
       setStudents((prev) => {
-        const existingTCs = new Set(prev.map((s) => s.Ogrenci_TC));
-        const merged = [...prev];
-        newStudents.forEach((s) => {
-          if (!existingTCs.has(s.Ogrenci_TC)) merged.push(s);
+        const updatedMap = new Map();
+        [...prev, ...newStudents].forEach((s) => {
+          updatedMap.set(s.Ogrenci_TC, s);
         });
-        return merged;
+        return Array.from(updatedMap.values());
       });
 
-      // ✅ Merge selected TCs
+      // Add them to selected
       setSelectedUsers((prev) => Array.from(new Set([...prev, ...tcList])));
+
+      // ✅ Show alert summary
+      alert(
+        `✅ ${newStudents.length} öğrenci yüklendi ve ${tcList.length} öğrenci seçildi.`
+      );
     };
 
     reader.readAsBinaryString(file);
@@ -397,7 +413,7 @@ function NewCampaignModal({ show, handleClose }) {
             </table>
           </div>
 
-          {selectedUsers.length > 0 && (
+          {/* {selectedUsers.length > 0 && (
             <div className="mt-2">
               <Form.Label>Seçilen Kullanıcılar:</Form.Label>
               <ul>
@@ -410,7 +426,7 @@ function NewCampaignModal({ show, handleClose }) {
                   ))}
               </ul>
             </div>
-          )}
+          )} */}
 
           <Button type="submit" className="mt-3" disabled={isLoading}>
             Kaydet
