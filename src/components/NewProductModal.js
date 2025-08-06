@@ -199,6 +199,7 @@ function AddProductModal({ show, handleClose }) {
       }
     }
   }, [form.category, customCategory, useCustomCategory, products]);
+  // Comment
   useEffect(() => {
     const classToCategoryMap = (cls) => {
       const sınıfNumMatch = cls.match(/\d+/);
