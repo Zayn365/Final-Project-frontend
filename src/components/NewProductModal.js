@@ -205,10 +205,12 @@ function AddProductModal({ show, handleClose }) {
       if (!sınıfNumMatch) return null;
 
       const num = parseInt(sınıfNumMatch[0]);
-      if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
-      if ([5, 6, 7, 8].includes(num)) return "Ortaokul Kıyafet";
-      if ([9, 10, 11, 12].includes(num)) return "Lise Kıyafet";
-      return null;
+      if (form.category !== "Eğitim Seti") {
+        if ([1, 2, 3, 4].includes(num)) return "İlkokul Kıyafet";
+        if ([5, 6, 7, 8].includes(num)) return "Ortaokul Kıyafet";
+        if ([9, 10, 11, 12].includes(num)) return "Lise Kıyafet";
+        return null;
+      }
     };
 
     if (form.class.length > 0 && !useCustomCategory) {

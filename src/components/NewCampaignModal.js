@@ -53,26 +53,34 @@ function NewCampaignModal({ show, handleClose }) {
   }, [students]);
 
   const filteredStudents = useMemo(() => {
-    return uniqueStudents.filter((s) => {
+    const uploadedTCs = new Set(selectedUsers);
+    const matched = uniqueStudents.filter((s) => uploadedTCs.has(s.Ogrenci_TC));
+    const unmatched = uniqueStudents.filter(
+      (s) => !uploadedTCs.has(s.Ogrenci_TC)
+    );
+
+    return [...matched, ...unmatched].filter((s) => {
       const matchesSearch =
         s.Ogrenci_Adı?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.Ogrenci_TC?.toString().includes(searchTerm);
       const matchesCampus = selectedCampus ? s.Okul === selectedCampus : true;
       return matchesSearch && matchesCampus;
     });
-  }, [uniqueStudents, searchTerm, selectedCampus]);
+  }, [uniqueStudents, searchTerm, selectedCampus, selectedUsers]);
 
   useEffect(() => {
+    // ✅ Prevent auto trigger on first render
+    if (!filteredStudents.length) return;
+
+    const newTCs = filteredStudents.map((s) => String(s.Ogrenci_TC));
+
     if (selectAll) {
-      const allTCs = filteredStudents.map((s) => s.Ogrenci_TC);
-      setSelectedUsers((prev) => Array.from(new Set([...prev, ...allTCs])));
+      setSelectedUsers((prev) => Array.from(new Set([...prev, ...newTCs])));
     } else {
-      const remaining = selectedUsers.filter(
-        (tc) => !filteredStudents.some((s) => s.Ogrenci_TC === tc)
-      );
-      setSelectedUsers(remaining);
+      setSelectedUsers((prev) => prev.filter((tc) => !newTCs.includes(tc)));
     }
-  }, [selectAll, filteredStudents]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectAll]);
 
   const resetForm = () => {
     setForm({
@@ -89,13 +97,14 @@ function NewCampaignModal({ show, handleClose }) {
     setSelectedCampus("");
     setSelectAll(false);
   };
-
   const toggleUser = (tc) => {
+    const tcStr = String(tc);
     setSelectedUsers((prev) =>
-      prev.includes(tc) ? prev.filter((id) => id !== tc) : [...prev, tc]
+      prev.includes(tcStr)
+        ? prev.filter((id) => id !== tcStr)
+        : [...prev, tcStr]
     );
   };
-
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
@@ -112,12 +121,20 @@ function NewCampaignModal({ show, handleClose }) {
       const jsonData = XLSX.utils.sheet_to_json(sheet);
 
       const newStudents = jsonData
-        .map((row) => ({
-          Ogrenci_TC: row["Öğrenci T.C. Kimlik Numarası"],
-          Ogrenci_Adı: row["Öğrenci Tam Adı"],
-          Okul: row["Öğrenci Okul"],
-        }))
-        .filter((s) => s.Ogrenci_TC);
+        .map((row) => {
+          const rawTC = row["Öğrenci T.C. Kimlik Numarası"];
+          const tc =
+            typeof rawTC === "number"
+              ? rawTC.toString().trim()
+              : (rawTC || "").toString().trim();
+
+          return {
+            Ogrenci_TC: tc,
+            Ogrenci_Adı: row["Öğrenci Tam Adı"]?.toString().trim(),
+            Okul: row["Öğrenci Okul"]?.toString().trim(),
+          };
+        })
+        .filter((s) => s.Ogrenci_TC.length === 11);
       if (newStudents.length === 0) {
         alert("Excel dosyasında geçerli öğrenci verisi bulunamadı.");
         return;
@@ -382,9 +399,10 @@ function NewCampaignModal({ show, handleClose }) {
                       type="checkbox"
                       label="Hepsini Seç"
                       checked={
+                        filteredStudents.length > 0 &&
                         filteredStudents.every((s) =>
-                          selectedUsers.includes(s.Ogrenci_TC)
-                        ) && filteredStudents.length > 0
+                          selectedUsers.includes(String(s.Ogrenci_TC))
+                        )
                       }
                       onChange={(e) => setSelectAll(e.target.checked)}
                     />
@@ -400,8 +418,8 @@ function NewCampaignModal({ show, handleClose }) {
                     <td>
                       <Form.Check
                         type="checkbox"
-                        checked={selectedUsers.includes(s.Ogrenci_TC)}
-                        onChange={() => toggleUser(s.Ogrenci_TC)}
+                        checked={selectedUsers.includes(String(s.Ogrenci_TC))}
+                        onChange={() => toggleUser(String(s.Ogrenci_TC))}
                       />
                     </td>
                     <td>{s.Ogrenci_Adı}</td>

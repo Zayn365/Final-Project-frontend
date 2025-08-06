@@ -68,30 +68,49 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
   }, [students]);
 
   const filteredStudents = useMemo(() => {
-    return uniqueStudents.filter((s) => {
+    const uploadedTCs = new Set(selectedUsers.map((tc) => String(tc)));
+
+    // Ensure TC is string consistently
+    const allStudents = uniqueStudents.map((s) => ({
+      ...s,
+      Ogrenci_TC: String(s.Ogrenci_TC),
+    }));
+
+    const matched = allStudents.filter((s) => uploadedTCs.has(s.Ogrenci_TC));
+    const unmatched = allStudents.filter((s) => !uploadedTCs.has(s.Ogrenci_TC));
+
+    const filtered = [...matched, ...unmatched].filter((s) => {
       const matchesSearch =
         s.Ogrenci_Adı?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.Ogrenci_TC?.toString().includes(searchTerm);
+        s.Ogrenci_TC.includes(searchTerm);
       const matchesCampus = selectedCampus ? s.Okul === selectedCampus : true;
       return matchesSearch && matchesCampus;
     });
-  }, [uniqueStudents, searchTerm, selectedCampus]);
+
+    return filtered;
+  }, [uniqueStudents, searchTerm, selectedCampus, selectedUsers]);
 
   useEffect(() => {
+    if (!filteredStudents.length) return;
+
+    const allTCs = filteredStudents.map((s) => String(s.Ogrenci_TC));
+
     if (selectAll) {
-      const allTCs = filteredStudents.map((s) => s.Ogrenci_TC);
       setSelectedUsers((prev) => Array.from(new Set([...prev, ...allTCs])));
     } else {
-      const remaining = selectedUsers.filter(
-        (tc) => !filteredStudents.some((s) => s.Ogrenci_TC === tc)
+      setSelectedUsers((prev) =>
+        prev.filter((tc) => !allTCs.includes(String(tc)))
       );
-      setSelectedUsers(remaining);
     }
-  }, [selectAll, filteredStudents]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectAll]); // ✅ DO NOT depend on filteredStudents!
 
   const toggleUser = (tc) => {
+    const tcStr = String(tc);
     setSelectedUsers((prev) =>
-      prev.includes(tc) ? prev.filter((id) => id !== tc) : [...prev, tc]
+      prev.includes(tcStr)
+        ? prev.filter((id) => id !== tcStr)
+        : [...prev, tcStr]
     );
   };
 
@@ -358,9 +377,10 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
                       type="checkbox"
                       label="Hepsini Seç"
                       checked={
+                        filteredStudents.length > 0 &&
                         filteredStudents.every((s) =>
-                          selectedUsers.includes(s.Ogrenci_TC)
-                        ) && filteredStudents.length > 0
+                          selectedUsers.includes(String(s.Ogrenci_TC))
+                        )
                       }
                       onChange={(e) => setSelectAll(e.target.checked)}
                     />
@@ -376,8 +396,8 @@ function EditCampaignModal({ show, handleClose, campaignId }) {
                     <td>
                       <Form.Check
                         type="checkbox"
-                        checked={selectedUsers.includes(s.Ogrenci_TC)}
-                        onChange={() => toggleUser(s.Ogrenci_TC)}
+                        checked={selectedUsers.includes(String(s.Ogrenci_TC))}
+                        onChange={() => toggleUser(String(s.Ogrenci_TC))}
                       />
                     </td>
                     <td>{s.Ogrenci_Adı}</td>
