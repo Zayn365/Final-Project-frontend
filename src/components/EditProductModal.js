@@ -60,6 +60,7 @@ function EditProductModal({ show, handleClose, productId }) {
   const [hasSize, setHasSize] = useState(false);
   const [stock, setStock] = useState("");
   const [useCustomCategory, setUseCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
 
   // const navigation = useNavigate();
   useEffect(() => {
@@ -185,6 +186,7 @@ function EditProductModal({ show, handleClose, productId }) {
     updateProduct(payload).then(({ data }) => {
       if (data) {
         handleClose();
+        setUseCustomCategory(false);
         reset();
         // navigation("/admin");
         // window.location.reload();
@@ -208,7 +210,15 @@ function EditProductModal({ show, handleClose, productId }) {
     [products]
   );
   return (
-    <Modal show={show} onHide={handleClose} size="lg" centered>
+    <Modal
+      show={show}
+      onHide={() => {
+        handleClose();
+        setUseCustomCategory(false);
+      }}
+      size="lg"
+      centered
+    >
       <Modal.Header closeButton>
         <Modal.Title>Ürün Düzenle</Modal.Title>
       </Modal.Header>
@@ -282,7 +292,17 @@ function EditProductModal({ show, handleClose, productId }) {
               <option value="__other__">Diğer (Manuel Kategori)</option>
             </Form.Select>
           </Form.Group>
-
+          {useCustomCategory && (
+            <>
+              <Form.Control
+                className="mt-2"
+                placeholder="Enter custom category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              />
+            </>
+          )}
           <Form.Check
             type="checkbox"
             className="mb-3"

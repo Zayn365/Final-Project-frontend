@@ -22,7 +22,7 @@ function CategoryPage() {
   const campaigns = useSelector((state) => state.campaigns || []);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
-  const [openGifts, setOpenGifts] = useState({});
+  // const [openGifts, setOpenGifts] = useState({});
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
@@ -149,7 +149,8 @@ function CategoryPage() {
   const pageCount = Math.ceil(prod.length / perPage);
   const pageStart = pageIdx * perPage;
   const pageEnd = Math.min(pageStart + perPage, prod.length);
-  const sortedProd = [...prod].sort((a, b) => {
+  const disabledProd = prod.filter((p) => !p.isDisabled); // or p.isPasif
+  const sortedProd = [...disabledProd].sort((a, b) => {
     const priority = {
       "Eğitim Seti": 1,
       "Kırtasiye Seti": 2,
@@ -506,31 +507,35 @@ function CategoryPage() {
                         variant="danger"
                         disabled={prod.stock <= 0}
                         onClick={() => {
-                          const currentYear = new Date().getFullYear();
+                          if (
+                            prod.category === "Eğitim Seti" ||
+                            prod.category === "Kırtasiye Seti"
+                          ) {
+                            const currentYear = new Date().getFullYear();
 
-                          // Step 1: Filter only orders by the current user
-                          const userOrders = orders.filter(
-                            (order) => order?.owner?._id === user?._id
-                          );
-
-                          // Step 2: Check if product was ordered in the current year
-                          const alreadyOrdered = userOrders?.some((order) => {
-                            const orderYear = new Date(
-                              order.date || order.createdAt
-                            ).getFullYear();
-                            if (orderYear !== currentYear) return false;
-
-                            const productIds = Object.keys(
-                              order.products || {}
+                            // Step 1: Filter only orders by the current user
+                            const userOrders = orders.filter(
+                              (order) => order?.owner?._id === user?._id
                             );
-                            return productIds.includes(prod._id);
-                          });
 
-                          if (alreadyOrdered) {
-                            setToastError(true);
-                            return;
+                            // Step 2: Check if product was ordered in the current year
+                            const alreadyOrdered = userOrders?.some((order) => {
+                              const orderYear = new Date(
+                                order.date || order.createdAt
+                              ).getFullYear();
+                              if (orderYear !== currentYear) return false;
+
+                              const productIds = Object.keys(
+                                order.products || {}
+                              );
+                              return productIds.includes(prod._id);
+                            });
+
+                            if (alreadyOrdered) {
+                              setToastError(true);
+                              return;
+                            }
                           }
-
                           addToCart({
                             userId: user._id,
                             productId: prod._id,

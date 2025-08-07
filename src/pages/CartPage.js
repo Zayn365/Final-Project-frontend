@@ -11,7 +11,7 @@ import {
 import "./CartPage.css";
 import { formatWithCommas } from "../hooks/formatFuctions";
 import { useState } from "react";
-
+import TableCard from "../components/TableCard";
 const stripePromise = loadStripe("pk_test_...");
 
 function CartPage() {
@@ -264,6 +264,9 @@ function CartPage() {
           </Col>
         )}
       </Row>
+      <div>
+        <TableCard />
+      </div>
     </Container>
   );
 }
