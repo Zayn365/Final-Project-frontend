@@ -4,11 +4,12 @@ import { Container, Row, Col, Button, Form, Badge } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import "./Shirts.css";
 import { useAddToCartMutation } from "../services/appApi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ToastMessage from "../components/ToastMessage";
 import { formatWithCommas } from "../hooks/formatFuctions";
-
+import { addSizes } from "../features/personalSlice";
 function CategoryPage() {
+  const dispatch = useDispatch();
   const { category = "all" } = useParams();
   const [allProducts, setAllProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -126,7 +127,6 @@ function CategoryPage() {
       önhazırlık3648ay: "3yaş",
       hazırlık3648: "3yaş",
     };
-
     // Handle preschool filtering
     const matchedPreschoolAges = studentGrades
       .filter((grade) => grade in preschoolMap)
@@ -555,6 +555,7 @@ function CategoryPage() {
                               return;
                             }
                           }
+                          dispatch(addSizes(uniqueSizes));
                           addToCart({
                             userId: user._id,
                             productId: prod._id,

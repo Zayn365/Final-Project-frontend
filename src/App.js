@@ -23,6 +23,7 @@ import Shirts from "./pages/Shirts";
 import Ziraat3DSecureResult from "./pages/PaymentResult";
 function App() {
   const user = useSelector((state) => state.user);
+
   const dispatch = useDispatch();
   useEffect(() => {
     const socket = io("https://final-project-backend-m9nb.onrender.com");

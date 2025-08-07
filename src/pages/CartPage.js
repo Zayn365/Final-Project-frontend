@@ -23,7 +23,7 @@ function CartPage() {
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
   const [selectedSize, setSelectedSize] = useState({});
   const [cartSubItems, setCartSubItems] = useState({});
-
+  const sizes = useSelector((state) => state.personal.sizes);
   const userCart = user.cart;
   const cartItems = products.filter((product) => userCart[product._id]);
 
@@ -60,6 +60,8 @@ function CartPage() {
     if (user.cart[product.productId] <= 1) return;
     decreaseCart(product);
   };
+
+  let uniqueSizes = [...new Set(sizes)];
   return (
     <Container className="cart-container py-4" style={{ minHeight: "95vh" }}>
       <Row>
@@ -89,7 +91,7 @@ function CartPage() {
           )}
         </Col>
 
-        {cartItems.length > 0 && (
+        {cartItems.length > 0 ? (
           <Col md={5}>
             <Table responsive="sm" className="cart-table">
               <thead>
@@ -240,11 +242,12 @@ function CartPage() {
                                     });
                                   }}
                                 >
-                                  {(Array.isArray(sub?.sizes) && sub.sizes).map(
-                                    (s) => (
-                                      <option key={s}>{s}</option>
-                                    )
-                                  )}
+                                  {(Array.isArray(sub?.sizes)
+                                    ? uniqueSizes
+                                    : sub.sizes
+                                  ).map((s) => (
+                                    <option key={s}>{s}</option>
+                                  ))}
                                 </Form.Select>
                               </div>
                             )}
@@ -262,11 +265,12 @@ function CartPage() {
 
             <h4 className="text-end pt-3">Toplam: ₺{total.toFixed(2)}</h4>
           </Col>
+        ) : (
+          <div>
+            <TableCard />
+          </div>
         )}
       </Row>
-      <div>
-        <TableCard />
-      </div>
     </Container>
   );
 }
