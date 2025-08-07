@@ -7,7 +7,7 @@ import { useAddToCartMutation } from "../services/appApi";
 import { useDispatch, useSelector } from "react-redux";
 import ToastMessage from "../components/ToastMessage";
 import { formatWithCommas } from "../hooks/formatFuctions";
-import { addSizes } from "../features/personalSlice";
+import { addSizeWithId, addSizes } from "../features/personalSlice";
 function CategoryPage() {
   const dispatch = useDispatch();
   const { category = "all" } = useParams();
@@ -23,6 +23,9 @@ function CategoryPage() {
   const campaigns = useSelector((state) => state.campaigns || []);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
+  const [selectedGiftSizes, setSelectedGiftSizes] = useState([]);
+  console.log("TCL ~ CategoryPage ~ selectedGiftSizes:", selectedGiftSizes);
+
   // const [openGifts, setOpenGifts] = useState({});
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   useEffect(() => {
@@ -53,8 +56,8 @@ function CategoryPage() {
           .map(([category]) => category);
 
         // Step 3: Add 'All' at the top
-        const uniqueCategories = ["All", ...filteredCategories, "Hediye"];
-
+        // const uniqueCategories = ["All", ...filteredCategories, "Hediye"];
+        const uniqueCategories = ["All", ...filteredCategories];
         // Step 4: Update categories
         setCategories(uniqueCategories);
       } catch (err) {
@@ -307,7 +310,7 @@ function CategoryPage() {
               </div>
             </div>
             <Row>
-              {category.toLowerCase() === "hediye" ? (
+              {/* {category.toLowerCase() === "hediye" ? (
                 <>
                   {campaigns
                     .filter(
@@ -425,7 +428,7 @@ function CategoryPage() {
                                   </Badge>
                                 </div>
                               )} */}
-                              <Button
+              {/* <Button
                                 className="mt-2"
                                 variant="success"
                                 onClick={() => {
@@ -475,8 +478,8 @@ function CategoryPage() {
                                 }}
                               >
                                 Ana Ürünü Sepete Ekle
-                              </Button>
-                              {/* 
+                              </Button> */}
+              {/* 
                               <Button
                                 className="choose-btn mt-3 w-100"
                                 variant="danger"
@@ -499,13 +502,13 @@ function CategoryPage() {
                               >
                                 Detaylar
                               </Button> */}
-                            </div>
+              {/* </div>
                           </Col>
                         );
                       })
-                    )}
+                    )} */}
 
-                  {campaigns.filter(
+              {/* {campaigns.filter(
                     (c) =>
                       Array.isArray(c.selectedUsers) &&
                       c.selectedUsers.includes(user?.tc_id) &&
@@ -518,137 +521,125 @@ function CategoryPage() {
                     </div>
                   )}
                 </>
-              ) : (
-                <>
-                  {paged.length === 0 && (
-                    <div className="text-center text-muted py-5">
-                      <h5>Ürün bulunamadı</h5>
-                      <p>Aramanızla eşleşen ürün bulunamadı.</p>
-                    </div>
-                  )}
+              ) : ( */}
+              <>
+                {paged.length === 0 && (
+                  <div className="text-center text-muted py-5">
+                    <h5>Ürün bulunamadı</h5>
+                    <p>Aramanızla eşleşen ürün bulunamadı.</p>
+                  </div>
+                )}
 
-                  {paged.map((prod) => {
-                    let campaignAmount;
-                    const campaign = campaigns.find(
-                      (c) =>
-                        c.products?.includes(prod.category) &&
-                        Array.isArray(c.selectedUsers) &&
-                        c.selectedUsers.includes(user?.tc_id)
-                    );
-                    let finalPrice = Number(prod.price) || 0;
-                    const subItems = campaign?.subItems?.items || [];
-                    const isGiftVisible = true;
-                    if (
-                      campaign &&
-                      typeof campaign.amount === "number" &&
-                      !isNaN(campaign.amount)
-                    ) {
-                      if (campaign.type === "percentage") {
-                        campaignAmount = campaign.amount;
-                        finalPrice -= (finalPrice * campaign.amount) / 100;
-                      } else if (campaign.type === "fixed") {
-                        campaignAmount = campaign.amount;
-                        finalPrice -= campaign.amount;
-                      }
-                      finalPrice = Math.max(finalPrice, 0);
+                {paged.map((prod) => {
+                  let campaignAmount;
+                  const campaign = campaigns.find(
+                    (c) =>
+                      c.products?.includes(prod.category) &&
+                      Array.isArray(c.selectedUsers) &&
+                      c.selectedUsers.includes(user?.tc_id)
+                  );
+                  let finalPrice = Number(prod.price) || 0;
+                  const subItems = campaign?.subItems?.items || [];
+                  const isGiftVisible = true;
+                  if (
+                    campaign &&
+                    typeof campaign.amount === "number" &&
+                    !isNaN(campaign.amount)
+                  ) {
+                    if (campaign.type === "percentage") {
+                      campaignAmount = campaign.amount;
+                      finalPrice -= (finalPrice * campaign.amount) / 100;
+                    } else if (campaign.type === "fixed") {
+                      campaignAmount = campaign.amount;
+                      finalPrice -= campaign.amount;
                     }
-                    let allSizes = paged
-                      .filter(
-                        (prod) => prod.hasSize && Array.isArray(prod.sizes)
-                      )
-                      .flatMap((prod) => prod.sizes);
+                    finalPrice = Math.max(finalPrice, 0);
+                  }
+                  let allSizes = paged
+                    .filter((prod) => prod.hasSize && Array.isArray(prod.sizes))
+                    .flatMap((prod) => prod.sizes);
 
-                    // Remove duplicates
-                    let uniqueSizes = [...new Set(allSizes)];
-                    return (
-                      <Col
-                        md={3}
-                        sm={6}
-                        xs={12}
-                        key={prod._id}
-                        className="mb-4"
-                      >
-                        <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
-                          <img
-                            src={prod.pictures?.[0]?.url}
-                            alt={prod.name}
-                            className="img-fluid mb-3"
-                          />
-                          <div className="product-info text-start flex-grow-1">
-                            <div className="mb-2">
-                              <div className="d-flex">
-                                <span
-                                  className="text-dark text-center text-wrap"
-                                  style={{
-                                    lineHeight: "1.3em",
-                                    fontSize: "16px",
-                                  }}
-                                >
-                                  {prod.name}
-                                </span>
-                              </div>
+                  // Remove duplicates
+                  let uniqueSizes = [...new Set(allSizes)];
+                  return (
+                    <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
+                      <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
+                        <img
+                          src={prod.pictures?.[0]?.url}
+                          alt={prod.name}
+                          className="img-fluid mb-3"
+                        />
+                        <div className="product-info text-start flex-grow-1">
+                          <div className="mb-2">
+                            <div className="d-flex">
+                              <span
+                                className="text-dark text-center text-wrap"
+                                style={{
+                                  lineHeight: "1.3em",
+                                  fontSize: "16px",
+                                }}
+                              >
+                                {prod.name}
+                              </span>
                             </div>
-                            <div className="top-info">
-                              <div className="info-row info-top flex-column">
-                                {prod.hasClass &&
-                                  Array.isArray(prod.class) &&
-                                  prod.class.length > 0 &&
-                                  user?.k12?.students?.length > 0 && (
-                                    <div className="d-flex align-items-center mb-1">
-                                      <span className="label">Sınıf:</span>
-                                      <span className="ms-1">
-                                        {(() => {
-                                          const normalize = (val) =>
-                                            String(val)
-                                              .toLowerCase()
-                                              .replace(/\./g, "")
-                                              .replace(/sınıf/g, "")
-                                              .replace(/\s+/g, "")
-                                              .trim();
+                          </div>
+                          <div className="top-info">
+                            <div className="info-row info-top flex-column">
+                              {prod.hasClass &&
+                                Array.isArray(prod.class) &&
+                                prod.class.length > 0 &&
+                                user?.k12?.students?.length > 0 && (
+                                  <div className="d-flex align-items-center mb-1">
+                                    <span className="label">Sınıf:</span>
+                                    <span className="ms-1">
+                                      {(() => {
+                                        const normalize = (val) =>
+                                          String(val)
+                                            .toLowerCase()
+                                            .replace(/\./g, "")
+                                            .replace(/sınıf/g, "")
+                                            .replace(/\s+/g, "")
+                                            .trim();
 
-                                          const studentGrades =
-                                            user.k12.students.map((s) =>
-                                              normalize(s.gradeLevel)
-                                            );
-
-                                          const match = prod.class.find((cls) =>
-                                            studentGrades.includes(
-                                              normalize(cls)
-                                            )
+                                        const studentGrades =
+                                          user.k12.students.map((s) =>
+                                            normalize(s.gradeLevel)
                                           );
 
-                                          return match || "Mevcut değil";
-                                        })()}
-                                      </span>
-                                    </div>
-                                  )}
+                                        const match = prod.class.find((cls) =>
+                                          studentGrades.includes(normalize(cls))
+                                        );
 
-                                {prod.hasSize && (
-                                  <div className="d-flex align-items-center">
-                                    <span className="label">Beden:</span>
-                                    <Form.Select
-                                      size="sm"
-                                      className="value-dropdown text-danger ms-2"
-                                      style={{ width: "auto" }}
-                                    >
-                                      {(Array.isArray(prod?.sizes)
-                                        ? prod.sizes
-                                        : sizeOptions
-                                      ).map((s) => (
-                                        <option key={s}>{s}</option>
-                                      ))}
-                                    </Form.Select>
+                                        return match || "Mevcut değil";
+                                      })()}
+                                    </span>
                                   </div>
                                 )}
-                                <div className="d-flex align-items-center mb-1">
-                                  <span className="label">Stok:</span>
-                                  <span className="ms-1">
-                                    {prod.stock ?? 0}
-                                  </span>
-                                </div>
-                              </div>
 
-                              {/* {subItems.length > 0 && (
+                              {prod.hasSize && (
+                                <div className="d-flex align-items-center">
+                                  <span className="label">Beden:</span>
+                                  <Form.Select
+                                    size="sm"
+                                    className="value-dropdown text-danger ms-2"
+                                    style={{ width: "auto" }}
+                                  >
+                                    {(Array.isArray(prod?.sizes)
+                                      ? prod.sizes
+                                      : sizeOptions
+                                    ).map((s) => (
+                                      <option key={s}>{s}</option>
+                                    ))}
+                                  </Form.Select>
+                                </div>
+                              )}
+                              <div className="d-flex align-items-center mb-1">
+                                <span className="label">Stok:</span>
+                                <span className="ms-1">{prod.stock ?? 0}</span>
+                              </div>
+                            </div>
+
+                            {/* {subItems.length > 0 && (
                             <Button
                               variant="outline-secondary"
                               size="sm"
@@ -666,152 +657,159 @@ function CategoryPage() {
                             </Button>
                           )} */}
 
-                              <div className="info-row">
-                                <span className="label">Fiyat:</span>
-                                <span className="value">
-                                  {formatWithCommas(finalPrice.toFixed(0))} TL
-                                </span>
-                              </div>
+                            <div className="info-row">
+                              <span className="label">Fiyat:</span>
+                              <span className="value">
+                                {formatWithCommas(finalPrice.toFixed(0))} TL
+                              </span>
                             </div>
                           </div>
-                          {isGiftVisible && subItems.length > 0 && (
-                            <div className="gift-section border p-2 rounded mb-2 bg-light">
-                              {subItems.map((gift, idx) => {
-                                return (
-                                  <>
-                                    {" "}
-                                    <div
-                                      key={gift._id || idx}
-                                      className="d-flex align-items-center gap-2 mb-1"
-                                    >
-                                      <img
-                                        src={
-                                          gift.pictures?.[0]?.url ||
-                                          "/placeholder.jpg"
-                                        }
-                                        alt={gift.name}
-                                        style={{
-                                          width: 40,
-                                          height: 40,
-                                          objectFit: "contain",
-                                        }}
-                                      />
-                                      <span className="small">{gift.name}</span>
-                                    </div>
-                                    {gift.sizes && (
-                                      <div className="d-flex justify-items-center align-items-center">
-                                        <span className="label small">
-                                          Beden:
-                                        </span>
-                                        <Form.Select
-                                          size="sm"
-                                          className="value-dropdown text-danger ms-2"
-                                          style={{ width: "auto" }}
-                                        >
-                                          {(Array.isArray(gift?.sizes)
-                                            ? uniqueSizes
-                                            : gift.sizes
-                                          ).map((s) => (
-                                            <option key={s}>{s}</option>
-                                          ))}
-                                        </Form.Select>
-                                        <span
-                                          style={{
-                                            textDecoration: "line-through",
-                                            color: "red",
-                                            marginRight: "4px",
-                                            marginLeft: "4px",
-                                          }}
-                                        >
-                                          ₺{gift.price}
-                                        </span>
-
-                                        <span
-                                          style={{
-                                            color: "green",
-                                            marginRight: "4px",
-                                            marginLeft: "4px",
-                                          }}
-                                        >
-                                          ₺{campaign?.subItems?.price}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </>
-                                );
-                              })}
-                            </div>
-                          )}
-                          {campaignAmount && (
-                            <Col
-                              sm={12}
-                              className="d-flex justify-content-center"
-                            >
-                              <Badge bg="success">
-                                ₺{campaignAmount} İNDİRİM
-                              </Badge>
-                            </Col>
-                          )}
-                          <Button
-                            className="choose-btn mt-3 w-100"
-                            variant="danger"
-                            disabled={prod.stock <= 0}
-                            onClick={() => {
-                              if (
-                                prod.category === "Eğitim Seti" ||
-                                prod.category === "Kırtasiye Seti"
-                              ) {
-                                const currentYear = new Date().getFullYear();
-
-                                // Step 1: Filter only orders by the current user
-                                const userOrders = orders.filter(
-                                  (order) => order?.owner?._id === user?._id
-                                );
-
-                                // Step 2: Check if product was ordered in the current year
-                                const alreadyOrdered = userOrders?.some(
-                                  (order) => {
-                                    const orderYear = new Date(
-                                      order.date || order.createdAt
-                                    ).getFullYear();
-                                    if (orderYear !== currentYear) return false;
-
-                                    const productIds = Object.keys(
-                                      order.products || {}
-                                    );
-                                    return productIds.includes(prod._id);
-                                  }
-                                );
-
-                                if (alreadyOrdered) {
-                                  setToastError(true);
-                                  return;
-                                }
-                              }
-                              dispatch(addSizes(uniqueSizes));
-                              addToCart({
-                                userId: user._id,
-                                productId: prod._id,
-                                price: finalPrice,
-                              });
-                            }}
-                          >
-                            {prod.stock <= 0 ? "Stokta Yok" : "Sepete Ekle"}
-                          </Button>
-
-                          <Button
-                            className="quick-view-btn mt-2 w-100"
-                            variant="light"
-                            onClick={() => navigate(`/product/${prod._id}`)}
-                          >
-                            Detaylar
-                          </Button>
                         </div>
-                      </Col>
-                    );
-                  })}
-                </>
-              )}
+                        {isGiftVisible && subItems.length > 0 && (
+                          <div className="gift-section border p-2 rounded mb-2 bg-light">
+                            {subItems.map((gift, idx) => {
+                              return (
+                                <>
+                                  {" "}
+                                  <div
+                                    key={gift._id || idx}
+                                    className="d-flex align-items-center gap-2 mb-1"
+                                  >
+                                    <img
+                                      src={
+                                        gift.pictures?.[0]?.url ||
+                                        "/placeholder.jpg"
+                                      }
+                                      alt={gift.name}
+                                      style={{
+                                        width: 40,
+                                        height: 40,
+                                        objectFit: "contain",
+                                      }}
+                                    />
+                                    <span className="small">{gift.name}</span>
+                                  </div>
+                                  {gift.sizes && (
+                                    <div className="d-flex justify-items-center align-items-center">
+                                      <span className="label small">
+                                        Beden:
+                                      </span>
+                                      <Form.Select
+                                        size="sm"
+                                        className="value-dropdown text-danger ms-2"
+                                        style={{ width: "auto" }}
+                                        onChange={(e) => {
+                                          setSelectedGiftSizes((prev) => ({
+                                            ...prev,
+                                            [gift._id]: e.target.value,
+                                          }));
+                                        }}
+                                      >
+                                        {(Array.isArray(gift?.sizes)
+                                          ? uniqueSizes
+                                          : gift.sizes
+                                        ).map((s) => (
+                                          <option key={s}>{s}</option>
+                                        ))}
+                                      </Form.Select>
+                                      <span
+                                        style={{
+                                          textDecoration: "line-through",
+                                          color: "red",
+                                          marginRight: "4px",
+                                          marginLeft: "4px",
+                                        }}
+                                      >
+                                        ₺{gift.price}
+                                      </span>
+
+                                      <span
+                                        style={{
+                                          color: "green",
+                                          marginRight: "4px",
+                                          marginLeft: "4px",
+                                        }}
+                                      >
+                                        ₺{campaign?.subItems?.price}
+                                      </span>
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {campaignAmount && (
+                          <Col
+                            sm={12}
+                            className="d-flex justify-content-center"
+                          >
+                            <Badge bg="success">
+                              ₺{campaignAmount} İNDİRİM
+                            </Badge>
+                          </Col>
+                        )}
+                        <Button
+                          className="choose-btn mt-3 w-100"
+                          variant="danger"
+                          disabled={prod.stock <= 0}
+                          onClick={() => {
+                            if (
+                              prod.category === "Eğitim Seti" ||
+                              prod.category === "Kırtasiye Seti"
+                            ) {
+                              const currentYear = new Date().getFullYear();
+
+                              // Step 1: Filter only orders by the current user
+                              const userOrders = orders.filter(
+                                (order) => order?.owner?._id === user?._id
+                              );
+
+                              // Step 2: Check if product was ordered in the current year
+                              const alreadyOrdered = userOrders?.some(
+                                (order) => {
+                                  const orderYear = new Date(
+                                    order.date || order.createdAt
+                                  ).getFullYear();
+                                  if (orderYear !== currentYear) return false;
+
+                                  const productIds = Object.keys(
+                                    order.products || {}
+                                  );
+                                  return productIds.includes(prod._id);
+                                }
+                              );
+
+                              if (alreadyOrdered) {
+                                setToastError(true);
+                                return;
+                              }
+                            }
+                            dispatch(addSizes(uniqueSizes));
+                            addToCart({
+                              userId: user._id,
+                              productId: prod._id,
+                              price: finalPrice,
+                            });
+                            dispatch(addSizeWithId(selectedGiftSizes));
+                          }}
+                        >
+                          {prod.stock <= 0 ? "Stokta Yok" : "Sepete Ekle"}
+                        </Button>
+
+                        <Button
+                          className="quick-view-btn mt-2 w-100"
+                          variant="light"
+                          onClick={() => navigate(`/product/${prod._id}`)}
+                        >
+                          Detaylar
+                        </Button>
+                      </div>
+                    </Col>
+                  );
+                })}
+              </>
+              {/* )} */}
             </Row>
             {pageCount > 1 && (
               <div className="d-flex justify-content-center gap-3 mt-4">

@@ -21,9 +21,10 @@ function CartPage() {
   const [increaseCart] = useIncreaseCartProductMutation();
   const [decreaseCart] = useDecreaseCartProductMutation();
   const [removeFromCart, { isLoading }] = useRemoveFromCartMutation();
-  const [selectedSize, setSelectedSize] = useState({});
   const [cartSubItems, setCartSubItems] = useState({});
-  const sizes = useSelector((state) => state.personal.sizes);
+  const { sizes, sizeWithId } = useSelector((state) => state.personal);
+  console.log("TCL ~ CartPage ~ sizes:", sizes);
+
   const userCart = user.cart;
   const cartItems = products.filter((product) => userCart[product._id]);
 
@@ -61,7 +62,7 @@ function CartPage() {
     decreaseCart(product);
   };
 
-  let uniqueSizes = [...new Set(sizes)];
+  let uniqueSizes = [...new Set(sizes || [])];
   return (
     <Container className="cart-container py-4" style={{ minHeight: "95vh" }}>
       <Row>
@@ -214,9 +215,10 @@ function CartPage() {
                                   value={
                                     cartSubItems[item._id]?.find(
                                       (s) => s._id === sub._id
-                                    )?.size || ""
-                                  }
-                                  e={selectedSize[item._id] || ""}
+                                    )?.size ||
+                                    sizeWithId[sub._id] ||
+                                    ""
+                                  } // e={sizeWithId[item._id] || ""}
                                   onChange={(e) => {
                                     const size = e.target.value;
 
