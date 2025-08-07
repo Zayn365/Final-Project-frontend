@@ -29,13 +29,32 @@ function CategoryPage() {
       try {
         const { data } = await axios.get("/products");
         const list = data || [];
+
         axios.get("/orders").then(({ data }) => setOrders(data));
         setAllProducts(list);
 
-        const uniqueCategories = [
-          "All",
-          ...new Set(list.map((p) => p.category).filter(Boolean)),
-        ];
+        // Step 1: Group products by category
+        const categoryMap = {};
+        for (const p of list) {
+          if (!p.category) continue;
+          if (!categoryMap[p.category]) categoryMap[p.category] = [];
+          categoryMap[p.category].push(p);
+        }
+
+        // Step 2: Remove categories with only 1 product and that product is disabled
+        const filteredCategories = Object.entries(categoryMap)
+          .filter(([_, products]) => {
+            const allDisabled = products.every((p) => p.isDisabled);
+            const onlyOneAndDisabled =
+              products.length === 1 && products[0].isDisabled;
+            return !onlyOneAndDisabled && !allDisabled;
+          })
+          .map(([category]) => category);
+
+        // Step 3: Add 'All' at the top
+        const uniqueCategories = ["All", ...filteredCategories];
+
+        // Step 4: Update categories
         setCategories(uniqueCategories);
       } catch (err) {
         console.error("Failed to load products:", err.message);
