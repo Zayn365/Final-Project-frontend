@@ -19,6 +19,7 @@ import thirdImage from "../assets/imagesSlider/3.jpeg";
 import forthImage from "../assets/imagesSlider/4.jpeg";
 import fifthImage from "../assets/imagesSlider/5.jpeg";
 import sixthImage from "../assets/imagesSlider/6.jpeg";
+import SizeChartPopup from "../components/PopupSlider";
 function Home() {
   const dispatch = useDispatch();
   const products = useSelector((state) => state.products);
@@ -88,6 +89,7 @@ function Home() {
           </div>
         </Carousel.Item>
       </Carousel>
+      <SizeChartPopup />
       <CategoryPage />
       {/* Last Ürünler */}
       {/* <div className="featured-products-container container mt-4">

@@ -34,6 +34,7 @@ function Navigation() {
   const handleLogout = () => {
     dispatch(removePass());
     dispatch(logout());
+    window.location.reload();
   };
 
   const unreadNotifications = user?.notifications?.filter(

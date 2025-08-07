@@ -1,0 +1,16 @@
+.carousel-control-prev,
+.carousel-control-next {
+  z-index: 5; /* Make sure they're on top */
+  width: 8%; /* Adjust as needed */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: black;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background-size: 60% 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
