@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Badge, Button, Modal, Table, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import axios from "../axios";
 import Loading from "./Loading";
+import html2pdf from "html2pdf.js";
 
 function OrdersAdminPage() {
   const [orders, setOrders] = useState([]);
@@ -13,6 +14,25 @@ function OrdersAdminPage() {
   const [orderToShow, setOrderToShow] = useState(null);
   const [show, setShow] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
+  const products = useSelector((state) => state.products);
+  const printRef = useRef();
+  const productList = useMemo(() => {
+    if (!orderToShow || !orderToShow.products) return [];
+
+    const productIds = Object.keys(orderToShow.products || {}).filter(
+      (key) => key !== "count" && key !== "total"
+    );
+
+    return productIds.map((productId) => {
+      const product = products.find((p) => p._id === productId);
+      return {
+        id: productId,
+        name: product?.name || "Bilinmeyen Ürün",
+        quantity: orderToShow.products[productId],
+        image: product?.pictures?.[0]?.url || null,
+      };
+    });
+  }, [orderToShow, products]);
 
   const handleClose = () => {
     setOrderToShow(null);
@@ -97,6 +117,17 @@ function OrdersAdminPage() {
   if (orders.length === 0)
     return <h1 className="text-center pt-4">No orders yet</h1>;
 
+  const handlePrint = () => {
+    const element = printRef.current;
+    const opt = {
+      margin: 0.5,
+      filename: "siparis-detayi.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true }, // ⬅️ critical for images!
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
+    html2pdf().set(opt).from(element).save();
+  };
   return (
     <>
       {/* Search + School Filter */}
@@ -192,7 +223,7 @@ function OrdersAdminPage() {
         </Modal.Header>
         <Modal.Body>
           {orderToShow && (
-            <div className="px-2">
+            <div className="px-2" ref={printRef}>
               <p>
                 <strong>Sipariş No:</strong> {orderToShow._id}
               </p>
@@ -219,6 +250,28 @@ function OrdersAdminPage() {
                 <strong>Durum:</strong> {orderToShow.status}
               </p>
               <p>
+                <strong>Ürünler:</strong>
+              </p>
+              <ul>
+                {productList.map((item, index) => (
+                  <li key={index} className="mb-2">
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          objectFit: "cover",
+                          marginRight: "10px",
+                        }}
+                      />
+                    )}
+                    {item.quantity} x {item.name}
+                  </li>
+                ))}
+              </ul>
+              <p>
                 <strong>Tutar:</strong> ₺{orderToShow.total}
               </p>
               <p>
@@ -230,6 +283,9 @@ function OrdersAdminPage() {
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Kapat
+          </Button>
+          <Button variant="primary" onClick={handlePrint}>
+            PDF İndir
           </Button>
         </Modal.Footer>
       </Modal>

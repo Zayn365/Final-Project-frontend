@@ -17,14 +17,13 @@ function CategoryPage() {
   const [pageIdx, setPageIdx] = useState(0);
   const [showLoginToast, setShowLoginToast] = useState(false);
   const navigate = useNavigate();
-  const [addToCart, { isSuccess }] = useAddToCartMutation();
+  const [addToCart, { isSuccess, reset }] = useAddToCartMutation();
   const user = useSelector((state) => state.user);
   const campaigns = useSelector((state) => state.campaigns || []);
   const [orders, setOrders] = useState([]);
   const [toastError, setToastError] = useState(false);
   const [openGifts, setOpenGifts] = useState({});
   const [showSuccessToast, setShowSuccessToast] = useState(false);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -146,11 +145,23 @@ function CategoryPage() {
       });
     });
   }, [user, sorted]);
-
-  const pageCount = Math.ceil(filterK12.length / perPage);
+  const prod = user && user.isAdmin ? sorted : filterK12;
+  const pageCount = Math.ceil(prod.length / perPage);
   const pageStart = pageIdx * perPage;
-  const pageEnd = Math.min(pageStart + perPage, filterK12.length);
-  const paged = filterK12.slice(pageStart, pageEnd);
+  const pageEnd = Math.min(pageStart + perPage, prod.length);
+  const sortedProd = [...prod].sort((a, b) => {
+    const priority = {
+      "Eğitim Seti": 1,
+      "Kırtasiye Seti": 2,
+    };
+
+    const aPriority = priority[a.category] || 99;
+    const bPriority = priority[b.category] || 99;
+
+    return aPriority - bPriority;
+  });
+
+  const paged = sortedProd.slice(pageStart, pageEnd);
 
   const sizeOptions = [
     "5-6",
@@ -189,7 +200,10 @@ function CategoryPage() {
           bg="success"
           title="Sepete Eklendi"
           body="Ürün sepetinize eklendi"
-          onClose={() => setShowSuccessToast(false)}
+          onClose={() => {
+            setShowSuccessToast(false);
+            reset();
+          }}
         />
       )}
       {showLoginToast && (
@@ -306,7 +320,12 @@ function CategoryPage() {
                   }
                   finalPrice = Math.max(finalPrice, 0);
                 }
+                let allSizes = paged
+                  .filter((prod) => prod.hasSize && Array.isArray(prod.sizes))
+                  .flatMap((prod) => prod.sizes);
 
+                // Remove duplicates
+                let uniqueSizes = [...new Set(allSizes)];
                 return (
                   <Col md={3} sm={6} xs={12} key={prod._id} className="mb-4">
                     <div className="product-card text-center p-3 border rounded h-100 d-flex flex-column">
@@ -402,16 +421,7 @@ function CategoryPage() {
                                 : "Hediye Ürünlerini Gör"}
                             </Button>
                           )} */}
-                          {campaignAmount && (
-                            <Col
-                              sm={12}
-                              className="d-flex justify-content-center"
-                            >
-                              <Badge bg="success">
-                                ₺{campaignAmount} İNDİRİM
-                              </Badge>
-                            </Col>
-                          )}
+
                           <div className="info-row">
                             <span className="label">Fiyat:</span>
                             <span className="value">
@@ -453,12 +463,32 @@ function CategoryPage() {
                                       style={{ width: "auto" }}
                                     >
                                       {(Array.isArray(gift?.sizes)
-                                        ? sizeOptions
+                                        ? uniqueSizes
                                         : gift.sizes
                                       ).map((s) => (
                                         <option key={s}>{s}</option>
                                       ))}
                                     </Form.Select>
+                                    <span
+                                      style={{
+                                        textDecoration: "line-through",
+                                        color: "red",
+                                        marginRight: "4px",
+                                        marginLeft: "4px",
+                                      }}
+                                    >
+                                      ₺{gift.price}
+                                    </span>
+
+                                    <span
+                                      style={{
+                                        color: "green",
+                                        marginRight: "4px",
+                                        marginLeft: "4px",
+                                      }}
+                                    >
+                                      ₺{campaign?.subItems?.price}
+                                    </span>
                                   </div>
                                 )}
                               </>
@@ -466,7 +496,11 @@ function CategoryPage() {
                           })}
                         </div>
                       )}
-
+                      {campaignAmount && (
+                        <Col sm={12} className="d-flex justify-content-center">
+                          <Badge bg="success">₺{campaignAmount} İNDİRİM</Badge>
+                        </Col>
+                      )}
                       <Button
                         className="choose-btn mt-3 w-100"
                         variant="danger"
@@ -474,17 +508,22 @@ function CategoryPage() {
                         onClick={() => {
                           const currentYear = new Date().getFullYear();
 
-                          const alreadyOrdered = orders.some((order) => {
-                            const year = new Date(
+                          // Step 1: Filter only orders by the current user
+                          const userOrders = orders.filter(
+                            (order) => order?.owner?._id === user?._id
+                          );
+
+                          // Step 2: Check if product was ordered in the current year
+                          const alreadyOrdered = userOrders?.some((order) => {
+                            const orderYear = new Date(
                               order.date || order.createdAt
                             ).getFullYear();
+                            if (orderYear !== currentYear) return false;
+
                             const productIds = Object.keys(
                               order.products || {}
                             );
-                            return (
-                              year === currentYear &&
-                              productIds.includes(prod._id)
-                            );
+                            return productIds.includes(prod._id);
                           });
 
                           if (alreadyOrdered) {

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Modal, Button, Form, Alert } from "react-bootstrap";
 import { useUpdateProductMutation } from "../services/appApi";
 import axios from "../axios";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+// import { useNavigate } from "react-router-dom";
 
 const sizeOptions = [
   "5-6",
@@ -44,8 +45,9 @@ const classOptions = [
 ];
 
 function EditProductModal({ show, handleClose, productId }) {
-  const [updateProduct, { isError, error, isLoading, isSuccess }] =
+  const [updateProduct, { isError, error, isLoading, isSuccess, reset }] =
     useUpdateProductMutation();
+  const products = useSelector((state) => state.products || []);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -57,7 +59,9 @@ function EditProductModal({ show, handleClose, productId }) {
   const [imgToRemove, setImgToRemove] = useState(null);
   const [hasSize, setHasSize] = useState(false);
   const [stock, setStock] = useState("");
-  const navigation = useNavigate();
+  const [useCustomCategory, setUseCustomCategory] = useState(false);
+
+  // const navigation = useNavigate();
   useEffect(() => {
     if (!productId) return;
     axios
@@ -145,18 +149,18 @@ function EditProductModal({ show, handleClose, productId }) {
     widget.open();
   }
 
-  function resetAndClose() {
-    setName("");
-    setDescription("");
-    setPrice("");
-    setCategory("");
-    setSizes([]);
-    setClassNo([]);
-    setImages([]);
-    setImgToRemove(null);
-    setHasSize(false);
-    handleClose();
-  }
+  // function resetAndClose() {
+  //   setName("");
+  //   setDescription("");
+  //   setPrice("");
+  //   setCategory("");
+  //   setSizes([]);
+  //   setClassNo([]);
+  //   setImages([]);
+  //   setImgToRemove(null);
+  //   setHasSize(false);
+  //   handleClose();
+  // }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -180,15 +184,31 @@ function EditProductModal({ show, handleClose, productId }) {
 
     updateProduct(payload).then(({ data }) => {
       if (data) {
-        resetAndClose();
-        navigation("/admin");
-        window.location.reload();
+        handleClose();
+        reset();
+        // navigation("/admin");
+        // window.location.reload();
       }
     });
   }
+  useEffect(() => {
+    if (isSuccess || isError) {
+      const timer = setTimeout(() => {
+        reset();
+      }, 1000);
 
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, isError, reset]);
+  const categoryTypes = useMemo(
+    () =>
+      Array.from(new Set(products.map((p) => p.category)))
+        .filter((v) => v && v.trim())
+        .sort(),
+    [products]
+  );
   return (
-    <Modal show={show} onHide={resetAndClose} size="lg" centered>
+    <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>Ürün Düzenle</Modal.Title>
       </Modal.Header>
@@ -238,12 +258,29 @@ function EditProductModal({ show, handleClose, productId }) {
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Kategori</Form.Label>
-            <Form.Control
-              type="text"
+            <Form.Select
               value={category}
-              required
-              onChange={(e) => setCategory(e.target.value)}
-            />
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "__other__") {
+                  setUseCustomCategory(true);
+                  setCategory(category);
+                } else {
+                  setUseCustomCategory(false);
+                  setCategory(value);
+                  setHasSize(false);
+                }
+              }}
+              required={!useCustomCategory}
+            >
+              <option value="">-- Seçiniz --</option>
+              {categoryTypes.map((type) => (
+                <option value={type} key={type}>
+                  {type}
+                </option>
+              ))}
+              <option value="__other__">Diğer (Manuel Kategori)</option>
+            </Form.Select>
           </Form.Group>
 
           <Form.Check

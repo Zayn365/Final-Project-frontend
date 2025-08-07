@@ -112,7 +112,42 @@ function CheckoutForm({ products, total }) {
         }
       }
     };
+    async function test() {
+      const contractDate = new Date().toISOString();
 
+      const salesItemInfos =
+        products.length > 0
+          ? products.map((val) => {
+              return {
+                Name: val.name,
+                Amount: val.price,
+              };
+            })
+          : [
+              { Name: "Kitap", Amount: 500 },
+              { Name: "Kırtasiye", Amount: 350 },
+              { Name: "Forma", Amount: 1500 },
+            ];
+      await Promise.all(
+        user.k12.students.map((student) =>
+          axios.post(
+            "https://final-project-backend-m9nb.onrender.com/users/k12/sale",
+            {
+              userId: user._id,
+              password: pass,
+              data: {
+                SSN: student.studentTc,
+                StudentPersonalID: student.studentId,
+                SchoolInfoID: student.schoolInfoId,
+                ContractDate: contractDate,
+                Description: "Satış",
+                SalesItemInfos: salesItemInfos,
+              },
+            }
+          )
+        )
+      );
+    }
     window.addEventListener("message", listener);
     return () => window.removeEventListener("message", listener);
   }, [user, street, area, city]);

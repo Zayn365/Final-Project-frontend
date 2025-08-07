@@ -160,13 +160,23 @@ function ProductPage() {
                     </Badge>
                   )}
 
-                  <p className="product__price mb-0">
-                    ₺ {formatWithCommas(finalPrice.toFixed(0))}{" "}
+                  <p
+                    className="product__price mb-0 text-success"
+                    style={{ fontSize: "18px", fontWeight: "600" }}
+                  >
                     {campaignAmount && (
-                      <span className="text-muted text-decoration-line-through ms-2 small">
-                        ₺ {formatWithCommas(Number(product.price).toFixed(0))}
+                      <span
+                        style={{
+                          marginRight: "8px",
+                          fontSize: "14px",
+                          fontWeight: "500",
+                        }}
+                        className="text-danger text-decoration-line-through ms-2"
+                      >
+                        ₺{formatWithCommas(Number(product.price).toFixed(0))}
                       </span>
                     )}
+                    ₺{formatWithCommas(finalPrice.toFixed(0))}{" "}
                   </p>
                 </div>
 

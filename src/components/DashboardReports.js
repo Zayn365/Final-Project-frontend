@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "../axios";
 import { Form, Table, Spinner } from "react-bootstrap";
-
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 function AdminReportPage() {
   const [reportData, setReportData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -19,6 +20,31 @@ function AdminReportPage() {
     fetchData();
   }, []);
 
+  const exportToExcel = () => {
+    // Prepare a simplified data array
+    const dataToExport = filteredData.map((row) => ({
+      Öğrenci: row.student || "Bilinmiyor",
+      "Alınan Ürünler": row.items?.length
+        ? row.items.map((item) => `${item.quantity} x ${item.name}`).join(", ")
+        : "Sipariş Yok",
+      "Toplam Tutar": (row.total || 0).toLocaleString("tr-TR") + " ₺",
+      Okul: row.school || "-",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rapor");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const dataBlob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(dataBlob, "Siparis_Raporu.xlsx");
+  };
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -113,7 +139,11 @@ function AdminReportPage() {
           <option value="not_ordered">Sipariş Vermeyen</option>
         </Form.Select>
       </Form.Group>
-
+      <div className="mb-3 d-flex justify-content-end">
+        <button className="btn btn-success" onClick={exportToExcel}>
+          Excel Olarak İndir
+        </button>
+      </div>
       <p>
         Toplam <strong>{filteredData.length}</strong> kayıt
       </p>
